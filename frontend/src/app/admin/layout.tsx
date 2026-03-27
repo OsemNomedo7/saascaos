@@ -101,7 +101,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <nav style={{ flex: 1, padding: '10px 8px' }}>
           <div style={{ marginBottom: 6, padding: '0 10px' }}>
             <span style={{ fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.2em', color: '#3a1800' }}>
-              // CONTROLES
+              {'// CONTROLES'}
             </span>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>

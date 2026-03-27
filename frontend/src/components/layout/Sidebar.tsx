@@ -107,7 +107,7 @@ export default function Sidebar() {
       <nav style={{ flex: 1, padding: '12px 8px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 20 }}>
         {/* Main nav */}
         <div>
-          <div className="section-hack">// NAVEGAÇÃO</div>
+          <div className="section-hack">{'// NAVEGAÇÃO'}</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             {userNav.map((item) => (
               <Link
@@ -127,7 +127,7 @@ export default function Sidebar() {
 
         {/* Account */}
         <div>
-          <div className="section-hack">// CONTA</div>
+          <div className="section-hack">{'// CONTA'}</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             {accountNav.map((item) => (
               <Link
@@ -145,7 +145,7 @@ export default function Sidebar() {
         {/* Admin */}
         {user?.role === 'admin' && (
           <div>
-            <div className="section-hack" style={{ color: '#4d1a0a' }}>// ADMIN</div>
+            <div className="section-hack" style={{ color: '#4d1a0a' }}>{'// ADMIN'}</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               {adminNav.map((item) => (
                 <Link
