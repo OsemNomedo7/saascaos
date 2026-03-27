@@ -4,13 +4,12 @@ import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import {
   Library, Users, Zap, TrendingUp, ArrowRight,
-  Download, Eye, Clock, Star, ChevronRight
+  Download, Eye, Clock, Star, ChevronRight, Terminal
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { contentApi, dropsApi, subscriptionsApi } from '@/lib/api';
 import { LevelBadge, PlanBadge, StatusBadge } from '@/components/ui/Badge';
-import { Card } from '@/components/ui/Card';
-import { formatRelativeDate, formatBytes, getContentTypeIcon, getCountdown } from '@/lib/utils';
+import { formatRelativeDate, getContentTypeIcon, getCountdown } from '@/lib/utils';
 import type { Content, Subscription } from '@/types';
 import { useState, useEffect } from 'react';
 
@@ -25,11 +24,11 @@ function CountdownTimer({ expiresAt }: { expiresAt: string }) {
   }, [expiresAt]);
 
   if (countdown.expired) {
-    return <span className="text-red-400 font-mono text-xs">Expired</span>;
+    return <span style={{ color: '#ff0040', fontFamily: 'JetBrains Mono, monospace', fontSize: '0.72rem' }}>EXPIRADO</span>;
   }
 
   return (
-    <span className="font-mono text-xs text-green-400">
+    <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.72rem', color: '#00ff41', textShadow: '0 0 6px rgba(0,255,65,0.4)' }}>
       {String(countdown.hours).padStart(2, '0')}:{String(countdown.minutes).padStart(2, '0')}:{String(countdown.seconds).padStart(2, '0')}
     </span>
   );
@@ -58,36 +57,58 @@ export default function DashboardPage() {
   const subscription = subData?.subscription as Subscription | null;
 
   const quickLinks = [
-    { label: 'Browse Content', href: '/content', icon: <Library className="w-5 h-5" />, color: 'text-green-400', bg: 'bg-green-500/10 border-green-500/20' },
-    { label: 'Community', href: '/community', icon: <Users className="w-5 h-5" />, color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-500/20' },
-    { label: 'Active Drops', href: '/drops', icon: <Zap className="w-5 h-5" />, color: 'text-yellow-400', bg: 'bg-yellow-500/10 border-yellow-500/20' },
-    { label: 'Upgrade Plan', href: '/planos', icon: <Star className="w-5 h-5" />, color: 'text-purple-400', bg: 'bg-purple-500/10 border-purple-500/20' },
+    { label: 'Conteúdo', href: '/content', icon: <Library className="w-5 h-5" />, color: '#00ff41', bg: 'rgba(0,255,65,0.07)', border: 'rgba(0,255,65,0.2)' },
+    { label: 'Comunidade', href: '/community', icon: <Users className="w-5 h-5" />, color: '#00d4ff', bg: 'rgba(0,212,255,0.07)', border: 'rgba(0,212,255,0.2)' },
+    { label: 'Drops', href: '/drops', icon: <Zap className="w-5 h-5" />, color: '#ffcc00', bg: 'rgba(255,204,0,0.07)', border: 'rgba(255,204,0,0.2)' },
+    { label: 'Planos', href: '/planos', icon: <Star className="w-5 h-5" />, color: '#cc66ff', bg: 'rgba(200,100,255,0.07)', border: 'rgba(200,100,255,0.2)' },
   ];
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
-      {/* Welcome header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-100">
-            Welcome back,{' '}
-            <span className="text-gradient-green">{user?.name?.split(' ')[0]}</span>
-          </h1>
-          <div className="flex items-center gap-2 mt-1">
-            <LevelBadge level={user?.level || 'iniciante'} />
-            {subscription && <PlanBadge plan={subscription.plan} />}
-            {!subscription && (
-              <Link href="/planos" className="text-xs text-yellow-400 hover:text-yellow-300 transition-colors">
-                No active plan — Subscribe now
-              </Link>
-            )}
-          </div>
-        </div>
+    <div style={{ maxWidth: 1200, margin: '0 auto' }} className="space-y-6">
+      {/* Header */}
+      <div style={{
+        padding: '20px 24px',
+        background: 'rgba(0,255,65,0.03)',
+        border: '1px solid rgba(0,255,65,0.12)',
+        borderRadius: 6,
+        position: 'relative',
+        overflow: 'hidden',
+      }}>
+        {/* Decorative top line */}
+        <div style={{
+          position: 'absolute', top: 0, left: 0, right: 0, height: 1,
+          background: 'linear-gradient(90deg, transparent, #00ff41, transparent)',
+          opacity: 0.5,
+        }} />
 
-        <div className="flex items-center gap-3">
-          <div className="text-right hidden sm:block">
-            <p className="text-xs text-gray-500">Member since</p>
-            <p className="text-sm text-gray-300">{formatRelativeDate(user?.createdAt)}</p>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+              <Terminal className="w-3.5 h-3.5" style={{ color: '#00ff41' }} />
+              <span style={{ fontSize: '0.65rem', color: '#2a4d30', letterSpacing: '0.15em' }}>
+                CONNECTION ESTABLISHED
+              </span>
+            </div>
+            <h1 style={{ fontSize: '1.4rem', fontWeight: 700, color: '#e0ffe8', lineHeight: 1.2 }}>
+              Bem-vindo,{' '}
+              <span style={{ color: '#00ff41', textShadow: '0 0 10px rgba(0,255,65,0.5)' }}>
+                {user?.name?.split(' ')[0]}
+              </span>
+            </h1>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6 }}>
+              <LevelBadge level={user?.level || 'iniciante'} />
+              {subscription && <PlanBadge plan={subscription.plan} />}
+              {!subscription && (
+                <Link href="/planos" style={{ fontSize: '0.7rem', color: '#ffcc00', textDecoration: 'none' }}>
+                  Sem plano ativo — Assinar agora →
+                </Link>
+              )}
+            </div>
+          </div>
+
+          <div style={{ textAlign: 'right' }} className="hidden sm:block">
+            <p style={{ fontSize: '0.6rem', color: '#1a3020', letterSpacing: '0.12em' }}>MEMBRO DESDE</p>
+            <p style={{ fontSize: '0.78rem', color: '#4d8c5a' }}>{formatRelativeDate(user?.createdAt)}</p>
           </div>
         </div>
       </div>
@@ -95,142 +116,250 @@ export default function DashboardPage() {
       {/* Quick links */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {quickLinks.map((link) => (
-          <Link key={link.href} href={link.href}>
-            <Card hover className={`p-4 border ${link.bg} flex flex-col gap-3`}>
-              <div className={`w-10 h-10 rounded-lg bg-gray-900/60 flex items-center justify-center ${link.color}`}>
+          <Link key={link.href} href={link.href} style={{ textDecoration: 'none' }}>
+            <div style={{
+              background: link.bg,
+              border: `1px solid ${link.border}`,
+              borderRadius: 6,
+              padding: '16px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 12,
+              cursor: 'pointer',
+              transition: 'transform 0.15s, box-shadow 0.15s',
+              position: 'relative',
+              overflow: 'hidden',
+            }}
+              onMouseOver={e => {
+                (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-2px)';
+                (e.currentTarget as HTMLDivElement).style.boxShadow = `0 8px 20px rgba(0,0,0,0.3), 0 0 15px ${link.bg}`;
+              }}
+              onMouseOut={e => {
+                (e.currentTarget as HTMLDivElement).style.transform = 'translateY(0)';
+                (e.currentTarget as HTMLDivElement).style.boxShadow = 'none';
+              }}>
+              <div style={{
+                width: 36, height: 36,
+                background: 'rgba(0,0,0,0.3)',
+                borderRadius: 4,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: link.color,
+              }}>
                 {link.icon}
               </div>
               <div>
-                <p className={`text-sm font-medium ${link.color}`}>{link.label}</p>
-                <ArrowRight className={`w-3.5 h-3.5 mt-0.5 ${link.color} opacity-60`} />
+                <p style={{ fontSize: '0.78rem', fontWeight: 600, color: link.color }}>{link.label}</p>
+                <ArrowRight className="w-3 h-3" style={{ color: link.color, opacity: 0.5, marginTop: 2 }} />
               </div>
-            </Card>
+            </div>
           </Link>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Recent content */}
         <div className="lg:col-span-2">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="section-title">
-              <Library className="w-4 h-4 text-green-400" />
-              Recent Content
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+            <h2 style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.82rem', fontWeight: 600, color: '#a0c8a8' }}>
+              <Library className="w-3.5 h-3.5" style={{ color: '#00ff41' }} />
+              <span style={{ letterSpacing: '0.08em' }}>CONTEÚDO RECENTE</span>
             </h2>
-            <Link href="/content" className="text-xs text-green-400 hover:text-green-300 flex items-center gap-1 transition-colors">
-              See all <ChevronRight className="w-3 h-3" />
+            <Link href="/content" style={{
+              display: 'flex', alignItems: 'center', gap: 4,
+              fontSize: '0.7rem', color: '#00a828', textDecoration: 'none', transition: 'color 0.15s',
+            }}
+              onMouseOver={e => (e.currentTarget.style.color = '#00ff41')}
+              onMouseOut={e => (e.currentTarget.style.color = '#00a828')}
+            >
+              Ver tudo <ChevronRight className="w-3 h-3" />
             </Link>
           </div>
 
-          <div className="space-y-2">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             {recentContent.length === 0 ? (
-              <Card className="p-8 text-center">
-                <Library className="w-8 h-8 text-gray-700 mx-auto mb-2" />
-                <p className="text-gray-500 text-sm">No content available yet</p>
-              </Card>
+              <div style={{
+                padding: '32px',
+                textAlign: 'center',
+                background: 'rgba(0,255,65,0.02)',
+                border: '1px solid rgba(0,255,65,0.08)',
+                borderRadius: 6,
+              }}>
+                <Library className="w-8 h-8" style={{ color: '#1a3020', margin: '0 auto 8px' }} />
+                <p style={{ fontSize: '0.78rem', color: '#2a4d30' }}>Nenhum conteúdo disponível</p>
+              </div>
             ) : (
               recentContent.map((item) => (
-                <Card key={item._id} hover className="p-4 flex items-center gap-4">
-                  <div className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center text-xl flex-shrink-0">
+                <div key={item._id} style={{
+                  display: 'flex', alignItems: 'center', gap: 12,
+                  padding: '12px 14px',
+                  background: 'rgba(5,10,5,0.8)',
+                  border: '1px solid rgba(0,255,65,0.08)',
+                  borderRadius: 5,
+                  transition: 'border-color 0.15s, background 0.15s',
+                  cursor: 'default',
+                }}
+                  onMouseOver={e => {
+                    (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(0,255,65,0.2)';
+                    (e.currentTarget as HTMLDivElement).style.background = 'rgba(0,255,65,0.03)';
+                  }}
+                  onMouseOut={e => {
+                    (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(0,255,65,0.08)';
+                    (e.currentTarget as HTMLDivElement).style.background = 'rgba(5,10,5,0.8)';
+                  }}>
+                  <div style={{
+                    width: 36, height: 36,
+                    background: 'rgba(0,255,65,0.06)',
+                    border: '1px solid rgba(0,255,65,0.15)',
+                    borderRadius: 4,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: '1.1rem', flexShrink: 0,
+                  }}>
                     {getContentTypeIcon(item.type)}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-200 truncate">{item.title}</p>
-                    <div className="flex items-center gap-3 mt-0.5 text-xs text-gray-500">
-                      <span className="flex items-center gap-1">
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ fontSize: '0.8rem', fontWeight: 500, color: '#c0e8c8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {item.title}
+                    </p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 2 }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: '0.62rem', color: '#2a4d30' }}>
                         <Eye className="w-3 h-3" /> {item.views}
                       </span>
-                      <span className="flex items-center gap-1">
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: '0.62rem', color: '#2a4d30' }}>
                         <Download className="w-3 h-3" /> {item.downloads}
                       </span>
-                      <span className="flex items-center gap-1">
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: '0.62rem', color: '#2a4d30' }}>
                         <Clock className="w-3 h-3" /> {formatRelativeDate(item.createdAt)}
                       </span>
                     </div>
                   </div>
-                  <Link
-                    href={`/content?id=${item._id}`}
-                    className="p-2 text-gray-600 hover:text-green-400 hover:bg-gray-800 rounded-lg transition-colors"
-                  >
-                    <ArrowRight className="w-4 h-4" />
+                  <Link href={`/content?id=${item._id}`}
+                    style={{
+                      padding: 7,
+                      color: '#2a4d30',
+                      borderRadius: 4,
+                      transition: 'color 0.15s, background 0.15s',
+                    }}
+                    onMouseOver={e => {
+                      (e.currentTarget as HTMLAnchorElement).style.color = '#00ff41';
+                      (e.currentTarget as HTMLAnchorElement).style.background = 'rgba(0,255,65,0.08)';
+                    }}
+                    onMouseOut={e => {
+                      (e.currentTarget as HTMLAnchorElement).style.color = '#2a4d30';
+                      (e.currentTarget as HTMLAnchorElement).style.background = 'none';
+                    }}>
+                    <ArrowRight className="w-3.5 h-3.5" />
                   </Link>
-                </Card>
+                </div>
               ))
             )}
           </div>
         </div>
 
-        {/* Active Drops */}
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="section-title">
-              <Zap className="w-4 h-4 text-yellow-400" />
-              Active Drops
-            </h2>
-            <Link href="/drops" className="text-xs text-yellow-400 hover:text-yellow-300 flex items-center gap-1 transition-colors">
-              All <ChevronRight className="w-3 h-3" />
-            </Link>
-          </div>
+        {/* Right column */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {/* Active drops */}
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+              <h2 style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.82rem', fontWeight: 600, color: '#a0c8a8' }}>
+                <Zap className="w-3.5 h-3.5" style={{ color: '#ffcc00' }} />
+                <span style={{ letterSpacing: '0.08em' }}>DROPS ATIVOS</span>
+              </h2>
+              <Link href="/drops" style={{ fontSize: '0.7rem', color: '#998800', textDecoration: 'none', transition: 'color 0.15s' }}
+                onMouseOver={e => (e.currentTarget.style.color = '#ffcc00')}
+                onMouseOut={e => (e.currentTarget.style.color = '#998800')}>
+                Ver <ChevronRight className="w-3 h-3 inline" />
+              </Link>
+            </div>
 
-          <div className="space-y-3">
-            {activeDrops.length === 0 ? (
-              <Card className="p-6 text-center">
-                <Zap className="w-8 h-8 text-gray-700 mx-auto mb-2" />
-                <p className="text-gray-500 text-sm">No active drops</p>
-              </Card>
-            ) : (
-              activeDrops.map((drop) => (
-                <Card key={drop._id} className="p-4 border border-yellow-500/10 bg-yellow-500/5">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-200 truncate">{drop.title}</p>
-                      <p className="text-xs text-gray-500 mt-0.5 truncate">{drop.description}</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {activeDrops.length === 0 ? (
+                <div style={{
+                  padding: '24px',
+                  textAlign: 'center',
+                  background: 'rgba(255,204,0,0.03)',
+                  border: '1px solid rgba(255,204,0,0.1)',
+                  borderRadius: 6,
+                }}>
+                  <Zap className="w-6 h-6" style={{ color: '#443300', margin: '0 auto 6px' }} />
+                  <p style={{ fontSize: '0.72rem', color: '#443300' }}>Nenhum drop ativo</p>
+                </div>
+              ) : (
+                activeDrops.map((drop) => (
+                  <div key={drop._id} style={{
+                    padding: '12px',
+                    background: 'rgba(255,204,0,0.04)',
+                    border: '1px solid rgba(255,204,0,0.15)',
+                    borderRadius: 5,
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 6 }}>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ fontSize: '0.78rem', fontWeight: 500, color: '#c8c080', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {drop.title}
+                        </p>
+                        <p style={{ fontSize: '0.65rem', color: '#665500', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {drop.description}
+                        </p>
+                      </div>
+                      <span style={{ fontSize: '1rem' }}>{getContentTypeIcon(drop.type)}</span>
                     </div>
-                    <span className="text-lg">{getContentTypeIcon(drop.type)}</span>
+                    {drop.dropExpiresAt && (
+                      <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <span style={{ fontSize: '0.6rem', color: '#443300', letterSpacing: '0.1em' }}>EXPIRA EM</span>
+                        <CountdownTimer expiresAt={drop.dropExpiresAt} />
+                      </div>
+                    )}
                   </div>
-                  {drop.dropExpiresAt && (
-                    <div className="mt-3 flex items-center justify-between">
-                      <span className="text-xs text-gray-600">Expires in</span>
-                      <CountdownTimer expiresAt={drop.dropExpiresAt} />
-                    </div>
-                  )}
-                </Card>
-              ))
-            )}
+                ))
+              )}
+            </div>
           </div>
 
           {/* Subscription card */}
-          <Card className="mt-4 p-4 bg-gradient-to-br from-green-900/20 to-cyan-900/10 border border-green-500/20">
-            <div className="flex items-center gap-2 mb-2">
-              <TrendingUp className="w-4 h-4 text-green-400" />
-              <span className="text-sm font-medium text-gray-200">Your Plan</span>
+          <div style={{
+            padding: '16px',
+            background: 'linear-gradient(135deg, rgba(0,255,65,0.06), rgba(0,212,255,0.04))',
+            border: '1px solid rgba(0,255,65,0.2)',
+            borderRadius: 6,
+            position: 'relative',
+            overflow: 'hidden',
+          }}>
+            <div style={{
+              position: 'absolute', top: 0, left: 0, right: 0, height: 1,
+              background: 'linear-gradient(90deg, transparent, rgba(0,255,65,0.5), transparent)',
+            }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+              <TrendingUp className="w-3.5 h-3.5" style={{ color: '#00ff41' }} />
+              <span style={{ fontSize: '0.72rem', fontWeight: 600, color: '#a0c8a8', letterSpacing: '0.1em' }}>
+                SEU PLANO
+              </span>
             </div>
             {subscription ? (
-              <div className="space-y-1">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-gray-500">Status</span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span style={{ fontSize: '0.65rem', color: '#2a4d30' }}>Status</span>
                   <StatusBadge status={subscription.status} />
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-gray-500">Plan</span>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span style={{ fontSize: '0.65rem', color: '#2a4d30' }}>Plano</span>
                   <PlanBadge plan={subscription.plan} />
                 </div>
                 {subscription.endDate && subscription.plan !== 'lifetime' && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-500">Expires</span>
-                    <span className="text-xs text-gray-300">{formatRelativeDate(subscription.endDate)}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span style={{ fontSize: '0.65rem', color: '#2a4d30' }}>Expira</span>
+                    <span style={{ fontSize: '0.72rem', color: '#4d8c5a' }}>{formatRelativeDate(subscription.endDate)}</span>
                   </div>
                 )}
               </div>
             ) : (
               <div>
-                <p className="text-xs text-gray-500 mb-2">No active subscription</p>
-                <Link href="/planos" className="btn-primary w-full text-xs py-2 flex items-center justify-center gap-1">
-                  <Zap className="w-3 h-3" /> Subscribe Now
+                <p style={{ fontSize: '0.72rem', color: '#2a4d30', marginBottom: 10 }}>Sem assinatura ativa</p>
+                <Link href="/planos" className="btn-hack w-full flex items-center justify-center gap-2"
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '9px', fontSize: '0.72rem', textDecoration: 'none' }}>
+                  <Zap className="w-3 h-3" /> ASSINAR AGORA
                 </Link>
               </div>
             )}
-          </Card>
+          </div>
         </div>
       </div>
     </div>

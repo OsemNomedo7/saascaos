@@ -21,25 +21,37 @@ interface NavItem {
   label: string;
   href: string;
   icon: React.ReactNode;
-  badge?: string;
 }
 
 const userNav: NavItem[] = [
-  { label: 'Dashboard', href: '/dashboard', icon: <LayoutDashboard className="w-4 h-4" /> },
-  { label: 'Content', href: '/content', icon: <Library className="w-4 h-4" /> },
-  { label: 'Community', href: '/community', icon: <Users className="w-4 h-4" /> },
-  { label: 'Chat', href: '/community/chat', icon: <Hash className="w-4 h-4" /> },
-  { label: 'Drops', href: '/drops', icon: <Zap className="w-4 h-4" /> },
-  { label: 'Plans', href: '/planos', icon: <CreditCard className="w-4 h-4" /> },
+  { label: 'Dashboard', href: '/dashboard', icon: <LayoutDashboard className="w-3.5 h-3.5" /> },
+  { label: 'Conteúdo', href: '/content', icon: <Library className="w-3.5 h-3.5" /> },
+  { label: 'Comunidade', href: '/community', icon: <Users className="w-3.5 h-3.5" /> },
+  { label: 'Chat', href: '/community/chat', icon: <Hash className="w-3.5 h-3.5" /> },
+  { label: 'Drops', href: '/drops', icon: <Zap className="w-3.5 h-3.5" /> },
+  { label: 'Planos', href: '/planos', icon: <CreditCard className="w-3.5 h-3.5" /> },
 ];
 
 const accountNav: NavItem[] = [
-  { label: 'Profile', href: '/profile', icon: <User className="w-4 h-4" /> },
+  { label: 'Perfil', href: '/profile', icon: <User className="w-3.5 h-3.5" /> },
 ];
 
 const adminNav: NavItem[] = [
-  { label: 'Admin Panel', href: '/admin', icon: <Shield className="w-4 h-4" /> },
+  { label: 'Admin Panel', href: '/admin', icon: <Shield className="w-3.5 h-3.5" /> },
 ];
+
+const SkullMini = () => (
+  <svg width="22" height="26" viewBox="0 0 36 40" fill="none"
+    style={{ filter: 'drop-shadow(0 0 5px rgba(0,255,65,0.5))' }}>
+    <path d="M18 2C9.163 2 2 9.163 2 18c0 5.4 2.56 10.2 6.56 13.28L9 32h18l.44-0.72C31.44 28.2 34 23.4 34 18 34 9.163 26.837 2 18 2z"
+      fill="rgba(0,255,65,0.08)" stroke="#00ff41" strokeWidth="1.6" strokeLinejoin="round"/>
+    <path d="M9 32v2h2.5v3h3v-3h7v3h3v-3H27v-2H9z"
+      fill="rgba(0,255,65,0.08)" stroke="#00ff41" strokeWidth="1.6"/>
+    <rect x="6.5" y="13" width="8" height="7" rx="1.5" fill="#00ff41" opacity="0.9"/>
+    <rect x="21.5" y="13" width="8" height="7" rx="1.5" fill="#00ff41" opacity="0.9"/>
+    <path d="M15.5 23.5h5l-2.5 3.5-2.5-3.5z" fill="#00ff41" opacity="0.55"/>
+  </svg>
+);
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -60,42 +72,54 @@ export default function Sidebar() {
     return pathname.startsWith(href);
   };
 
-  const handleLogout = async () => {
-    await logout();
-  };
-
   return (
-    <aside className="w-64 min-h-screen bg-gray-900/95 border-r border-gray-800/60 flex flex-col">
+    <aside style={{
+      width: 240,
+      minHeight: '100vh',
+      background: '#0a120a',
+      borderRight: '1px solid rgba(0,255,65,0.12)',
+      display: 'flex',
+      flexDirection: 'column',
+    }}>
       {/* Logo */}
-      <div className="p-5 border-b border-gray-800/60">
-        <Link href="/dashboard" className="flex items-center gap-3 group">
-          <div className="w-9 h-9 bg-green-500/10 border border-green-500/30 rounded-lg flex items-center justify-center group-hover:border-green-500/60 transition-colors">
-            <Terminal className="w-4 h-4 text-green-400" />
-          </div>
+      <div style={{ padding: '20px 16px 16px', borderBottom: '1px solid rgba(0,255,65,0.1)' }}>
+        <Link href="/dashboard" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
+          <SkullMini />
           <div>
-            <span className="text-sm font-bold text-gradient-green font-mono block">SaaS Platform</span>
-            <span className="text-xs text-gray-600 font-mono">v1.0.0</span>
+            <div style={{
+              fontFamily: 'JetBrains Mono, monospace',
+              fontSize: '0.82rem',
+              fontWeight: 700,
+              letterSpacing: '0.18em',
+              color: '#00ff41',
+              textShadow: '0 0 8px rgba(0,255,65,0.5)',
+            }}>
+              ELITE TROJAN
+            </div>
+            <div style={{ fontSize: '0.58rem', color: '#1a3020', letterSpacing: '0.12em', marginTop: 1 }}>
+              v2.0.0 // SISTEMA
+            </div>
           </div>
         </Link>
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 p-3 space-y-6 overflow-y-auto">
+      {/* Nav */}
+      <nav style={{ flex: 1, padding: '12px 8px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 20 }}>
         {/* Main nav */}
         <div>
-          <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider px-3 mb-2">Navigation</p>
-          <div className="space-y-0.5">
+          <div className="section-hack">// NAVEGAÇÃO</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             {userNav.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className={cn(
-                  isActive(item.href) ? 'nav-link-active' : 'nav-link'
-                )}
+                className={cn(isActive(item.href) ? 'nav-link-active' : 'nav-link')}
               >
                 {item.icon}
                 <span>{item.label}</span>
-                {isActive(item.href) && <ChevronRight className="w-3 h-3 ml-auto opacity-60" />}
+                {isActive(item.href) && (
+                  <ChevronRight className="w-3 h-3 ml-auto opacity-50" />
+                )}
               </Link>
             ))}
           </div>
@@ -103,8 +127,8 @@ export default function Sidebar() {
 
         {/* Account */}
         <div>
-          <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider px-3 mb-2">Account</p>
-          <div className="space-y-0.5">
+          <div className="section-hack">// CONTA</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             {accountNav.map((item) => (
               <Link
                 key={item.href}
@@ -121,13 +145,19 @@ export default function Sidebar() {
         {/* Admin */}
         {user?.role === 'admin' && (
           <div>
-            <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider px-3 mb-2">Admin</p>
-            <div className="space-y-0.5">
+            <div className="section-hack" style={{ color: '#4d1a0a' }}>// ADMIN</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               {adminNav.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
                   className={cn(isActive(item.href) ? 'nav-link-active' : 'nav-link')}
+                  style={isActive(item.href) ? {
+                    color: '#ff4400',
+                    background: 'rgba(255,68,0,0.08)',
+                    borderColor: 'rgba(255,68,0,0.25)',
+                    boxShadow: '0 0 8px rgba(255,68,0,0.1)',
+                  } : { color: '#4d2a1a' }}
                 >
                   {item.icon}
                   <span>{item.label}</span>
@@ -138,44 +168,96 @@ export default function Sidebar() {
         )}
       </nav>
 
-      {/* Bottom: user info */}
-      <div className="p-3 border-t border-gray-800/60">
-        {/* Subscription status */}
+      {/* Bottom */}
+      <div style={{ padding: '10px 8px', borderTop: '1px solid rgba(0,255,65,0.08)' }}>
+        {/* Subscription */}
         {subscription && (
-          <div className="mb-2 px-3 py-2 bg-green-500/5 border border-green-500/20 rounded-lg">
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-gray-500">Plan</span>
-              <PlanBadge plan={subscription.plan} />
-            </div>
+          <div style={{
+            marginBottom: 8,
+            padding: '8px 12px',
+            background: 'rgba(0,255,65,0.04)',
+            border: '1px solid rgba(0,255,65,0.15)',
+            borderRadius: 4,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}>
+            <span style={{ fontSize: '0.62rem', color: '#2a4d30', letterSpacing: '0.1em' }}>PLANO</span>
+            <PlanBadge plan={subscription.plan} />
           </div>
         )}
 
         {/* Socket status */}
-        <div className="px-3 mb-2 flex items-center gap-2">
-          <div className={cn('w-1.5 h-1.5 rounded-full', isConnected ? 'bg-green-400 animate-pulse' : 'bg-gray-600')} />
-          <span className="text-xs text-gray-600">{isConnected ? 'Connected' : 'Disconnected'}</span>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 6,
+          padding: '4px 12px',
+          marginBottom: 6,
+        }}>
+          <div style={{
+            width: 6, height: 6, borderRadius: '50%',
+            background: isConnected ? '#00ff41' : '#3a3a3a',
+            boxShadow: isConnected ? '0 0 6px #00ff41' : undefined,
+            animation: isConnected ? 'pulse 2s infinite' : undefined,
+          }} />
+          <span style={{ fontSize: '0.6rem', color: '#1a3020', letterSpacing: '0.1em' }}>
+            {isConnected ? 'CONECTADO' : 'DESCONECTADO'}
+          </span>
         </div>
 
         {/* User info */}
-        <div className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-800/50 transition-colors">
-          <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center text-xs font-bold text-gray-300 flex-shrink-0">
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 10,
+          padding: '8px 12px',
+          borderRadius: 4,
+          transition: 'background 0.15s',
+          cursor: 'default',
+        }}
+          onMouseOver={e => (e.currentTarget.style.background = 'rgba(0,255,65,0.04)')}
+          onMouseOut={e => (e.currentTarget.style.background = 'transparent')}>
+          <div style={{
+            width: 30, height: 30,
+            background: 'rgba(0,255,65,0.1)',
+            border: '1px solid rgba(0,255,65,0.25)',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '0.65rem',
+            fontWeight: 700,
+            color: '#00ff41',
+            flexShrink: 0,
+            overflow: 'hidden',
+          }}>
             {user?.avatar ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={user.avatar} alt={user.name} className="w-full h-full rounded-full object-cover" />
+              <img src={user.avatar} alt={user.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             ) : (
               getInitials(user?.name || 'U')
             )}
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-gray-200 truncate">{user?.name}</p>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p style={{
+              fontSize: '0.75rem',
+              fontWeight: 600,
+              color: '#a0c8a8',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}>{user?.name}</p>
             <LevelBadge level={user?.level || 'iniciante'} size="sm" />
           </div>
           <button
-            onClick={handleLogout}
-            className="p-1 text-gray-600 hover:text-red-400 transition-colors"
-            title="Logout"
+            onClick={logout}
+            style={{ padding: 4, color: '#2a4d30', transition: 'color 0.15s', background: 'none', border: 'none', cursor: 'pointer' }}
+            title="Sair"
+            onMouseOver={e => (e.currentTarget.style.color = '#ff0040')}
+            onMouseOut={e => (e.currentTarget.style.color = '#2a4d30')}
           >
-            <LogOut className="w-4 h-4" />
+            <LogOut className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>

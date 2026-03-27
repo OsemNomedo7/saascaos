@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const http = require('http');
+const path = require('path');
 const { Server } = require('socket.io');
 const cors = require('cors');
 const cron = require('node-cron');
@@ -46,6 +47,9 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // Make io accessible to routes
 app.set('io', io);
+
+// Serve uploaded files statically
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Routes
 app.use('/api/auth', authRoutes);

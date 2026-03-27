@@ -1,13 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
-import { Plus, Edit2, Trash2, Search } from 'lucide-react';
+import {
+  Plus, Edit2, Trash2, Search, Upload, X, File,
+  FileText, Film, Database, Package, Code, AlertCircle, CheckCircle2,
+  Eye, Download
+} from 'lucide-react';
 import { contentApi, categoriesApi } from '@/lib/api';
 import { LevelBadge } from '@/components/ui/Badge';
 import { Modal, ConfirmModal } from '@/components/ui/Modal';
-import { getContentTypeIcon, getContentTypeLabel, formatDate } from '@/lib/utils';
+import { getContentTypeIcon, getContentTypeLabel, formatDate, formatBytes } from '@/lib/utils';
 import type { Content, Category, ContentType, UserLevel } from '@/types';
 
 interface ContentForm {
@@ -22,6 +26,169 @@ interface ContentForm {
   dropExpiresAt: string;
 }
 
+function getFileIcon(filename: string) {
+  const ext = filename.split('.').pop()?.toLowerCase() || '';
+  if (['exe', 'msi', 'app', 'dmg', 'deb', 'rpm'].includes(ext)) return <Package className="w-5 h-5" style={{ color: '#00d4ff' }} />;
+  if (['pdf'].includes(ext)) return <FileText className="w-5 h-5" style={{ color: '#ff6644' }} />;
+  if (['mp4', 'mkv', 'avi', 'mov', 'webm'].includes(ext)) return <Film className="w-5 h-5" style={{ color: '#cc66ff' }} />;
+  if (['zip', 'rar', '7z', 'tar', 'gz'].includes(ext)) return <Database className="w-5 h-5" style={{ color: '#ffcc00' }} />;
+  if (['py', 'js', 'ts', 'java', 'cpp', 'c', 'cs', 'php', 'rb', 'go'].includes(ext)) return <Code className="w-5 h-5" style={{ color: '#00ff41' }} />;
+  return <File className="w-5 h-5" style={{ color: '#4d8c5a' }} />;
+}
+
+function FileUploadZone({
+  selectedFile,
+  existingFileUrl,
+  existingFileName,
+  isUploading,
+  uploadError,
+  onFileSelect,
+  onClear,
+}: {
+  selectedFile: File | null;
+  existingFileUrl?: string | null;
+  existingFileName?: string | null;
+  isUploading: boolean;
+  uploadError: string;
+  onFileSelect: (file: File) => void;
+  onClear: () => void;
+}) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files[0];
+    if (file) onFileSelect(file);
+  };
+
+  return (
+    <div>
+      <label className="label-text" style={{ marginBottom: 8, display: 'block' }}>
+        ARQUIVO PARA DOWNLOAD
+      </label>
+
+      {/* Existing file */}
+      {existingFileUrl && !selectedFile && (
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 10,
+          padding: '10px 12px', marginBottom: 8,
+          background: 'rgba(0,212,255,0.06)',
+          border: '1px solid rgba(0,212,255,0.2)',
+          borderRadius: 4,
+        }}>
+          <File className="w-4 h-4" style={{ color: '#00d4ff', flexShrink: 0 }} />
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p style={{ fontSize: '0.72rem', color: '#00d4ff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              Arquivo atual
+            </p>
+            <a href={existingFileUrl} target="_blank" rel="noopener noreferrer"
+              style={{ fontSize: '0.62rem', color: '#2a6890', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 3, marginTop: 1 }}>
+              <Download className="w-2.5 h-2.5" /> Ver arquivo
+            </a>
+          </div>
+          <button type="button" onClick={() => fileInputRef.current?.click()}
+            style={{
+              fontSize: '0.62rem', color: '#00a828', background: 'rgba(0,255,65,0.08)',
+              border: '1px solid rgba(0,255,65,0.2)', borderRadius: 3,
+              padding: '3px 8px', cursor: 'pointer', letterSpacing: '0.06em',
+            }}>
+            SUBSTITUIR
+          </button>
+        </div>
+      )}
+
+      {/* Selected new file */}
+      {selectedFile && (
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 10,
+          padding: '10px 12px', marginBottom: 8,
+          background: 'rgba(0,255,65,0.06)',
+          border: '1px solid rgba(0,255,65,0.25)',
+          borderRadius: 4,
+        }}>
+          {getFileIcon(selectedFile.name)}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p style={{ fontSize: '0.75rem', color: '#a0c8a8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {selectedFile.name}
+            </p>
+            <p style={{ fontSize: '0.62rem', color: '#2a4d30', marginTop: 1 }}>
+              {formatBytes(selectedFile.size)}
+            </p>
+          </div>
+          {isUploading ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <div style={{
+                width: 14, height: 14,
+                border: '1.5px solid #00ff41',
+                borderTopColor: 'transparent',
+                borderRadius: '50%',
+                animation: 'spin 0.7s linear infinite',
+              }} />
+              <span style={{ fontSize: '0.62rem', color: '#00a828' }}>ENVIANDO...</span>
+            </div>
+          ) : (
+            <button type="button" onClick={onClear}
+              style={{ color: '#2a4d30', background: 'none', border: 'none', cursor: 'pointer', padding: 4, transition: 'color 0.15s' }}
+              onMouseOver={e => (e.currentTarget.style.color = '#ff0040')}
+              onMouseOut={e => (e.currentTarget.style.color = '#2a4d30')}>
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Drop zone */}
+      {!selectedFile && (
+        <div
+          style={{
+            border: `2px dashed ${isDragging ? 'rgba(0,255,65,0.5)' : 'rgba(0,255,65,0.15)'}`,
+            borderRadius: 5,
+            padding: '24px 16px',
+            textAlign: 'center',
+            cursor: 'pointer',
+            transition: 'border-color 0.2s, background 0.2s',
+            background: isDragging ? 'rgba(0,255,65,0.05)' : 'transparent',
+          }}
+          onClick={() => fileInputRef.current?.click()}
+          onDragOver={e => { e.preventDefault(); setIsDragging(true); }}
+          onDragLeave={() => setIsDragging(false)}
+          onDrop={handleDrop}
+          onMouseOver={e => (e.currentTarget.style.borderColor = 'rgba(0,255,65,0.3)')}
+          onMouseOut={e => !isDragging && (e.currentTarget.style.borderColor = 'rgba(0,255,65,0.15)')}
+        >
+          <Upload className="w-7 h-7" style={{ color: '#2a4d30', margin: '0 auto 8px' }} />
+          <p style={{ fontSize: '0.78rem', color: '#4d8c5a', marginBottom: 4 }}>
+            Clique ou arraste um arquivo aqui
+          </p>
+          <p style={{ fontSize: '0.65rem', color: '#1a3020', lineHeight: 1.5 }}>
+            Programas (.exe, .msi), PDFs, ZIPs, Vídeos, Scripts, qualquer formato — máx. 500MB
+          </p>
+        </div>
+      )}
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="*/*"
+        style={{ display: 'none' }}
+        onChange={e => e.target.files?.[0] && onFileSelect(e.target.files[0])}
+      />
+
+      {uploadError && (
+        <div style={{
+          marginTop: 6, display: 'flex', alignItems: 'center', gap: 6,
+          fontSize: '0.7rem', color: '#ff6080',
+        }}>
+          <AlertCircle className="w-3.5 h-3.5" />
+          {uploadError}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function AdminContentPage() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
@@ -29,6 +196,11 @@ export default function AdminContentPage() {
   const [editModal, setEditModal] = useState<{ open: boolean; content: Content | null }>({ open: false, content: null });
   const [deleteModal, setDeleteModal] = useState<{ open: boolean; id: string | null }>({ open: false, id: null });
   const [isCreating, setIsCreating] = useState(false);
+
+  // File upload states
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState('');
 
   const { data, isLoading } = useQuery({
     queryKey: ['admin-content', { search, page }],
@@ -47,6 +219,8 @@ export default function AdminContentPage() {
       queryClient.invalidateQueries({ queryKey: ['admin-content'] });
       setIsCreating(false);
       resetForm();
+      setSelectedFile(null);
+      setUploadError('');
     },
   });
 
@@ -55,6 +229,8 @@ export default function AdminContentPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-content'] });
       setEditModal({ open: false, content: null });
+      setSelectedFile(null);
+      setUploadError('');
     },
   });
 
@@ -66,9 +242,10 @@ export default function AdminContentPage() {
     },
   });
 
-  const { register, handleSubmit, reset: resetForm, setValue, formState: { errors } } = useForm<ContentForm>({
+  const { register, handleSubmit, reset: resetForm, setValue, watch, formState: { errors } } = useForm<ContentForm>({
     defaultValues: { type: 'material', minLevel: 'iniciante' },
   });
+  const isDrop = watch('isDrop');
 
   const contents: Content[] = data?.contents || [];
   const pagination = data?.pagination;
@@ -76,6 +253,8 @@ export default function AdminContentPage() {
 
   const openEditModal = (content: Content) => {
     setEditModal({ open: true, content });
+    setSelectedFile(null);
+    setUploadError('');
     const cat = typeof content.category === 'object' ? content.category._id : content.category;
     setValue('title', content.title);
     setValue('description', content.description);
@@ -88,9 +267,42 @@ export default function AdminContentPage() {
     setValue('dropExpiresAt', content.dropExpiresAt?.slice(0, 16) || '');
   };
 
-  const onSubmit = (data: ContentForm) => {
+  const closeModal = () => {
+    setIsCreating(false);
+    setEditModal({ open: false, content: null });
+    setSelectedFile(null);
+    setUploadError('');
+    resetForm();
+  };
+
+  const onSubmit = async (data: ContentForm) => {
+    setUploadError('');
+    let filePayload: Record<string, unknown> = {};
+
+    // Upload file first if selected
+    if (selectedFile) {
+      setIsUploading(true);
+      try {
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+        const uploadRes = await contentApi.upload(formData);
+        filePayload = {
+          fileUrl: uploadRes.data.fileUrl,
+          fileKey: uploadRes.data.fileKey,
+          fileSize: uploadRes.data.fileSize,
+          mimeType: uploadRes.data.mimeType,
+        };
+      } catch {
+        setUploadError('Falha no upload do arquivo. Verifique o tamanho e tente novamente.');
+        setIsUploading(false);
+        return;
+      }
+      setIsUploading(false);
+    }
+
     const payload = {
       ...data,
+      ...filePayload,
       tags: data.tags ? data.tags.split(',').map((t) => t.trim()).filter(Boolean) : [],
       dropExpiresAt: data.isDrop && data.dropExpiresAt ? new Date(data.dropExpiresAt).toISOString() : null,
     };
@@ -102,149 +314,163 @@ export default function AdminContentPage() {
     }
   };
 
-  const renderContentFormFields = () => (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
-        <div className="col-span-2">
-          <label className="label-text">Title *</label>
-          <input {...register('title', { required: 'Required' })} type="text" className="input-field" />
-          {errors.title && <p className="text-red-400 text-xs mt-1">{errors.title.message}</p>}
-        </div>
-        <div className="col-span-2">
-          <label className="label-text">Description</label>
-          <textarea {...register('description')} rows={3} className="input-field resize-none" />
-        </div>
-        <div>
-          <label className="label-text">Category *</label>
-          <select {...register('category', { required: 'Required' })} className="input-field">
-            <option value="">Select...</option>
-            {categories.map((cat) => (
-              <option key={cat._id} value={cat._id}>{cat.name}</option>
-            ))}
-          </select>
-          {errors.category && <p className="text-red-400 text-xs mt-1">{errors.category.message}</p>}
-        </div>
-        <div>
-          <label className="label-text">Type *</label>
-          <select {...register('type')} className="input-field">
-            {['programa', 'database', 'material', 'esquema', 'video', 'outro'].map((t) => (
-              <option key={t} value={t}>{t}</option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className="label-text">Minimum Level</label>
-          <select {...register('minLevel')} className="input-field">
-            {['iniciante', 'intermediario', 'avancado', 'elite'].map((l) => (
-              <option key={l} value={l}>{l}</option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className="label-text">External Link</label>
-          <input {...register('externalLink')} type="url" placeholder="https://..." className="input-field" />
-        </div>
-        <div className="col-span-2">
-          <label className="label-text">Tags (comma-separated)</label>
-          <input {...register('tags')} type="text" placeholder="tag1, tag2, tag3" className="input-field" />
-        </div>
-        <div className="col-span-2">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input {...register('isDrop')} type="checkbox" className="w-4 h-4 accent-yellow-400" />
-            <span className="label-text mb-0">This is a Drop (time-limited)</span>
-          </label>
-        </div>
-        <div className="col-span-2">
-          <label className="label-text">Drop Expiration Date</label>
-          <input {...register('dropExpiresAt')} type="datetime-local" className="input-field" />
-        </div>
-      </div>
-    </div>
-  );
+  const isSubmitting = isUploading || createContent.isPending || updateContent.isPending;
 
   return (
-    <div className="max-w-7xl mx-auto space-y-5">
-      <div className="flex items-center justify-between">
+    <div style={{ maxWidth: 1200, margin: '0 auto' }} className="space-y-5">
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
         <div>
-          <h1 className="text-2xl font-bold text-gray-100">Content Management</h1>
-          <p className="text-gray-500 text-sm">{pagination?.total || 0} items</p>
+          <h1 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#c08060', letterSpacing: '0.08em' }}>
+            GERENCIAR CONTEÚDO
+          </h1>
+          <p style={{ fontSize: '0.7rem', color: '#3a1800', marginTop: 2 }}>
+            {pagination?.total || 0} arquivos no sistema
+          </p>
         </div>
-        <button onClick={() => { setIsCreating(true); resetForm(); }} className="btn-primary flex items-center gap-2">
-          <Plus className="w-4 h-4" /> New Content
+        <button
+          onClick={() => { setIsCreating(true); resetForm(); setSelectedFile(null); setUploadError(''); }}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 6,
+            padding: '8px 14px',
+            background: 'rgba(255,68,0,0.1)',
+            border: '1px solid rgba(255,68,0,0.35)',
+            borderRadius: 4,
+            color: '#ff4400',
+            fontSize: '0.75rem', fontWeight: 600,
+            letterSpacing: '0.06em',
+            cursor: 'pointer',
+            transition: 'all 0.15s',
+            fontFamily: 'JetBrains Mono, monospace',
+          }}
+          onMouseOver={e => (e.currentTarget.style.background = 'rgba(255,68,0,0.18)')}
+          onMouseOut={e => (e.currentTarget.style.background = 'rgba(255,68,0,0.1)')}
+        >
+          <Plus className="w-3.5 h-3.5" /> NOVO CONTEÚDO
         </button>
       </div>
 
       {/* Search */}
-      <div className="relative max-w-sm">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+      <div style={{ position: 'relative', maxWidth: 360 }}>
+        <Search className="w-3.5 h-3.5" style={{ position: 'absolute', left: 11, top: '50%', transform: 'translateY(-50%)', color: '#3a1800', pointerEvents: 'none' }} />
         <input
           type="text"
           value={search}
           onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-          placeholder="Search content..."
-          className="input-field pl-9"
+          placeholder="// buscar conteúdo..."
+          className="input-field"
+          style={{ paddingLeft: 34, fontSize: '0.78rem' }}
         />
       </div>
 
       {/* Table */}
-      <div className="bg-gray-900/80 border border-gray-800/60 rounded-xl overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
+      <div style={{
+        background: 'rgba(8,8,8,0.9)',
+        border: '1px solid rgba(255,68,0,0.12)',
+        borderRadius: 6,
+        overflow: 'hidden',
+      }}>
+        <div style={{ overflowX: 'auto' }}>
+          <table className="table-hack" style={{ minWidth: 700 }}>
             <thead>
-              <tr className="border-b border-gray-800/60">
-                <th className="text-left text-xs font-semibold text-gray-500 uppercase px-4 py-3">Content</th>
-                <th className="text-left text-xs font-semibold text-gray-500 uppercase px-4 py-3">Type</th>
-                <th className="text-left text-xs font-semibold text-gray-500 uppercase px-4 py-3">Level</th>
-                <th className="text-left text-xs font-semibold text-gray-500 uppercase px-4 py-3">Stats</th>
-                <th className="text-left text-xs font-semibold text-gray-500 uppercase px-4 py-3">Date</th>
-                <th className="text-right text-xs font-semibold text-gray-500 uppercase px-4 py-3">Actions</th>
+              <tr>
+                <th>CONTEÚDO</th>
+                <th>TIPO</th>
+                <th>NÍVEL</th>
+                <th>ARQUIVO</th>
+                <th>STATS</th>
+                <th>DATA</th>
+                <th style={{ textAlign: 'right' }}>AÇÕES</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-800/40">
+            <tbody>
               {isLoading ? (
-                Array.from({ length: 6 }).map((_, i) => (
-                  <tr key={i}><td colSpan={6} className="px-4 py-3"><div className="skeleton h-5 rounded" /></td></tr>
+                Array.from({ length: 5 }).map((_, i) => (
+                  <tr key={i}>
+                    <td colSpan={7}>
+                      <div className="skeleton" style={{ height: 18, borderRadius: 3 }} />
+                    </td>
+                  </tr>
                 ))
               ) : contents.length === 0 ? (
-                <tr><td colSpan={6} className="text-center py-12 text-gray-500 text-sm">No content found</td></tr>
+                <tr>
+                  <td colSpan={7} style={{ textAlign: 'center', padding: '40px', color: '#3a1800', fontSize: '0.8rem' }}>
+                    Nenhum conteúdo encontrado
+                  </td>
+                </tr>
               ) : (
                 contents.map((item) => {
                   const cat = typeof item.category === 'object' ? item.category : null;
                   return (
-                    <tr key={item._id} className="hover:bg-gray-800/30 transition-colors">
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-3">
-                          <span className="text-xl">{getContentTypeIcon(item.type)}</span>
+                    <tr key={item._id}>
+                      <td>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <span style={{ fontSize: '1.1rem' }}>{getContentTypeIcon(item.type)}</span>
                           <div>
-                            <p className="text-sm font-medium text-gray-200 max-w-xs truncate">{item.title}</p>
-                            {cat && <p className="text-xs text-gray-500">{cat.name}</p>}
-                            {item.isDrop && (
-                              <span className="text-xs text-yellow-400 bg-yellow-500/10 px-1.5 rounded">DROP</span>
-                            )}
+                            <p style={{ fontSize: '0.78rem', fontWeight: 500, color: '#c0a890', maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {item.title}
+                            </p>
+                            <div style={{ display: 'flex', gap: 6, marginTop: 2, flexWrap: 'wrap' }}>
+                              {cat && <span style={{ fontSize: '0.6rem', color: '#5a3a2a' }}>{cat.name}</span>}
+                              {item.isDrop && (
+                                <span style={{
+                                  fontSize: '0.58rem', color: '#ffcc00',
+                                  background: 'rgba(255,204,0,0.1)',
+                                  border: '1px solid rgba(255,204,0,0.2)',
+                                  borderRadius: 2, padding: '1px 5px', letterSpacing: '0.08em',
+                                }}>DROP</span>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </td>
-                      <td className="px-4 py-3">
-                        <span className="text-xs text-gray-400">{getContentTypeLabel(item.type)}</span>
+                      <td>
+                        <span style={{ fontSize: '0.7rem', color: '#5a3a2a' }}>{getContentTypeLabel(item.type)}</span>
                       </td>
-                      <td className="px-4 py-3">
-                        <LevelBadge level={item.minLevel} />
+                      <td><LevelBadge level={item.minLevel} /></td>
+                      <td>
+                        {item.fileUrl ? (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                            <CheckCircle2 className="w-3.5 h-3.5" style={{ color: '#00a828' }} />
+                            <span style={{ fontSize: '0.62rem', color: '#2a4d30' }}>
+                              {item.fileSize > 0 ? formatBytes(item.fileSize) : 'Arquivo'}
+                            </span>
+                          </div>
+                        ) : item.externalLink ? (
+                          <span style={{ fontSize: '0.62rem', color: '#2a6890' }}>Link externo</span>
+                        ) : (
+                          <span style={{ fontSize: '0.62rem', color: '#3a3a3a' }}>—</span>
+                        )}
                       </td>
-                      <td className="px-4 py-3">
-                        <div className="text-xs text-gray-500">
-                          <span>👁 {item.views}</span>
-                          <span className="ml-2">⬇ {item.downloads}</span>
+                      <td>
+                        <div style={{ fontSize: '0.65rem', color: '#3a3a3a', display: 'flex', flexDirection: 'column', gap: 2 }}>
+                          <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+                            <Eye className="w-3 h-3" /> {item.views}
+                          </span>
+                          <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+                            <Download className="w-3 h-3" /> {item.downloads}
+                          </span>
                         </div>
                       </td>
-                      <td className="px-4 py-3">
-                        <span className="text-xs text-gray-500">{formatDate(item.createdAt)}</span>
+                      <td>
+                        <span style={{ fontSize: '0.65rem', color: '#3a3a3a' }}>{formatDate(item.createdAt)}</span>
                       </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center justify-end gap-2">
-                          <button onClick={() => openEditModal(item)} className="p-1.5 text-gray-500 hover:text-blue-400 hover:bg-blue-900/20 rounded transition-colors">
+                      <td>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 4 }}>
+                          <button
+                            onClick={() => openEditModal(item)}
+                            style={{ padding: 6, color: '#3a3a3a', background: 'none', border: 'none', cursor: 'pointer', borderRadius: 3, transition: 'all 0.15s' }}
+                            onMouseOver={e => { e.currentTarget.style.color = '#00d4ff'; e.currentTarget.style.background = 'rgba(0,212,255,0.08)'; }}
+                            onMouseOut={e => { e.currentTarget.style.color = '#3a3a3a'; e.currentTarget.style.background = 'none'; }}
+                          >
                             <Edit2 className="w-3.5 h-3.5" />
                           </button>
-                          <button onClick={() => setDeleteModal({ open: true, id: item._id })} className="p-1.5 text-gray-500 hover:text-red-400 hover:bg-red-900/20 rounded transition-colors">
+                          <button
+                            onClick={() => setDeleteModal({ open: true, id: item._id })}
+                            style={{ padding: 6, color: '#3a3a3a', background: 'none', border: 'none', cursor: 'pointer', borderRadius: 3, transition: 'all 0.15s' }}
+                            onMouseOver={e => { e.currentTarget.style.color = '#ff0040'; e.currentTarget.style.background = 'rgba(255,0,64,0.08)'; }}
+                            onMouseOut={e => { e.currentTarget.style.color = '#3a3a3a'; e.currentTarget.style.background = 'none'; }}
+                          >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </div>
@@ -258,12 +484,22 @@ export default function AdminContentPage() {
         </div>
 
         {pagination && pagination.pages > 1 && (
-          <div className="px-4 py-3 border-t border-gray-800/40 flex items-center justify-between">
-            <p className="text-xs text-gray-500">{(page - 1) * 15 + 1}–{Math.min(page * 15, pagination.total)} of {pagination.total}</p>
-            <div className="flex items-center gap-2">
-              <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1} className="btn-secondary px-3 py-1 text-xs">Previous</button>
-              <span className="text-xs text-gray-500">{page}/{pagination.pages}</span>
-              <button onClick={() => setPage((p) => Math.min(pagination.pages, p + 1))} disabled={page === pagination.pages} className="btn-secondary px-3 py-1 text-xs">Next</button>
+          <div style={{
+            padding: '10px 16px',
+            borderTop: '1px solid rgba(255,68,0,0.08)',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          }}>
+            <p style={{ fontSize: '0.65rem', color: '#3a1800' }}>
+              {(page - 1) * 15 + 1}–{Math.min(page * 15, pagination.total)} de {pagination.total}
+            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1} className="btn-secondary" style={{ padding: '4px 10px', fontSize: '0.7rem' }}>
+                Anterior
+              </button>
+              <span style={{ fontSize: '0.7rem', color: '#3a1800' }}>{page}/{pagination.pages}</span>
+              <button onClick={() => setPage((p) => Math.min(pagination.pages, p + 1))} disabled={page === pagination.pages} className="btn-secondary" style={{ padding: '4px 10px', fontSize: '0.7rem' }}>
+                Próximo
+              </button>
             </div>
           </div>
         )}
@@ -272,21 +508,124 @@ export default function AdminContentPage() {
       {/* Create/Edit Modal */}
       <Modal
         isOpen={isCreating || editModal.open}
-        onClose={() => { setIsCreating(false); setEditModal({ open: false, content: null }); resetForm(); }}
-        title={editModal.content ? 'Edit Content' : 'New Content'}
+        onClose={closeModal}
+        title={editModal.content ? 'Editar Conteúdo' : 'Novo Conteúdo'}
         size="xl"
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {renderContentFormFields()}
-          <div className="flex gap-3 justify-end pt-2">
-            <button type="button" onClick={() => { setIsCreating(false); setEditModal({ open: false, content: null }); resetForm(); }} className="btn-secondary">
-              Cancel
+          <div className="grid grid-cols-2 gap-4">
+            <div className="col-span-2">
+              <label className="label-text">TÍTULO *</label>
+              <input {...register('title', { required: 'Obrigatório' })} type="text" className="input-field" placeholder="Nome do conteúdo" />
+              {errors.title && <p style={{ color: '#ff6080', fontSize: '0.7rem', marginTop: 4 }}>{errors.title.message}</p>}
+            </div>
+
+            <div className="col-span-2">
+              <label className="label-text">DESCRIÇÃO</label>
+              <textarea {...register('description')} rows={3} className="input-field" style={{ resize: 'none' }} placeholder="Descreva o conteúdo..." />
+            </div>
+
+            <div>
+              <label className="label-text">CATEGORIA *</label>
+              <select {...register('category', { required: 'Obrigatório' })} className="input-field">
+                <option value="">Selecionar...</option>
+                {categories.map((cat) => (
+                  <option key={cat._id} value={cat._id}>{cat.name}</option>
+                ))}
+              </select>
+              {errors.category && <p style={{ color: '#ff6080', fontSize: '0.7rem', marginTop: 4 }}>{errors.category.message}</p>}
+            </div>
+
+            <div>
+              <label className="label-text">TIPO *</label>
+              <select {...register('type')} className="input-field">
+                {['programa', 'database', 'material', 'esquema', 'video', 'outro'].map((t) => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="label-text">NÍVEL MÍNIMO</label>
+              <select {...register('minLevel')} className="input-field">
+                {['iniciante', 'intermediario', 'avancado', 'elite'].map((l) => (
+                  <option key={l} value={l}>{l}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="label-text">LINK EXTERNO</label>
+              <input {...register('externalLink')} type="url" placeholder="https://..." className="input-field" />
+            </div>
+
+            <div className="col-span-2">
+              <label className="label-text">TAGS (separadas por vírgula)</label>
+              <input {...register('tags')} type="text" placeholder="tag1, tag2, tag3" className="input-field" />
+            </div>
+
+            {/* File Upload Zone */}
+            <div className="col-span-2">
+              <FileUploadZone
+                selectedFile={selectedFile}
+                existingFileUrl={editModal.content?.fileUrl}
+                existingFileName={editModal.content?.fileKey}
+                isUploading={isUploading}
+                uploadError={uploadError}
+                onFileSelect={(file) => { setSelectedFile(file); setUploadError(''); }}
+                onClear={() => { setSelectedFile(null); setUploadError(''); }}
+              />
+            </div>
+
+            <div className="col-span-2">
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                <input {...register('isDrop')} type="checkbox"
+                  style={{ width: 14, height: 14, accentColor: '#ffcc00', cursor: 'pointer' }} />
+                <span className="label-text" style={{ marginBottom: 0 }}>
+                  É um Drop (conteúdo por tempo limitado)
+                </span>
+              </label>
+            </div>
+
+            {isDrop && (
+              <div className="col-span-2">
+                <label className="label-text">DATA DE EXPIRAÇÃO DO DROP</label>
+                <input {...register('dropExpiresAt')} type="datetime-local" className="input-field" />
+              </div>
+            )}
+          </div>
+
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', paddingTop: 8, borderTop: '1px solid rgba(0,255,65,0.1)' }}>
+            <button type="button" onClick={closeModal} className="btn-secondary">
+              CANCELAR
             </button>
-            <button type="submit" disabled={createContent.isPending || updateContent.isPending} className="btn-primary flex items-center gap-2">
-              {(createContent.isPending || updateContent.isPending) && (
-                <div className="w-4 h-4 border-2 border-gray-950 border-t-transparent rounded-full animate-spin" />
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                padding: '9px 18px',
+                background: isSubmitting ? 'rgba(255,68,0,0.05)' : 'rgba(255,68,0,0.1)',
+                border: '1px solid rgba(255,68,0,0.35)',
+                borderRadius: 4,
+                color: '#ff4400',
+                fontSize: '0.75rem', fontWeight: 600,
+                cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                opacity: isSubmitting ? 0.7 : 1,
+                fontFamily: 'JetBrains Mono, monospace',
+                letterSpacing: '0.06em',
+              }}
+            >
+              {isSubmitting && (
+                <div style={{
+                  width: 13, height: 13,
+                  border: '1.5px solid #ff4400',
+                  borderTopColor: 'transparent',
+                  borderRadius: '50%',
+                  animation: 'spin 0.7s linear infinite',
+                }} />
               )}
-              {editModal.content ? 'Save Changes' : 'Create Content'}
+              {isUploading ? 'ENVIANDO...' : editModal.content ? 'SALVAR' : 'CRIAR'}
             </button>
           </div>
         </form>
@@ -297,9 +636,9 @@ export default function AdminContentPage() {
         isOpen={deleteModal.open}
         onClose={() => setDeleteModal({ open: false, id: null })}
         onConfirm={() => deleteContent.mutate(deleteModal.id!)}
-        title="Delete Content"
-        description="Are you sure? This will deactivate the content."
-        confirmText="Delete"
+        title="Deletar Conteúdo"
+        description="Tem certeza? O conteúdo será desativado do sistema."
+        confirmText="Deletar"
         isLoading={deleteContent.isPending}
       />
     </div>

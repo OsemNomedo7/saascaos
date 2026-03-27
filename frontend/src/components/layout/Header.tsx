@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, Bell, X, Menu } from 'lucide-react';
+import { Search, Bell, X, Menu, Terminal } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { searchApi } from '@/lib/api';
 import { getInitials, formatRelativeDate, truncateText } from '@/lib/utils';
@@ -35,13 +35,11 @@ export default function Header({ onMenuToggle }: HeaderProps) {
   const handleSearch = (query: string) => {
     setSearchQuery(query);
     clearTimeout(searchTimer.current);
-
     if (query.trim().length < 2) {
       setSearchResults([]);
       setShowResults(false);
       return;
     }
-
     searchTimer.current = setTimeout(async () => {
       setIsSearching(true);
       try {
@@ -71,104 +69,237 @@ export default function Header({ onMenuToggle }: HeaderProps) {
   };
 
   return (
-    <header className="h-14 bg-gray-900/95 border-b border-gray-800/60 flex items-center px-4 gap-4 sticky top-0 z-30 backdrop-blur-sm">
-      {/* Mobile menu button */}
+    <header style={{
+      height: 52,
+      background: 'rgba(8,18,8,0.95)',
+      borderBottom: '1px solid rgba(0,255,65,0.1)',
+      display: 'flex',
+      alignItems: 'center',
+      padding: '0 16px',
+      gap: 12,
+      position: 'sticky',
+      top: 0,
+      zIndex: 30,
+      backdropFilter: 'blur(12px)',
+    }}>
+      {/* Mobile menu */}
       <button
         onClick={onMenuToggle}
-        className="lg:hidden p-2 text-gray-500 hover:text-gray-300 hover:bg-gray-800 rounded-lg transition-colors"
+        className="lg:hidden"
+        style={{
+          padding: 6,
+          color: '#2a4d30',
+          background: 'none',
+          border: 'none',
+          cursor: 'pointer',
+          transition: 'color 0.15s',
+          borderRadius: 4,
+        }}
+        onMouseOver={e => (e.currentTarget.style.color = '#00ff41')}
+        onMouseOut={e => (e.currentTarget.style.color = '#2a4d30')}
       >
         <Menu className="w-5 h-5" />
       </button>
 
       {/* Search */}
-      <div ref={searchRef} className="flex-1 max-w-xl relative">
+      <div ref={searchRef} style={{ flex: 1, maxWidth: 480, position: 'relative' }}>
         <form onSubmit={handleSearchSubmit}>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+          <div style={{ position: 'relative' }}>
+            <Search className="w-3.5 h-3.5"
+              style={{
+                position: 'absolute', left: 12, top: '50%',
+                transform: 'translateY(-50%)',
+                color: '#2a4d30', pointerEvents: 'none',
+              }} />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => handleSearch(e.target.value)}
-              placeholder="Search content..."
-              className="w-full bg-gray-800/60 border border-gray-700/60 rounded-lg pl-9 pr-8 py-2 text-sm text-gray-300 placeholder-gray-600 focus:outline-none focus:border-green-500/50 focus:ring-1 focus:ring-green-500/20 transition-colors"
-              onFocus={() => searchQuery.length >= 2 && setShowResults(true)}
+              placeholder="// buscar conteúdo..."
+              style={{
+                width: '100%',
+                background: 'rgba(5,10,5,0.6)',
+                border: '1px solid rgba(0,255,65,0.15)',
+                borderRadius: 4,
+                padding: '7px 32px 7px 34px',
+                fontSize: '0.78rem',
+                color: '#a0c8a8',
+                fontFamily: 'JetBrains Mono, monospace',
+                outline: 'none',
+                transition: 'border-color 0.2s, box-shadow 0.2s',
+              }}
+              onFocus={e => {
+                e.currentTarget.style.borderColor = '#00ff41';
+                e.currentTarget.style.boxShadow = '0 0 0 2px rgba(0,255,65,0.07)';
+                if (searchQuery.length >= 2) setShowResults(true);
+              }}
+              onBlur={e => {
+                e.currentTarget.style.borderColor = 'rgba(0,255,65,0.15)';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
             />
             {searchQuery && (
-              <button
-                type="button"
-                onClick={clearSearch}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-600 hover:text-gray-400"
+              <button type="button" onClick={clearSearch}
+                style={{
+                  position: 'absolute', right: 10, top: '50%',
+                  transform: 'translateY(-50%)',
+                  color: '#2a4d30', background: 'none', border: 'none',
+                  cursor: 'pointer', transition: 'color 0.15s',
+                }}
+                onMouseOver={e => (e.currentTarget.style.color = '#00ff41')}
+                onMouseOut={e => (e.currentTarget.style.color = '#2a4d30')}
               >
-                <X className="w-3.5 h-3.5" />
+                <X className="w-3 h-3" />
               </button>
             )}
           </div>
         </form>
 
-        {/* Search results dropdown */}
+        {/* Dropdown */}
         {showResults && (
-          <div className="absolute top-full left-0 right-0 mt-1.5 bg-gray-900 border border-gray-800 rounded-xl shadow-xl overflow-hidden z-50">
+          <div style={{
+            position: 'absolute',
+            top: 'calc(100% + 6px)',
+            left: 0, right: 0,
+            background: '#0a120a',
+            border: '1px solid rgba(0,255,65,0.2)',
+            borderRadius: 6,
+            boxShadow: '0 8px 30px rgba(0,0,0,0.5)',
+            overflow: 'hidden',
+            zIndex: 50,
+          }}>
             {isSearching ? (
-              <div className="p-4 text-center text-gray-500 text-sm">
-                <div className="w-4 h-4 border-2 border-green-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-                Searching...
+              <div style={{ padding: 16, textAlign: 'center', color: '#2a4d30', fontSize: '0.75rem' }}>
+                <div style={{
+                  width: 14, height: 14,
+                  border: '1.5px solid #00ff41',
+                  borderTopColor: 'transparent',
+                  borderRadius: '50%',
+                  animation: 'spin 0.8s linear infinite',
+                  margin: '0 auto 8px',
+                }} />
+                Buscando...
               </div>
             ) : searchResults.length > 0 ? (
               <div>
                 {searchResults.map((item) => (
-                  <button
-                    key={item._id}
-                    onClick={() => {
-                      router.push(`/content?id=${item._id}`);
-                      setShowResults(false);
-                      clearSearch();
+                  <button key={item._id}
+                    onClick={() => { router.push(`/content?id=${item._id}`); setShowResults(false); clearSearch(); }}
+                    style={{
+                      width: '100%', display: 'flex', alignItems: 'center', gap: 12,
+                      padding: '10px 14px', textAlign: 'left',
+                      borderBottom: '1px solid rgba(0,255,65,0.06)',
+                      background: 'none', border: 'none', cursor: 'pointer',
+                      transition: 'background 0.15s',
+                      borderBottomStyle: 'solid',
                     }}
-                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-800/60 transition-colors text-left border-b border-gray-800/40 last:border-0"
+                    onMouseOver={e => (e.currentTarget.style.background = 'rgba(0,255,65,0.04)')}
+                    onMouseOut={e => (e.currentTarget.style.background = 'none')}
                   >
-                    <div className="w-8 h-8 bg-gray-800 rounded-lg flex items-center justify-center text-base flex-shrink-0">
+                    <div style={{
+                      width: 30, height: 30,
+                      background: 'rgba(0,255,65,0.06)',
+                      border: '1px solid rgba(0,255,65,0.15)',
+                      borderRadius: 4,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: '0.9rem', flexShrink: 0,
+                    }}>
                       {item.type === 'programa' ? '💻' : item.type === 'video' ? '🎥' : item.type === 'database' ? '🗄️' : '📄'}
                     </div>
-                    <div className="min-w-0">
-                      <p className="text-sm text-gray-200 truncate">{item.title}</p>
-                      <p className="text-xs text-gray-500">{truncateText(item.description, 60)}</p>
+                    <div style={{ minWidth: 0 }}>
+                      <p style={{ fontSize: '0.78rem', color: '#a0c8a8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {item.title}
+                      </p>
+                      <p style={{ fontSize: '0.65rem', color: '#2a4d30' }}>{truncateText(item.description, 55)}</p>
                     </div>
                   </button>
                 ))}
-                <button
-                  onClick={handleSearchSubmit}
-                  className="w-full px-4 py-2.5 text-xs text-green-400 hover:bg-gray-800/40 transition-colors text-center"
+                <button onClick={handleSearchSubmit}
+                  style={{
+                    width: '100%', padding: '8px 14px',
+                    fontSize: '0.7rem', color: '#00a828',
+                    background: 'none', border: 'none', cursor: 'pointer',
+                    textAlign: 'center', transition: 'color 0.15s',
+                    fontFamily: 'JetBrains Mono, monospace',
+                  }}
+                  onMouseOver={e => (e.currentTarget.style.color = '#00ff41')}
+                  onMouseOut={e => (e.currentTarget.style.color = '#00a828')}
                 >
-                  See all results for &ldquo;{searchQuery}&rdquo;
+                  Ver todos resultados para &ldquo;{searchQuery}&rdquo; →
                 </button>
               </div>
             ) : (
-              <div className="p-4 text-center text-gray-500 text-sm">No results found</div>
+              <div style={{ padding: 14, textAlign: 'center', color: '#2a4d30', fontSize: '0.72rem' }}>
+                Nenhum resultado encontrado
+              </div>
             )}
           </div>
         )}
       </div>
 
-      {/* Right side */}
-      <div className="flex items-center gap-2 ml-auto">
-        {/* Notifications placeholder */}
-        <button className="relative p-2 text-gray-500 hover:text-gray-300 hover:bg-gray-800 rounded-lg transition-colors">
+      {/* Right */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginLeft: 'auto' }}>
+        {/* Terminal indicator */}
+        <div style={{
+          display: 'none',
+          alignItems: 'center',
+          gap: 6,
+          padding: '4px 10px',
+          background: 'rgba(0,255,65,0.04)',
+          border: '1px solid rgba(0,255,65,0.1)',
+          borderRadius: 4,
+        }} className="sm:flex">
+          <Terminal className="w-3 h-3" style={{ color: '#2a4d30' }} />
+          <span style={{ fontSize: '0.6rem', color: '#1a3020', letterSpacing: '0.1em' }}>ONLINE</span>
+          <div style={{ width: 4, height: 4, borderRadius: '50%', background: '#00ff41', boxShadow: '0 0 5px #00ff41' }} />
+        </div>
+
+        {/* Notifications */}
+        <button style={{
+          position: 'relative', padding: 7,
+          color: '#2a4d30', background: 'none', border: 'none',
+          cursor: 'pointer', transition: 'color 0.15s', borderRadius: 4,
+        }}
+          onMouseOver={e => (e.currentTarget.style.color = '#00ff41')}
+          onMouseOut={e => (e.currentTarget.style.color = '#2a4d30')}
+        >
           <Bell className="w-4 h-4" />
-          <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-green-400 rounded-full" />
+          <span style={{
+            position: 'absolute', top: 6, right: 6,
+            width: 5, height: 5, borderRadius: '50%',
+            background: '#00ff41', boxShadow: '0 0 6px #00ff41',
+          }} />
         </button>
 
-        {/* User avatar */}
-        <div className="flex items-center gap-2 pl-2 border-l border-gray-800">
-          <div className="w-7 h-7 bg-gray-700 rounded-full flex items-center justify-center text-xs font-bold text-gray-300">
+        {/* User */}
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 8,
+          paddingLeft: 10,
+          borderLeft: '1px solid rgba(0,255,65,0.1)',
+        }}>
+          <div style={{
+            width: 28, height: 28,
+            background: 'rgba(0,255,65,0.08)',
+            border: '1px solid rgba(0,255,65,0.3)',
+            borderRadius: '50%',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: '0.62rem', fontWeight: 700,
+            color: '#00ff41',
+            overflow: 'hidden',
+            flexShrink: 0,
+          }}>
             {user?.avatar ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={user.avatar} alt={user.name} className="w-full h-full rounded-full object-cover" />
+              <img src={user.avatar} alt={user.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             ) : (
               getInitials(user?.name || 'U')
             )}
           </div>
           <div className="hidden sm:block">
-            <p className="text-xs font-medium text-gray-300 leading-tight">{user?.name}</p>
-            <p className="text-xs text-gray-600 leading-tight capitalize">{user?.role}</p>
+            <p style={{ fontSize: '0.72rem', fontWeight: 600, color: '#a0c8a8', lineHeight: 1.2 }}>{user?.name}</p>
+            <p style={{ fontSize: '0.58rem', color: '#2a4d30', letterSpacing: '0.08em', textTransform: 'capitalize' }}>
+              {user?.role}
+            </p>
           </div>
         </div>
       </div>

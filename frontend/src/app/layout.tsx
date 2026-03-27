@@ -1,19 +1,23 @@
 import React from 'react';
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { SocketProvider } from '@/contexts/SocketContext';
 import QueryProvider from '@/components/providers/QueryProvider';
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  variable: '--font-mono',
+  weight: ['300', '400', '500', '600', '700'],
+});
 
 export const metadata: Metadata = {
   title: {
-    default: 'SaaS Platform',
-    template: '%s | SaaS Platform',
+    default: 'ELITE TROJAN',
+    template: '%s | ELITE TROJAN',
   },
-  description: 'Premium membership platform with exclusive content and community.',
+  description: 'Plataforma de conteúdo exclusivo para membros elite.',
   icons: {
     icon: '/favicon.ico',
   },
@@ -21,8 +25,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="dark">
-      <body className={`${inter.variable} font-sans bg-gray-950 text-gray-100 antialiased`}>
+    <html lang="pt-BR" className="dark">
+      <body className={`${jetbrainsMono.variable} bg-[#050a05] text-[#e0ffe8] antialiased`}>
         <QueryProvider>
           <AuthProvider>
             <SocketProvider>

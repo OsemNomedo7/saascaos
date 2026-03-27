@@ -15,6 +15,10 @@ const nextConfig = {
         hostname: '**.amazonaws.com',
       },
       {
+        protocol: 'https',
+        hostname: '**.onrender.com',
+      },
+      {
         protocol: 'http',
         hostname: 'localhost',
         port: '5000',
