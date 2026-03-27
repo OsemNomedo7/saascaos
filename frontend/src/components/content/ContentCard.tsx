@@ -35,9 +35,10 @@ interface ContentCardProps {
   content: Content;
   subscription?: Subscription | null;
   onDownload?: () => void;
+  onOpenModal?: (content: Content) => void;
 }
 
-export default function ContentCard({ content, subscription, onDownload }: ContentCardProps) {
+export default function ContentCard({ content, subscription, onDownload, onOpenModal }: ContentCardProps) {
   const { user } = useAuth();
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloads, setDownloads] = useState(content.downloads);
@@ -47,7 +48,7 @@ export default function ContentCard({ content, subscription, onDownload }: Conte
   const userLevelOrder = LEVEL_ORDER[user?.level || 'iniciante'] || 0;
   const contentLevelOrder = LEVEL_ORDER[content.minLevel] || 0;
   const isLevelLocked = userLevelOrder < contentLevelOrder && user?.role !== 'admin';
-  const isSubLocked = !subscription && user?.role !== 'admin';
+  const isSubLocked = !content.isFree && !subscription && user?.role !== 'admin';
   const isLocked = isLevelLocked || isSubLocked;
 
   const category = typeof content.category === 'object' ? content.category : null;
@@ -60,6 +61,7 @@ export default function ContentCard({ content, subscription, onDownload }: Conte
 
   const handleDownload = async (e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     if (isLocked || isDownloading) return;
     setDownloadError('');
 
@@ -91,16 +93,19 @@ export default function ContentCard({ content, subscription, onDownload }: Conte
   };
 
   return (
-    <div style={{
-      background: 'rgba(10,18,10,0.9)',
-      border: `1px solid rgba(${isLevelLocked ? '255,204,0' : isSubLocked ? '255,68,0' : '0,255,65'},0.18)`,
-      borderRadius: 6,
-      display: 'flex',
-      flexDirection: 'column',
-      transition: 'all 0.2s ease',
-      overflow: 'hidden',
-      position: 'relative',
-    }}
+    <div
+      onClick={() => onOpenModal?.(content)}
+      style={{
+        background: 'rgba(10,18,10,0.9)',
+        border: `1px solid rgba(${isLevelLocked ? '255,204,0' : isSubLocked ? '255,68,0' : content.isFree ? '0,255,65' : '0,255,65'},0.18)`,
+        borderRadius: 6,
+        display: 'flex',
+        flexDirection: 'column',
+        transition: 'all 0.2s ease',
+        overflow: 'hidden',
+        position: 'relative',
+        cursor: onOpenModal ? 'pointer' : 'default',
+      }}
       onMouseEnter={e => {
         const color = isLevelLocked ? '255,204,0' : isSubLocked ? '255,68,0' : '0,255,65';
         (e.currentTarget as HTMLDivElement).style.borderColor = `rgba(${color},0.4)`;
@@ -221,8 +226,20 @@ export default function ContentCard({ content, subscription, onDownload }: Conte
           }}>
             {content.title}
           </h3>
-          {isLevelLocked && <Lock style={{ width: 13, height: 13, color: '#ffcc00', flexShrink: 0 }} />}
-          {isSubLocked && !isLevelLocked && <Lock style={{ width: 13, height: 13, color: '#ff4400', flexShrink: 0 }} />}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
+            {content.isFree && (
+              <span style={{
+                fontFamily: 'JetBrains Mono, monospace', fontSize: '0.5rem', fontWeight: 700,
+                letterSpacing: '0.12em', color: '#00ff41',
+                background: 'rgba(0,255,65,0.12)', border: '1px solid rgba(0,255,65,0.35)',
+                borderRadius: 3, padding: '1px 4px',
+              }}>
+                FREE
+              </span>
+            )}
+            {isLevelLocked && <Lock style={{ width: 13, height: 13, color: '#ffcc00' }} />}
+            {isSubLocked && !isLevelLocked && <Lock style={{ width: 13, height: 13, color: '#ff4400' }} />}
+          </div>
         </div>
 
         {/* Badges row */}
@@ -321,7 +338,7 @@ export default function ContentCard({ content, subscription, onDownload }: Conte
         </div>
 
         {isSubLocked ? (
-          <Link href="/planos" style={{
+          <Link href="/planos" onClick={e => e.stopPropagation()} style={{
             display: 'flex', alignItems: 'center', gap: 4,
             fontSize: '0.65rem',
             fontFamily: 'JetBrains Mono, monospace',
@@ -338,7 +355,7 @@ export default function ContentCard({ content, subscription, onDownload }: Conte
             ASSINAR
           </Link>
         ) : isLevelLocked ? (
-          <Link href="/planos" style={{
+          <Link href="/planos" onClick={e => e.stopPropagation()} style={{
             display: 'flex', alignItems: 'center', gap: 4,
             fontSize: '0.65rem',
             fontFamily: 'JetBrains Mono, monospace',

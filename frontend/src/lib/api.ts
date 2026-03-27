@@ -77,6 +77,11 @@ export const contentApi = {
     api.post('/content/upload-image', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     }),
+  getReviews: (id: string) => api.get(`/content/${id}/reviews`),
+  createReview: (id: string, data: { rating: number; comment: string }) =>
+    api.post(`/content/${id}/reviews`, data),
+  deleteReview: (contentId: string, reviewId: string) =>
+    api.delete(`/content/${contentId}/reviews/${reviewId}`),
 };
 
 export const categoriesApi = {

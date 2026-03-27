@@ -77,6 +77,10 @@ const contentSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    isFree: {
+      type: Boolean,
+      default: false,
+    },
     thumbnail: {
       type: String,
       default: null,

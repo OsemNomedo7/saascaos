@@ -68,10 +68,27 @@ export interface Content {
   isActive: boolean;
   isDrop: boolean;
   dropExpiresAt: string | null;
+  isFree: boolean;
   thumbnail: string | null;
   images: string[];
   createdAt: string;
   updatedAt: string;
+}
+
+export interface Review {
+  _id: string;
+  content: string;
+  user: string | User;
+  rating: number;
+  comment: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ReviewStats {
+  total: number;
+  avgRating: number;
+  distribution: { star: number; count: number }[];
 }
 
 export interface Post {

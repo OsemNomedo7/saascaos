@@ -7,6 +7,7 @@ import { Search, Grid3X3, List, SlidersHorizontal, Library, ChevronLeft, Chevron
 import { contentApi, categoriesApi, subscriptionsApi } from '@/lib/api';
 import ContentCard from '@/components/content/ContentCard';
 import ContentFilter from '@/components/content/ContentFilter';
+import ContentModal from '@/components/content/ContentModal';
 import type { Content, Category, Subscription } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
@@ -24,6 +25,7 @@ export default function ContentPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
   const [searchInput, setSearchInput] = useState(search);
+  const [modalContent, setModalContent] = useState<Content | null>(null);
 
   const { data: categoriesData } = useQuery({
     queryKey: ['categories'],
@@ -312,7 +314,12 @@ export default function ContentPage() {
                 gridTemplateColumns: viewMode === 'grid' ? 'repeat(auto-fill, minmax(260px, 1fr))' : '1fr',
               }}>
                 {contents.map((item) => (
-                  <ContentCard key={item._id} content={item} subscription={subscription} />
+                  <ContentCard
+                    key={item._id}
+                    content={item}
+                    subscription={subscription}
+                    onOpenModal={setModalContent}
+                  />
                 ))}
               </div>
 
@@ -376,6 +383,15 @@ export default function ContentPage() {
           )}
         </div>
       </div>
+
+      {/* Content detail modal */}
+      {modalContent && (
+        <ContentModal
+          content={modalContent}
+          subscription={subscription}
+          onClose={() => setModalContent(null)}
+        />
+      )}
     </div>
   );
 }

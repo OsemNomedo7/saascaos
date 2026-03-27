@@ -22,6 +22,7 @@ interface ContentForm {
   minLevel: UserLevel;
   externalLink: string;
   tags: string;
+  isFree: boolean;
   isDrop: boolean;
   dropExpiresAt: string;
 }
@@ -256,7 +257,7 @@ export default function AdminContentPage() {
   });
 
   const { register, handleSubmit, reset: resetForm, setValue, watch, formState: { errors } } = useForm<ContentForm>({
-    defaultValues: { type: 'material', minLevel: 'iniciante' },
+    defaultValues: { type: 'material', minLevel: 'iniciante', isFree: false },
   });
   const isDrop = watch('isDrop');
 
@@ -279,6 +280,7 @@ export default function AdminContentPage() {
     setValue('minLevel', content.minLevel);
     setValue('externalLink', content.externalLink || '');
     setValue('tags', content.tags?.join(', ') || '');
+    setValue('isFree', content.isFree || false);
     setValue('isDrop', content.isDrop);
     setValue('dropExpiresAt', content.dropExpiresAt?.slice(0, 16) || '');
   };
@@ -454,6 +456,14 @@ export default function AdminContentPage() {
                             </p>
                             <div style={{ display: 'flex', gap: 6, marginTop: 2, flexWrap: 'wrap' }}>
                               {cat && <span style={{ fontSize: '0.6rem', color: '#5a3a2a' }}>{cat.name}</span>}
+                              {item.isFree && (
+                                <span style={{
+                                  fontSize: '0.58rem', color: '#00ff41',
+                                  background: 'rgba(0,255,65,0.08)',
+                                  border: '1px solid rgba(0,255,65,0.2)',
+                                  borderRadius: 2, padding: '1px 5px', letterSpacing: '0.08em',
+                                }}>FREE</span>
+                              )}
                               {item.isDrop && (
                                 <span style={{
                                   fontSize: '0.58rem', color: '#ffcc00',
@@ -730,7 +740,19 @@ export default function AdminContentPage() {
               </p>
             </div>
 
-            <div className="col-span-2">
+            <div>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                <input {...register('isFree')} type="checkbox"
+                  style={{ width: 14, height: 14, accentColor: '#00ff41', cursor: 'pointer' }} />
+                <span className="label-text" style={{ marginBottom: 0 }}>
+                  Conteúdo Gratuito (plano free)
+                </span>
+              </label>
+              <p style={{ fontSize: '0.6rem', color: '#1a3020', fontFamily: 'JetBrains Mono, monospace', margin: '3px 0 0 22px' }}>
+                Qualquer usuário pode baixar sem assinatura
+              </p>
+            </div>
+            <div>
               <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
                 <input {...register('isDrop')} type="checkbox"
                   style={{ width: 14, height: 14, accentColor: '#ffcc00', cursor: 'pointer' }} />

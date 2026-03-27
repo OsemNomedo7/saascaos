@@ -5,12 +5,13 @@ const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 const { body, validationResult } = require('express-validator');
 const Content = require('../models/Content');
+const Review = require('../models/Review');
 const Log = require('../models/Log');
 const auth = require('../middlewares/auth');
 const admin = require('../middlewares/admin');
 const requireSubscription = require('../middlewares/subscription');
 
-// Multer config (local storage, swap for S3 in production)
+// Multer config
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, 'uploads/');
@@ -25,7 +26,7 @@ const upload = multer({
   storage,
   limits: { fileSize: 500 * 1024 * 1024 }, // 500MB
   fileFilter: (req, file, cb) => {
-    cb(null, true); // Accept all files
+    cb(null, true);
   },
 });
 
@@ -41,8 +42,6 @@ router.get('/', auth, async (req, res) => {
     if (category) query.category = category;
     if (type) query.type = type;
     if (isDrop !== undefined) query.isDrop = isDrop === 'true';
-
-    // Apply level filter only if explicitly requested
     if (level) query.minLevel = level;
 
     if (search) {
@@ -92,7 +91,6 @@ router.get('/:id', auth, async (req, res) => {
       return res.status(404).json({ message: 'Content not found.' });
     }
 
-    // Level check
     const userLevelOrder = LEVEL_ORDER[req.user.level] || 0;
     const contentLevelOrder = LEVEL_ORDER[content.minLevel] || 0;
     if (userLevelOrder < contentLevelOrder && req.user.role !== 'admin') {
@@ -135,7 +133,6 @@ router.post(
     try {
       const contentData = { ...req.body, createdBy: req.user._id };
       const content = await Content.create(contentData);
-
       res.status(201).json({ message: 'Content created.', content });
     } catch (error) {
       console.error('Create content error:', error);
@@ -169,8 +166,8 @@ router.delete('/:id', auth, admin, async (req, res) => {
   }
 });
 
-// POST /api/content/:id/download - Increment download counter
-router.post('/:id/download', auth, requireSubscription, async (req, res) => {
+// POST /api/content/:id/download
+router.post('/:id/download', auth, async (req, res) => {
   try {
     const content = await Content.findById(req.params.id);
     if (!content || !content.isActive) {
@@ -180,7 +177,28 @@ router.post('/:id/download', auth, requireSubscription, async (req, res) => {
     const userLevelOrder = LEVEL_ORDER[req.user.level] || 0;
     const contentLevelOrder = LEVEL_ORDER[content.minLevel] || 0;
     if (userLevelOrder < contentLevelOrder && req.user.role !== 'admin') {
-      return res.status(403).json({ message: 'Insufficient level.' });
+      return res.status(403).json({ message: 'Insufficient level.', code: 'LEVEL_REQUIRED' });
+    }
+
+    // Free content: anyone can download
+    // Paid content: require active subscription (unless admin)
+    if (!content.isFree && req.user.role !== 'admin') {
+      const Subscription = require('../models/Subscription');
+      const sub = await Subscription.findOne({ user: req.user._id, status: 'active' });
+      if (!sub) {
+        return res.status(403).json({
+          message: 'Active subscription required to download this content.',
+          code: 'NO_SUBSCRIPTION',
+        });
+      }
+      if (sub.plan !== 'lifetime' && sub.endDate && new Date() > sub.endDate) {
+        sub.status = 'expired';
+        await sub.save();
+        return res.status(403).json({
+          message: 'Your subscription has expired.',
+          code: 'SUBSCRIPTION_EXPIRED',
+        });
+      }
     }
 
     content.downloads += 1;
@@ -201,12 +219,97 @@ router.post('/:id/download', auth, requireSubscription, async (req, res) => {
   }
 });
 
-// POST /api/content/upload - File upload
+// ──────────────────────────── REVIEWS ────────────────────────────
+
+// GET /api/content/:id/reviews
+router.get('/:id/reviews', auth, async (req, res) => {
+  try {
+    const reviews = await Review.find({ content: req.params.id })
+      .sort({ createdAt: -1 })
+      .populate('user', 'name avatar level');
+
+    // Aggregate rating stats
+    const total = reviews.length;
+    const avgRating = total > 0 ? reviews.reduce((sum, r) => sum + r.rating, 0) / total : 0;
+    const distribution = [1, 2, 3, 4, 5].map((star) => ({
+      star,
+      count: reviews.filter((r) => r.rating === star).length,
+    }));
+
+    // Find current user's review
+    const myReview = reviews.find((r) => r.user?._id?.toString() === req.user._id.toString());
+
+    res.json({
+      reviews,
+      stats: { total, avgRating: Math.round(avgRating * 10) / 10, distribution },
+      myReview: myReview || null,
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error.' });
+  }
+});
+
+// POST /api/content/:id/reviews
+router.post(
+  '/:id/reviews',
+  auth,
+  [
+    body('rating').isInt({ min: 1, max: 5 }).withMessage('Rating must be between 1 and 5'),
+    body('comment').optional().trim().isLength({ max: 1000 }).withMessage('Comment too long'),
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ message: errors.array()[0].msg });
+    }
+
+    try {
+      const content = await Content.findById(req.params.id);
+      if (!content || !content.isActive) {
+        return res.status(404).json({ message: 'Content not found.' });
+      }
+
+      const { rating, comment } = req.body;
+
+      // Upsert: update if exists, create otherwise
+      const review = await Review.findOneAndUpdate(
+        { content: req.params.id, user: req.user._id },
+        { rating, comment: comment || '' },
+        { upsert: true, new: true, runValidators: true }
+      ).populate('user', 'name avatar level');
+
+      res.status(201).json({ message: 'Review saved.', review });
+    } catch (error) {
+      console.error('Review error:', error);
+      res.status(500).json({ message: 'Server error.' });
+    }
+  }
+);
+
+// DELETE /api/content/:id/reviews/:reviewId
+router.delete('/:id/reviews/:reviewId', auth, async (req, res) => {
+  try {
+    const review = await Review.findById(req.params.reviewId);
+    if (!review) return res.status(404).json({ message: 'Review not found.' });
+
+    const isOwner = review.user.toString() === req.user._id.toString();
+    if (!isOwner && req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Not authorized.' });
+    }
+
+    await review.deleteOne();
+    res.json({ message: 'Review deleted.' });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error.' });
+  }
+});
+
+// ────────────────────────── FILE UPLOADS ──────────────────────────
+
+// POST /api/content/upload
 router.post('/upload', auth, admin, upload.single('file'), async (req, res) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ message: 'No file uploaded.' });
-    }
+    if (!req.file) return res.status(400).json({ message: 'No file uploaded.' });
 
     const fileUrl = `${process.env.BACKEND_URL || 'http://localhost:5000'}/uploads/${req.file.filename}`;
 
@@ -230,20 +333,14 @@ router.post('/upload', auth, admin, upload.single('file'), async (req, res) => {
   }
 });
 
-// POST /api/content/upload-image - Image upload (admin only)
+// POST /api/content/upload-image
 router.post('/upload-image', auth, admin, upload.single('image'), async (req, res) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ message: 'No image uploaded.' });
-    }
+    if (!req.file) return res.status(400).json({ message: 'No image uploaded.' });
 
     const imageUrl = `${process.env.BACKEND_URL || 'http://localhost:5000'}/uploads/${req.file.filename}`;
 
-    res.json({
-      message: 'Image uploaded.',
-      imageUrl,
-      fileKey: req.file.filename,
-    });
+    res.json({ message: 'Image uploaded.', imageUrl, fileKey: req.file.filename });
   } catch (error) {
     console.error('Image upload error:', error);
     res.status(500).json({ message: 'Image upload failed.' });
