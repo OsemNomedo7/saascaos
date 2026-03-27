@@ -81,6 +81,10 @@ const contentSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    images: {
+      type: [String],
+      default: [],
+    },
   },
   {
     timestamps: true,

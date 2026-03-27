@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import {
   Plus, Edit2, Trash2, Search, Upload, X, File,
   FileText, Film, Database, Package, Code, AlertCircle, CheckCircle2,
-  Eye, Download
+  Eye, Download, Image as ImageIcon
 } from 'lucide-react';
 import { contentApi, categoriesApi } from '@/lib/api';
 import { LevelBadge } from '@/components/ui/Badge';
@@ -202,6 +202,13 @@ export default function AdminContentPage() {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
 
+  // Image upload states
+  const [selectedImages, setSelectedImages] = useState<File[]>([]);
+  const [uploadedImageUrls, setUploadedImageUrls] = useState<string[]>([]);
+  const [isUploadingImages, setIsUploadingImages] = useState(false);
+  const [imageUploadError, setImageUploadError] = useState('');
+  const imageInputRef = useRef<HTMLInputElement>(null);
+
   const { data, isLoading } = useQuery({
     queryKey: ['admin-content', { search, page }],
     queryFn: () =>
@@ -221,6 +228,9 @@ export default function AdminContentPage() {
       resetForm();
       setSelectedFile(null);
       setUploadError('');
+      setSelectedImages([]);
+      setUploadedImageUrls([]);
+      setImageUploadError('');
     },
   });
 
@@ -231,6 +241,9 @@ export default function AdminContentPage() {
       setEditModal({ open: false, content: null });
       setSelectedFile(null);
       setUploadError('');
+      setSelectedImages([]);
+      setUploadedImageUrls([]);
+      setImageUploadError('');
     },
   });
 
@@ -255,6 +268,9 @@ export default function AdminContentPage() {
     setEditModal({ open: true, content });
     setSelectedFile(null);
     setUploadError('');
+    setSelectedImages([]);
+    setUploadedImageUrls(content.images || []);
+    setImageUploadError('');
     const cat = typeof content.category === 'object' ? content.category._id : content.category;
     setValue('title', content.title);
     setValue('description', content.description);
@@ -272,12 +288,17 @@ export default function AdminContentPage() {
     setEditModal({ open: false, content: null });
     setSelectedFile(null);
     setUploadError('');
+    setSelectedImages([]);
+    setUploadedImageUrls([]);
+    setImageUploadError('');
     resetForm();
   };
 
   const onSubmit = async (data: ContentForm) => {
     setUploadError('');
+    setImageUploadError('');
     let filePayload: Record<string, unknown> = {};
+    let newImageUrls: string[] = [...uploadedImageUrls];
 
     // Upload file first if selected
     if (selectedFile) {
@@ -300,9 +321,30 @@ export default function AdminContentPage() {
       setIsUploading(false);
     }
 
+    // Upload new images if any
+    if (selectedImages.length > 0) {
+      setIsUploadingImages(true);
+      try {
+        const uploadedUrls: string[] = [];
+        for (const img of selectedImages) {
+          const formData = new FormData();
+          formData.append('image', img);
+          const res = await contentApi.uploadImage(formData);
+          uploadedUrls.push(res.data.imageUrl);
+        }
+        newImageUrls = [...newImageUrls, ...uploadedUrls];
+      } catch {
+        setImageUploadError('Falha no upload de imagens. Tente novamente.');
+        setIsUploadingImages(false);
+        return;
+      }
+      setIsUploadingImages(false);
+    }
+
     const payload = {
       ...data,
       ...filePayload,
+      images: newImageUrls,
       tags: data.tags ? data.tags.split(',').map((t) => t.trim()).filter(Boolean) : [],
       dropExpiresAt: data.isDrop && data.dropExpiresAt ? new Date(data.dropExpiresAt).toISOString() : null,
     };
@@ -314,7 +356,7 @@ export default function AdminContentPage() {
     }
   };
 
-  const isSubmitting = isUploading || createContent.isPending || updateContent.isPending;
+  const isSubmitting = isUploading || isUploadingImages || createContent.isPending || updateContent.isPending;
 
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto' }} className="space-y-5">
@@ -329,7 +371,7 @@ export default function AdminContentPage() {
           </p>
         </div>
         <button
-          onClick={() => { setIsCreating(true); resetForm(); setSelectedFile(null); setUploadError(''); }}
+          onClick={() => { setIsCreating(true); resetForm(); setSelectedFile(null); setUploadError(''); setSelectedImages([]); setUploadedImageUrls([]); setImageUploadError(''); }}
           style={{
             display: 'flex', alignItems: 'center', gap: 6,
             padding: '8px 14px',
@@ -577,6 +619,117 @@ export default function AdminContentPage() {
               />
             </div>
 
+            {/* Image Upload Section */}
+            <div className="col-span-2">
+              <label className="label-text" style={{ marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <ImageIcon className="w-3.5 h-3.5" style={{ color: '#cc66ff' }} />
+                IMAGENS DO CONTEÚDO (carrossel)
+              </label>
+
+              {/* Existing uploaded images */}
+              {uploadedImageUrls.length > 0 && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 10 }}>
+                  {uploadedImageUrls.map((url, i) => (
+                    <div key={i} style={{ position: 'relative', width: 80, height: 60 }}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={url} alt={`img-${i}`} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 3, border: '1px solid rgba(204,102,255,0.2)' }} />
+                      <button
+                        type="button"
+                        onClick={() => setUploadedImageUrls((prev) => prev.filter((_, idx) => idx !== i))}
+                        style={{
+                          position: 'absolute', top: -6, right: -6, width: 16, height: 16,
+                          background: '#ff0040', border: 'none', borderRadius: '50%',
+                          color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
+                        }}
+                      >
+                        <X style={{ width: 10, height: 10 }} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* New images to upload */}
+              {selectedImages.length > 0 && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 8 }}>
+                  {selectedImages.map((img, i) => (
+                    <div key={i} style={{ position: 'relative', width: 80, height: 60 }}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={URL.createObjectURL(img)} alt={`new-${i}`} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 3, border: '1px solid rgba(0,255,65,0.25)' }} />
+                      {!isUploadingImages && (
+                        <button
+                          type="button"
+                          onClick={() => setSelectedImages((prev) => prev.filter((_, idx) => idx !== i))}
+                          style={{
+                            position: 'absolute', top: -6, right: -6, width: 16, height: 16,
+                            background: '#ff0040', border: 'none', borderRadius: '50%',
+                            color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
+                          }}
+                        >
+                          <X style={{ width: 10, height: 10 }} />
+                        </button>
+                      )}
+                      <div style={{
+                        position: 'absolute', inset: 0, borderRadius: 3,
+                        background: 'rgba(0,255,65,0.1)',
+                        border: '1px dashed rgba(0,255,65,0.4)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      }}>
+                        <span style={{ fontSize: '0.5rem', color: '#00ff41', fontFamily: 'JetBrains Mono, monospace' }}>NOVO</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <button
+                type="button"
+                onClick={() => imageInputRef.current?.click()}
+                disabled={isUploadingImages}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 6,
+                  padding: '7px 14px', borderRadius: 4, cursor: isUploadingImages ? 'not-allowed' : 'pointer',
+                  background: 'rgba(204,102,255,0.06)', border: '1px dashed rgba(204,102,255,0.25)',
+                  color: '#cc66ff', fontSize: '0.68rem', fontFamily: 'JetBrains Mono, monospace', fontWeight: 700,
+                  opacity: isUploadingImages ? 0.6 : 1,
+                }}
+              >
+                {isUploadingImages ? (
+                  <>
+                    <div style={{ width: 12, height: 12, border: '1.5px solid #cc66ff', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
+                    ENVIANDO IMAGENS...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-3.5 h-3.5" />
+                    ADICIONAR IMAGENS
+                  </>
+                )}
+              </button>
+              <input
+                ref={imageInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                style={{ display: 'none' }}
+                onChange={(e) => {
+                  if (e.target.files) {
+                    setSelectedImages((prev) => [...prev, ...Array.from(e.target.files!)]);
+                    setImageUploadError('');
+                  }
+                }}
+              />
+
+              {imageUploadError && (
+                <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.7rem', color: '#ff6080' }}>
+                  <AlertCircle className="w-3.5 h-3.5" /> {imageUploadError}
+                </div>
+              )}
+              <p style={{ fontSize: '0.6rem', color: '#1a3020', marginTop: 4, fontFamily: 'JetBrains Mono, monospace' }}>
+                Aceita JPG, PNG, GIF, WebP — primeira imagem será o thumbnail principal
+              </p>
+            </div>
+
             <div className="col-span-2">
               <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
                 <input {...register('isDrop')} type="checkbox"
@@ -625,7 +778,7 @@ export default function AdminContentPage() {
                   animation: 'spin 0.7s linear infinite',
                 }} />
               )}
-              {isUploading ? 'ENVIANDO...' : editModal.content ? 'SALVAR' : 'CRIAR'}
+              {isUploading ? 'ENVIANDO ARQUIVO...' : isUploadingImages ? 'ENVIANDO IMAGENS...' : editModal.content ? 'SALVAR' : 'CRIAR'}
             </button>
           </div>
         </form>

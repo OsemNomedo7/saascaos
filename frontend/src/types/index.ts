@@ -69,6 +69,7 @@ export interface Content {
   isDrop: boolean;
   dropExpiresAt: string | null;
   thumbnail: string | null;
+  images: string[];
   createdAt: string;
   updatedAt: string;
 }

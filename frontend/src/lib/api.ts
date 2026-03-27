@@ -73,6 +73,10 @@ export const contentApi = {
     api.post('/content/upload', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     }),
+  uploadImage: (formData: FormData) =>
+    api.post('/content/upload-image', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
 };
 
 export const categoriesApi = {

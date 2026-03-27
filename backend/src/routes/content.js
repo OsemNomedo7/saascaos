@@ -32,7 +32,7 @@ const upload = multer({
 const LEVEL_ORDER = { iniciante: 0, intermediario: 1, avancado: 2, elite: 3 };
 
 // GET /api/content
-router.get('/', auth, requireSubscription, async (req, res) => {
+router.get('/', auth, async (req, res) => {
   try {
     const { page = 1, limit = 20, category, type, level, search, sort = '-createdAt', isDrop } = req.query;
     const skip = (parseInt(page) - 1) * parseInt(limit);
@@ -40,15 +40,10 @@ router.get('/', auth, requireSubscription, async (req, res) => {
     const query = { isActive: true };
     if (category) query.category = category;
     if (type) query.type = type;
-    if (level) query.minLevel = level;
     if (isDrop !== undefined) query.isDrop = isDrop === 'true';
 
-    // Level access control
-    const userLevelOrder = LEVEL_ORDER[req.user.level] || 0;
-    const accessibleLevels = Object.keys(LEVEL_ORDER).filter(
-      (l) => LEVEL_ORDER[l] <= userLevelOrder
-    );
-    query.minLevel = { $in: accessibleLevels };
+    // Apply level filter only if explicitly requested
+    if (level) query.minLevel = level;
 
     if (search) {
       query.$text = { $search: search };
@@ -87,7 +82,7 @@ router.get('/', auth, requireSubscription, async (req, res) => {
 });
 
 // GET /api/content/:id
-router.get('/:id', auth, requireSubscription, async (req, res) => {
+router.get('/:id', auth, async (req, res) => {
   try {
     const content = await Content.findById(req.params.id)
       .populate('category', 'name slug color icon')
@@ -232,6 +227,26 @@ router.post('/upload', auth, admin, upload.single('file'), async (req, res) => {
   } catch (error) {
     console.error('Upload error:', error);
     res.status(500).json({ message: 'Upload failed.' });
+  }
+});
+
+// POST /api/content/upload-image - Image upload (admin only)
+router.post('/upload-image', auth, admin, upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'No image uploaded.' });
+    }
+
+    const imageUrl = `${process.env.BACKEND_URL || 'http://localhost:5000'}/uploads/${req.file.filename}`;
+
+    res.json({
+      message: 'Image uploaded.',
+      imageUrl,
+      fileKey: req.file.filename,
+    });
+  } catch (error) {
+    console.error('Image upload error:', error);
+    res.status(500).json({ message: 'Image upload failed.' });
   }
 });
 

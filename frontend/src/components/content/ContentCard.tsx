@@ -2,19 +2,17 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Download, Eye, ExternalLink, Lock, Clock, Tag } from 'lucide-react';
+import { Download, Eye, ExternalLink, Lock, Clock, Tag, ChevronLeft, ChevronRight, CreditCard } from 'lucide-react';
 import { contentApi } from '@/lib/api';
 import { LevelBadge } from '@/components/ui/Badge';
-import { Card } from '@/components/ui/Card';
 import {
   getContentTypeIcon,
   getContentTypeLabel,
-  getContentTypeColor,
   formatBytes,
   formatRelativeDate,
   cn,
 } from '@/lib/utils';
-import type { Content } from '@/types';
+import type { Content, Subscription } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 
 const LEVEL_ORDER: Record<string, number> = {
@@ -24,26 +22,46 @@ const LEVEL_ORDER: Record<string, number> = {
   elite: 3,
 };
 
+const TYPE_COLORS: Record<string, string> = {
+  programa: '#00d4ff',
+  database: '#ffcc00',
+  material: '#00ff41',
+  esquema: '#cc66ff',
+  video: '#ff6644',
+  outro: '#4d8c5a',
+};
+
 interface ContentCardProps {
   content: Content;
+  subscription?: Subscription | null;
   onDownload?: () => void;
 }
 
-export default function ContentCard({ content, onDownload }: ContentCardProps) {
+export default function ContentCard({ content, subscription, onDownload }: ContentCardProps) {
   const { user } = useAuth();
   const [isDownloading, setIsDownloading] = useState(false);
-  const [views, setViews] = useState(content.views);
   const [downloads, setDownloads] = useState(content.downloads);
+  const [imgIndex, setImgIndex] = useState(0);
+  const [downloadError, setDownloadError] = useState('');
 
   const userLevelOrder = LEVEL_ORDER[user?.level || 'iniciante'] || 0;
   const contentLevelOrder = LEVEL_ORDER[content.minLevel] || 0;
-  const isLocked = userLevelOrder < contentLevelOrder && user?.role !== 'admin';
+  const isLevelLocked = userLevelOrder < contentLevelOrder && user?.role !== 'admin';
+  const isSubLocked = !subscription && user?.role !== 'admin';
+  const isLocked = isLevelLocked || isSubLocked;
 
   const category = typeof content.category === 'object' ? content.category : null;
+  const typeColor = TYPE_COLORS[content.type] || '#4d8c5a';
+
+  const allImages = [
+    ...(content.thumbnail ? [content.thumbnail] : []),
+    ...(content.images || []),
+  ];
 
   const handleDownload = async (e: React.MouseEvent) => {
     e.preventDefault();
     if (isLocked || isDownloading) return;
+    setDownloadError('');
 
     setIsDownloading(true);
     try {
@@ -64,113 +82,337 @@ export default function ContentCard({ content, onDownload }: ContentCardProps) {
       }
 
       onDownload?.();
-    } catch (err) {
-      console.error('Download error:', err);
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { message?: string } } };
+      setDownloadError(e?.response?.data?.message || 'Erro ao baixar');
     } finally {
       setIsDownloading(false);
     }
   };
 
   return (
-    <Card className={cn('flex flex-col transition-all duration-200 hover:border-green-500/20 hover:shadow-green-glow/30', isLocked && 'opacity-75')}>
-      {/* Header */}
-      <div className="p-4 pb-3">
-        <div className="flex items-start gap-3">
-          <div className={cn(
-            'w-10 h-10 rounded-lg flex items-center justify-center text-xl flex-shrink-0',
-            'bg-gray-800/80'
-          )}>
+    <div style={{
+      background: 'rgba(10,18,10,0.9)',
+      border: `1px solid rgba(${isLevelLocked ? '255,204,0' : isSubLocked ? '255,68,0' : '0,255,65'},0.18)`,
+      borderRadius: 6,
+      display: 'flex',
+      flexDirection: 'column',
+      transition: 'all 0.2s ease',
+      overflow: 'hidden',
+      position: 'relative',
+    }}
+      onMouseEnter={e => {
+        const color = isLevelLocked ? '255,204,0' : isSubLocked ? '255,68,0' : '0,255,65';
+        (e.currentTarget as HTMLDivElement).style.borderColor = `rgba(${color},0.4)`;
+        (e.currentTarget as HTMLDivElement).style.boxShadow = `0 0 16px rgba(${color},0.08)`;
+      }}
+      onMouseLeave={e => {
+        const color = isLevelLocked ? '255,204,0' : isSubLocked ? '255,68,0' : '0,255,65';
+        (e.currentTarget as HTMLDivElement).style.borderColor = `rgba(${color},0.18)`;
+        (e.currentTarget as HTMLDivElement).style.boxShadow = 'none';
+      }}
+    >
+      {/* Image carousel */}
+      {allImages.length > 0 && (
+        <div style={{ position: 'relative', aspectRatio: '16/9', overflow: 'hidden', background: '#050a05' }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={allImages[imgIndex]}
+            alt={content.title}
+            style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: isLocked ? 0.4 : 1 }}
+          />
+          {allImages.length > 1 && (
+            <>
+              <button
+                onClick={() => setImgIndex((i) => (i - 1 + allImages.length) % allImages.length)}
+                style={{
+                  position: 'absolute', left: 6, top: '50%', transform: 'translateY(-50%)',
+                  background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(0,255,65,0.3)',
+                  borderRadius: 3, color: '#00ff41', cursor: 'pointer', padding: '2px 4px', display: 'flex',
+                }}
+              >
+                <ChevronLeft style={{ width: 14, height: 14 }} />
+              </button>
+              <button
+                onClick={() => setImgIndex((i) => (i + 1) % allImages.length)}
+                style={{
+                  position: 'absolute', right: 6, top: '50%', transform: 'translateY(-50%)',
+                  background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(0,255,65,0.3)',
+                  borderRadius: 3, color: '#00ff41', cursor: 'pointer', padding: '2px 4px', display: 'flex',
+                }}
+              >
+                <ChevronRight style={{ width: 14, height: 14 }} />
+              </button>
+              <div style={{ position: 'absolute', bottom: 6, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 4 }}>
+                {allImages.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setImgIndex(i)}
+                    style={{
+                      width: i === imgIndex ? 16 : 5, height: 5,
+                      borderRadius: 3, border: 'none', cursor: 'pointer',
+                      background: i === imgIndex ? '#00ff41' : 'rgba(0,255,65,0.3)',
+                      transition: 'all 0.2s',
+                    }}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+          {isLocked && (
+            <div style={{
+              position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              background: 'rgba(5,10,5,0.5)',
+            }}>
+              <Lock style={{ width: 28, height: 28, color: isSubLocked ? '#ff4400' : '#ffcc00' }} />
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Type badge top-left if no image */}
+      {allImages.length === 0 && (
+        <div style={{
+          padding: '10px 14px 0',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+        }}>
+          <div style={{
+            width: 36, height: 36, borderRadius: 4, flexShrink: 0,
+            background: `${typeColor}14`,
+            border: `1px solid ${typeColor}30`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: '1.1rem',
+          }}>
             {getContentTypeIcon(content.type)}
           </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between gap-2">
-              <h3 className="text-sm font-semibold text-gray-200 leading-tight line-clamp-2">
-                {content.title}
-              </h3>
-              {isLocked && (
-                <Lock className="w-4 h-4 text-gray-600 flex-shrink-0 mt-0.5" />
-              )}
-            </div>
-
-            <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
-              <span className={cn('text-xs px-1.5 py-0.5 rounded border font-medium', getContentTypeColor(content.type))}>
-                {getContentTypeLabel(content.type)}
-              </span>
-              <LevelBadge level={content.minLevel} size="sm" />
-              {category && (
-                <span
-                  className="text-xs px-1.5 py-0.5 rounded border font-medium"
-                  style={{ color: category.color, borderColor: `${category.color}40`, backgroundColor: `${category.color}15` }}
-                >
-                  {category.name}
-                </span>
-              )}
-            </div>
+          <div style={{
+            fontFamily: 'JetBrains Mono, monospace',
+            fontSize: '0.6rem',
+            fontWeight: 700,
+            letterSpacing: '0.15em',
+            color: typeColor,
+            background: `${typeColor}14`,
+            border: `1px solid ${typeColor}30`,
+            borderRadius: 3,
+            padding: '2px 6px',
+          }}>
+            {getContentTypeLabel(content.type).toUpperCase()}
           </div>
+        </div>
+      )}
+
+      {/* Content body */}
+      <div style={{ padding: '12px 14px', flex: 1 }}>
+        {/* Title row */}
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8, marginBottom: 6 }}>
+          <h3 style={{
+            fontFamily: 'JetBrains Mono, monospace',
+            fontSize: '0.78rem',
+            fontWeight: 700,
+            color: isLocked ? '#3a4a3a' : '#c8e8c8',
+            lineHeight: 1.4,
+            margin: 0,
+            overflow: 'hidden',
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+          }}>
+            {content.title}
+          </h3>
+          {isLevelLocked && <Lock style={{ width: 13, height: 13, color: '#ffcc00', flexShrink: 0 }} />}
+          {isSubLocked && !isLevelLocked && <Lock style={{ width: 13, height: 13, color: '#ff4400', flexShrink: 0 }} />}
+        </div>
+
+        {/* Badges row */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 6 }}>
+          {allImages.length > 0 && (
+            <span style={{
+              fontFamily: 'JetBrains Mono, monospace',
+              fontSize: '0.58rem',
+              fontWeight: 700,
+              letterSpacing: '0.12em',
+              color: typeColor,
+              background: `${typeColor}14`,
+              border: `1px solid ${typeColor}30`,
+              borderRadius: 3,
+              padding: '1px 5px',
+            }}>
+              {getContentTypeLabel(content.type).toUpperCase()}
+            </span>
+          )}
+          <LevelBadge level={content.minLevel} size="sm" />
+          {category && (
+            <span style={{
+              fontSize: '0.6rem',
+              padding: '1px 5px',
+              borderRadius: 3,
+              border: `1px solid ${category.color}40`,
+              backgroundColor: `${category.color}15`,
+              color: category.color,
+              fontWeight: 600,
+            }}>
+              {category.name}
+            </span>
+          )}
         </div>
 
         {content.description && (
-          <p className="text-xs text-gray-500 mt-2 line-clamp-2">{content.description}</p>
+          <p style={{
+            fontSize: '0.7rem',
+            color: '#3a5a3a',
+            margin: '0 0 6px',
+            overflow: 'hidden',
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            lineHeight: 1.5,
+          }}>
+            {content.description}
+          </p>
         )}
 
         {/* Tags */}
         {content.tags && content.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1 mt-2">
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3, marginTop: 4 }}>
             {content.tags.slice(0, 3).map((tag) => (
-              <span key={tag} className="flex items-center gap-0.5 text-xs text-gray-600 bg-gray-800/50 rounded px-1.5 py-0.5">
-                <Tag className="w-2.5 h-2.5" />
+              <span key={tag} style={{
+                display: 'flex', alignItems: 'center', gap: 2,
+                fontSize: '0.6rem', color: '#2a4a2a',
+                background: 'rgba(0,255,65,0.04)',
+                border: '1px solid rgba(0,255,65,0.1)',
+                borderRadius: 3, padding: '1px 5px',
+              }}>
+                <Tag style={{ width: 8, height: 8 }} />
                 {tag}
               </span>
             ))}
             {content.tags.length > 3 && (
-              <span className="text-xs text-gray-600">+{content.tags.length - 3}</span>
+              <span style={{ fontSize: '0.6rem', color: '#2a4a2a' }}>+{content.tags.length - 3}</span>
             )}
           </div>
         )}
       </div>
 
       {/* Footer */}
-      <div className="mt-auto px-4 py-3 border-t border-gray-800/40 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3 text-xs text-gray-600">
-          <span className="flex items-center gap-1">
-            <Eye className="w-3 h-3" /> {views}
+      <div style={{
+        padding: '8px 14px',
+        borderTop: '1px solid rgba(0,255,65,0.08)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: 8,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: '0.62rem', color: '#2a4a2a' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+            <Eye style={{ width: 10, height: 10 }} /> {content.views}
           </span>
-          <span className="flex items-center gap-1">
-            <Download className="w-3 h-3" /> {downloads}
+          <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+            <Download style={{ width: 10, height: 10 }} /> {downloads}
           </span>
           {content.fileSize > 0 && (
-            <span>{formatBytes(content.fileSize)}</span>
+            <span style={{ color: '#1a3020' }}>{formatBytes(content.fileSize)}</span>
           )}
-          <span className="flex items-center gap-1">
-            <Clock className="w-3 h-3" />
+          <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+            <Clock style={{ width: 10, height: 10 }} />
             {formatRelativeDate(content.createdAt)}
           </span>
         </div>
 
-        {isLocked ? (
-          <Link
-            href="/planos"
-            className="text-xs text-yellow-400 hover:text-yellow-300 flex items-center gap-1 transition-colors whitespace-nowrap"
-          >
-            <Lock className="w-3 h-3" /> Upgrade
+        {isSubLocked ? (
+          <Link href="/planos" style={{
+            display: 'flex', alignItems: 'center', gap: 4,
+            fontSize: '0.65rem',
+            fontFamily: 'JetBrains Mono, monospace',
+            fontWeight: 700,
+            color: '#ff4400',
+            background: 'rgba(255,68,0,0.08)',
+            border: '1px solid rgba(255,68,0,0.3)',
+            borderRadius: 4,
+            padding: '4px 8px',
+            textDecoration: 'none',
+            whiteSpace: 'nowrap',
+          }}>
+            <CreditCard style={{ width: 10, height: 10 }} />
+            ASSINAR
+          </Link>
+        ) : isLevelLocked ? (
+          <Link href="/planos" style={{
+            display: 'flex', alignItems: 'center', gap: 4,
+            fontSize: '0.65rem',
+            fontFamily: 'JetBrains Mono, monospace',
+            fontWeight: 700,
+            color: '#ffcc00',
+            background: 'rgba(255,204,0,0.08)',
+            border: '1px solid rgba(255,204,0,0.3)',
+            borderRadius: 4,
+            padding: '4px 8px',
+            textDecoration: 'none',
+            whiteSpace: 'nowrap',
+          }}>
+            <Lock style={{ width: 10, height: 10 }} />
+            UPGRADE
           </Link>
         ) : (
           <button
             onClick={handleDownload}
             disabled={isDownloading}
-            className="flex items-center gap-1.5 text-xs bg-green-500/10 hover:bg-green-500/20 text-green-400 border border-green-500/20 hover:border-green-500/40 px-2.5 py-1.5 rounded-lg transition-all whitespace-nowrap disabled:opacity-50"
+            style={{
+              display: 'flex', alignItems: 'center', gap: 4,
+              fontSize: '0.65rem',
+              fontFamily: 'JetBrains Mono, monospace',
+              fontWeight: 700,
+              color: isDownloading ? '#2a4a2a' : '#00ff41',
+              background: 'rgba(0,255,65,0.07)',
+              border: `1px solid rgba(0,255,65,${isDownloading ? '0.1' : '0.3'})`,
+              borderRadius: 4,
+              padding: '4px 8px',
+              cursor: isDownloading ? 'not-allowed' : 'pointer',
+              whiteSpace: 'nowrap',
+              transition: 'all 0.15s',
+            }}
+            onMouseEnter={e => {
+              if (!isDownloading) {
+                (e.currentTarget).style.background = 'rgba(0,255,65,0.14)';
+                (e.currentTarget).style.boxShadow = '0 0 8px rgba(0,255,65,0.2)';
+              }
+            }}
+            onMouseLeave={e => {
+              (e.currentTarget).style.background = 'rgba(0,255,65,0.07)';
+              (e.currentTarget).style.boxShadow = 'none';
+            }}
           >
             {isDownloading ? (
-              <div className="w-3 h-3 border-2 border-green-400 border-t-transparent rounded-full animate-spin" />
+              <div style={{
+                width: 10, height: 10,
+                border: '2px solid rgba(0,255,65,0.3)',
+                borderTopColor: '#00ff41',
+                borderRadius: '50%',
+                animation: 'spin 0.7s linear infinite',
+              }} />
             ) : content.externalLink ? (
-              <ExternalLink className="w-3 h-3" />
+              <ExternalLink style={{ width: 10, height: 10 }} />
             ) : (
-              <Download className="w-3 h-3" />
+              <Download style={{ width: 10, height: 10 }} />
             )}
-            {content.externalLink ? 'Open' : 'Download'}
+            {content.externalLink ? 'ABRIR' : 'DOWNLOAD'}
           </button>
         )}
       </div>
-    </Card>
+
+      {downloadError && (
+        <div style={{
+          padding: '4px 14px',
+          fontSize: '0.62rem',
+          color: '#ff4400',
+          background: 'rgba(255,68,0,0.05)',
+          borderTop: '1px solid rgba(255,68,0,0.1)',
+          fontFamily: 'JetBrains Mono, monospace',
+        }}>
+          ⚠ {downloadError}
+        </div>
+      )}
+    </div>
   );
 }

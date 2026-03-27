@@ -19,10 +19,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-gray-500 text-sm font-mono">Loading...</p>
+      <div style={{ minHeight: '100vh', background: '#050a05', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+          <div style={{
+            width: 32, height: 32,
+            border: '2px solid rgba(0,255,65,0.2)',
+            borderTopColor: '#00ff41',
+            borderRadius: '50%',
+            animation: 'spin 0.7s linear infinite',
+          }} />
+          <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.7rem', color: '#1a4a1a', letterSpacing: '0.15em' }}>
+            {'> CARREGANDO...'}
+          </p>
         </div>
       </div>
     );
