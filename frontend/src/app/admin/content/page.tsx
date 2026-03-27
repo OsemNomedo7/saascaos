@@ -42,7 +42,7 @@ export default function AdminContentPage() {
   });
 
   const createContent = useMutation({
-    mutationFn: (data: Record<string, unknown>) => contentApi.create(data),
+    mutationFn: (data: object) => contentApi.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-content'] });
       setIsCreating(false);
@@ -51,7 +51,7 @@ export default function AdminContentPage() {
   });
 
   const updateContent = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Record<string, unknown> }) => contentApi.update(id, data),
+    mutationFn: ({ id, data }: { id: string; data: object }) => contentApi.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-content'] });
       setEditModal({ open: false, content: null });

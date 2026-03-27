@@ -65,8 +65,8 @@ export const usersApi = {
 export const contentApi = {
   list: (params?: Record<string, unknown>) => api.get('/content', { params }),
   getById: (id: string) => api.get(`/content/${id}`),
-  create: (data: Record<string, unknown>) => api.post('/content', data),
-  update: (id: string, data: Record<string, unknown>) => api.put(`/content/${id}`, data),
+  create: (data: object) => api.post('/content', data),
+  update: (id: string, data: object) => api.put(`/content/${id}`, data),
   remove: (id: string) => api.delete(`/content/${id}`),
   download: (id: string) => api.post(`/content/${id}/download`),
   upload: (formData: FormData) =>
@@ -78,8 +78,8 @@ export const contentApi = {
 export const categoriesApi = {
   list: () => api.get('/categories'),
   getBySlug: (slug: string) => api.get(`/categories/${slug}`),
-  create: (data: Record<string, unknown>) => api.post('/categories', data),
-  update: (id: string, data: Record<string, unknown>) => api.put(`/categories/${id}`, data),
+  create: (data: object) => api.post('/categories', data),
+  update: (id: string, data: object) => api.put(`/categories/${id}`, data),
   remove: (id: string) => api.delete(`/categories/${id}`),
 };
 
@@ -97,7 +97,7 @@ export const communityApi = {
   getPost: (id: string) => api.get(`/community/posts/${id}`),
   createPost: (data: { title: string; content: string; category?: string }) =>
     api.post('/community/posts', data),
-  updatePost: (id: string, data: Record<string, unknown>) => api.put(`/community/posts/${id}`, data),
+  updatePost: (id: string, data: object) => api.put(`/community/posts/${id}`, data),
   deletePost: (id: string) => api.delete(`/community/posts/${id}`),
   likePost: (id: string) => api.post(`/community/posts/${id}/like`),
   pinPost: (id: string) => api.post(`/community/posts/${id}/pin`),
@@ -111,8 +111,8 @@ export const communityApi = {
 export const dropsApi = {
   list: () => api.get('/drops'),
   getById: (id: string) => api.get(`/drops/${id}`),
-  create: (data: Record<string, unknown>) => api.post('/drops', data),
-  update: (id: string, data: Record<string, unknown>) => api.put(`/drops/${id}`, data),
+  create: (data: object) => api.post('/drops', data),
+  update: (id: string, data: object) => api.put(`/drops/${id}`, data),
   remove: (id: string) => api.delete(`/drops/${id}`),
 };
 

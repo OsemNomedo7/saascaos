@@ -29,7 +29,7 @@ export default function AdminCategoriesPage() {
   });
 
   const createCategory = useMutation({
-    mutationFn: (data: Record<string, unknown>) => categoriesApi.create(data),
+    mutationFn: (data: object) => categoriesApi.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
       queryClient.invalidateQueries({ queryKey: ['categories'] });
@@ -39,7 +39,7 @@ export default function AdminCategoriesPage() {
   });
 
   const updateCategory = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Record<string, unknown> }) => categoriesApi.update(id, data),
+    mutationFn: ({ id, data }: { id: string; data: object }) => categoriesApi.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
       queryClient.invalidateQueries({ queryKey: ['categories'] });
