@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { Download, Eye, ExternalLink, Lock, Clock, Tag } from 'lucide-react';
 import { contentApi } from '@/lib/api';

@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Check, Zap, Star, Crown, CreditCard, Loader2 } from 'lucide-react';
 import { subscriptionsApi } from '@/lib/api';

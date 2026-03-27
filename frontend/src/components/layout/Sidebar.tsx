@@ -1,11 +1,12 @@
 'use client';
 
+import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  LayoutDashboard, Library, Users, MessageSquare, Zap,
+  LayoutDashboard, Library, Users, Zap,
   User, CreditCard, Terminal, LogOut, ChevronRight,
-  Shield, Settings, Hash
+  Shield, Hash
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSocket } from '@/contexts/SocketContext';

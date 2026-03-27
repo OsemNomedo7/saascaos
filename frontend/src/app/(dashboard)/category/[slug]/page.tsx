@@ -24,7 +24,7 @@ export default function CategoryPage() {
   const { data: contentData, isLoading: contentLoading } = useQuery({
     queryKey: ['category-content', category?._id, page],
     queryFn: () =>
-      contentApi.list({ category: category._id, page, limit: 18 }).then((r) => r.data),
+      contentApi.list({ category: category!._id, page, limit: 18 }).then((r) => r.data),
     enabled: !!category?._id,
   });
 

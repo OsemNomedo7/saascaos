@@ -4,8 +4,8 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import {
-  MessageSquare, Heart, Pin, Trash2, Plus, ChevronRight,
-  Eye, Clock, ThumbsUp, Send, X, Hash
+  MessageSquare, Pin, Trash2, Plus,
+  Eye, ThumbsUp, Send, Hash
 } from 'lucide-react';
 import Link from 'next/link';
 import { communityApi } from '@/lib/api';

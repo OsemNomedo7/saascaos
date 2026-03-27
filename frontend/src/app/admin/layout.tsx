@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import {
   LayoutDashboard, Users, Library, CreditCard, FileText,
-  Terminal, LogOut, ChevronRight, Shield, Settings
+  Terminal, LogOut, ChevronRight, Shield
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { getInitials } from '@/lib/utils';

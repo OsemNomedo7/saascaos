@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
+import { useSearchParams } from 'next/navigation';
+import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { Search, Grid3X3, List, SlidersHorizontal } from 'lucide-react';
 import { contentApi, categoriesApi } from '@/lib/api';
 import ContentCard from '@/components/content/ContentCard';
@@ -11,7 +11,6 @@ import type { Content, Category } from '@/types';
 
 export default function ContentPage() {
   const searchParams = useSearchParams();
-  const router = useRouter();
 
   const [search, setSearch] = useState(searchParams.get('search') || '');
   const [selectedCategory, setSelectedCategory] = useState('');
@@ -28,7 +27,7 @@ export default function ContentPage() {
     queryFn: () => categoriesApi.list().then((r) => r.data),
   });
 
-  const { data, isLoading, refetch } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['content', { search, selectedCategory, selectedType, selectedLevel, sortBy, page }],
     queryFn: () =>
       contentApi.list({
@@ -40,7 +39,7 @@ export default function ContentPage() {
         page,
         limit: 18,
       }).then((r) => r.data),
-    placeholderData: (prev: unknown) => prev,
+    placeholderData: keepPreviousData,
   });
 
   const categories: Category[] = categoriesData?.categories || [];

@@ -3,11 +3,11 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
-import { Plus, Edit2, Trash2, Search, Upload, ExternalLink } from 'lucide-react';
+import { Plus, Edit2, Trash2, Search } from 'lucide-react';
 import { contentApi, categoriesApi } from '@/lib/api';
 import { LevelBadge } from '@/components/ui/Badge';
 import { Modal, ConfirmModal } from '@/components/ui/Modal';
-import { getContentTypeIcon, getContentTypeLabel, formatBytes, formatDate } from '@/lib/utils';
+import { getContentTypeIcon, getContentTypeLabel, formatDate } from '@/lib/utils';
 import type { Content, Category, ContentType, UserLevel } from '@/types';
 
 interface ContentForm {
@@ -102,7 +102,7 @@ export default function AdminContentPage() {
     }
   };
 
-  const ContentFormFields = () => (
+  const renderContentFormFields = () => (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
         <div className="col-span-2">
@@ -277,7 +277,7 @@ export default function AdminContentPage() {
         size="xl"
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <ContentFormFields />
+          {renderContentFormFields()}
           <div className="flex gap-3 justify-end pt-2">
             <button type="button" onClick={() => { setIsCreating(false); setEditModal({ open: false, content: null }); resetForm(); }} className="btn-secondary">
               Cancel

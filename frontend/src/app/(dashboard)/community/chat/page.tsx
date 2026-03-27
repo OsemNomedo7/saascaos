@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Send, Hash, Users, Wifi, WifiOff } from 'lucide-react';
 import { useSocket } from '@/contexts/SocketContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -25,7 +25,7 @@ export default function ChatPage() {
   const [isTyping, setIsTyping] = useState<{ name: string } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const typingTimer = useRef<NodeJS.Timeout>();
+  const typingTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   useEffect(() => {
     if (!socket) return;

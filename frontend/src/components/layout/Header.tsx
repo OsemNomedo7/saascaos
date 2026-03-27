@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, Bell, X, Menu } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -20,7 +20,7 @@ export default function Header({ onMenuToggle }: HeaderProps) {
   const [isSearching, setIsSearching] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
-  const searchTimer = useRef<NodeJS.Timeout>();
+  const searchTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -56,7 +56,7 @@ export default function Header({ onMenuToggle }: HeaderProps) {
     }, 400);
   };
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
+  const handleSearchSubmit = (e: React.FormEvent | React.MouseEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       router.push(`/content?search=${encodeURIComponent(searchQuery)}`);

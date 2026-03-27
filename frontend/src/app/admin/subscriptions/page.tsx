@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
-import { Plus, CreditCard, Search } from 'lucide-react';
+import { Plus, CreditCard } from 'lucide-react';
 import { adminApi, subscriptionsApi } from '@/lib/api';
 import { PlanBadge, StatusBadge } from '@/components/ui/Badge';
 import { Modal } from '@/components/ui/Modal';

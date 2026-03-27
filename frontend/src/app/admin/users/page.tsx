@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Search, UserX, UserCheck, ChevronUp, Shield, Crown } from 'lucide-react';
+import { Search, UserX, UserCheck, ChevronUp, Shield } from 'lucide-react';
 import { usersApi } from '@/lib/api';
 import { LevelBadge, StatusBadge } from '@/components/ui/Badge';
 import { ConfirmModal, Modal } from '@/components/ui/Modal';

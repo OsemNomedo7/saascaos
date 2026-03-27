@@ -1,5 +1,5 @@
+import React, { forwardRef } from 'react';
 import { cn } from '@/lib/utils';
-import { forwardRef } from 'react';
 
 interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   hover?: boolean;

@@ -79,7 +79,7 @@ export default function AdminCategoriesPage() {
     }
   };
 
-  const FormFields = () => (
+  const renderFormFields = () => (
     <div className="space-y-4">
       <div>
         <label className="label-text">Name *</label>
@@ -177,7 +177,7 @@ export default function AdminCategoriesPage() {
         size="md"
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <FormFields />
+          {renderFormFields()}
           <div className="flex gap-3 justify-end pt-2">
             <button type="button" onClick={() => { setIsCreating(false); setEditModal({ open: false, category: null }); reset(); }} className="btn-secondary">
               Cancel
