@@ -40,7 +40,7 @@ export default function ContentPage() {
         page,
         limit: 18,
       }).then((r) => r.data),
-    keepPreviousData: true,
+    placeholderData: (prev: unknown) => prev,
   });
 
   const categories: Category[] = categoriesData?.categories || [];
