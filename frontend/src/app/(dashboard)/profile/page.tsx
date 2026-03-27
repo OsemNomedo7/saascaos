@@ -43,7 +43,7 @@ export default function ProfilePage() {
   });
 
   const updateProfile = useMutation({
-    mutationFn: (data: EditForm) => usersApi.update(user!._id, data),
+    mutationFn: (data: EditForm) => usersApi.update(user!._id, data as Record<string, unknown>),
     onSuccess: async () => {
       await refreshUser();
       queryClient.invalidateQueries({ queryKey: ['auth-user'] });
