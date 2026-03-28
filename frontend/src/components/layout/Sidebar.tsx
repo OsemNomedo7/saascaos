@@ -228,20 +228,26 @@ export default function Sidebar() {
           onMouseOut={e => (e.currentTarget.style.background = 'transparent')}>
           <div style={{
             width: 30, height: 30,
-            background: user?.avatar
-              ? `url(${user.avatar}) center top / cover no-repeat, rgba(0,120,255,0.1)`
-              : 'rgba(0,120,255,0.1)',
+            background: 'rgba(0,120,255,0.1)',
             border: '1px solid rgba(0,120,255,0.25)',
             borderRadius: '50%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '0.65rem',
-            fontWeight: 700,
-            color: '#0096ff',
-            flexShrink: 0,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: '0.65rem', fontWeight: 700, color: '#0096ff',
+            flexShrink: 0, overflow: 'hidden', position: 'relative',
           }}>
-            {!user?.avatar && getInitials(user?.name || 'U')}
+            <span style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1 }}>
+              {getInitials(user?.name || 'U')}
+            </span>
+            {user?.avatar && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                key={user.avatar}
+                src={user.avatar}
+                alt=""
+                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top', zIndex: 2 }}
+                onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+              />
+            )}
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <p style={{

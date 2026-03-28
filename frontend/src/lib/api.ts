@@ -123,6 +123,15 @@ export const communityApi = {
     api.post(`/community/posts/${postId}/comments`, { content }),
   deleteComment: (id: string) => api.delete(`/community/comments/${id}`),
   likeComment: (id: string) => api.post(`/community/comments/${id}/like`),
+  uploadChatMedia: (file: File, type: 'image' | 'file' | 'audio') => {
+    const formData = new FormData();
+    formData.append('media', file);
+    formData.append('type', type);
+    return api.post('/community/chat/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      timeout: 0,
+    });
+  },
 };
 
 export const dropsApi = {

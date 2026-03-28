@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
 const { body, validationResult } = require('express-validator');
 const Post = require('../models/Post');
 const Comment = require('../models/Comment');
@@ -7,6 +8,13 @@ const auth = require('../middlewares/auth');
 const admin = require('../middlewares/admin');
 const requireSubscription = require('../middlewares/subscription');
 const { addXp } = require('../utils/xp');
+const { processImageUpload, processFileUpload } = require('../config/storage');
+
+// multer para mídia do chat (25 MB)
+const chatUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 25 * 1024 * 1024 },
+});
 
 // GET /api/community/posts
 router.get('/posts', auth, requireSubscription, async (req, res) => {
@@ -240,6 +248,40 @@ router.post('/comments/:id/like', auth, requireSubscription, async (req, res) =>
     res.json({ message: 'Like toggled.', likes: comment.likes.length, liked: idx === -1 });
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });
+  }
+});
+
+// POST /api/community/chat/upload — upload de mídia para o chat (imagens, áudio, arquivos)
+router.post('/chat/upload', auth, (req, res, next) => {
+  chatUpload.single('media')(req, res, (err) => {
+    if (err?.code === 'LIMIT_FILE_SIZE') {
+      return res.status(400).json({ message: 'Arquivo muito grande. Limite: 25 MB para mídia no chat.' });
+    }
+    if (err) return res.status(400).json({ message: err.message });
+    next();
+  });
+}, async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ message: 'Nenhum arquivo enviado.' });
+
+    const mediaType = req.body.type || 'file'; // 'image' | 'file' | 'audio'
+    let url;
+
+    if (mediaType === 'image') {
+      url = await processImageUpload(req.file);
+    } else {
+      url = await processFileUpload(req.file);
+    }
+
+    res.json({
+      url,
+      fileName: req.file.originalname,
+      fileSize: req.file.size,
+      mimeType: req.file.mimetype,
+    });
+  } catch (err) {
+    console.error('[chat/upload]', err);
+    res.status(500).json({ message: 'Falha no upload da mídia.' });
   }
 });
 

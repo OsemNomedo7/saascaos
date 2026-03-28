@@ -5,10 +5,11 @@ const Message = require('../models/Message');
 const onlineUsers = new Map(); // socketId -> user info
 
 const chatHandler = (io) => {
-  // Auth middleware for socket
   io.use(async (socket, next) => {
     try {
-      const token = socket.handshake.auth?.token || socket.handshake.headers?.authorization?.split(' ')[1];
+      const token =
+        socket.handshake.auth?.token ||
+        socket.handshake.headers?.authorization?.split(' ')[1];
       if (!token) return next(new Error('Authentication required'));
 
       const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret');
@@ -26,12 +27,11 @@ const chatHandler = (io) => {
     const user = socket.user;
     console.log(`[Socket] ${user.name} connected (${socket.id})`);
 
-    // Join room
+    // ── Join room ──────────────────────────────────────────────
     socket.on('join_room', async ({ room = 'global' } = {}) => {
       socket.join(room);
       socket.currentRoom = room;
 
-      // Track online user
       onlineUsers.set(socket.id, {
         _id: user._id,
         name: user.name,
@@ -41,60 +41,70 @@ const chatHandler = (io) => {
         room,
       });
 
-      // Broadcast online users for this room
       const roomUsers = Array.from(onlineUsers.values()).filter((u) => u.room === room);
       io.to(room).emit('online_users', roomUsers);
 
-      // Notify room of new user
-      const systemMsg = {
+      socket.to(room).emit('system_message', {
         type: 'system',
-        content: `${user.name} joined the chat`,
+        content: `${user.name} entrou no chat`,
         room,
         createdAt: new Date(),
-      };
-      socket.to(room).emit('system_message', systemMsg);
+      });
     });
 
-    // Get message history
-    socket.on('get_history', async ({ room = 'global', limit = 50 } = {}) => {
+    // ── Message history ────────────────────────────────────────
+    socket.on('get_history', async ({ room = 'global', limit = 60 } = {}) => {
       try {
         const messages = await Message.find({ room })
           .sort({ createdAt: -1 })
           .limit(limit)
           .populate('author', 'name avatar level role')
           .lean();
-
         socket.emit('message_history', messages.reverse());
       } catch (err) {
-        socket.emit('error', { message: 'Failed to load history.' });
+        socket.emit('error', { message: 'Falha ao carregar histórico.' });
       }
     });
 
-    // Send message
-    socket.on('send_message', async ({ content, room = 'global' } = {}) => {
+    // ── Send message (text or media) ───────────────────────────
+    socket.on('send_message', async ({
+      content = '',
+      room = 'global',
+      type = 'text',
+      mediaUrl = null,
+      mediaFileName = null,
+      mediaSize = 0,
+      mediaMime = null,
+    } = {}) => {
       try {
-        if (!content || content.trim().length === 0) return;
-        if (content.trim().length > 1000) {
-          return socket.emit('error', { message: 'Message too long.' });
+        const text = content.trim();
+
+        // Must have text OR media
+        if (!text && !mediaUrl) return;
+        if (text.length > 1000) {
+          return socket.emit('error', { message: 'Mensagem muito longa.' });
         }
 
         const message = await Message.create({
-          content: content.trim(),
+          content: text,
           author: user._id,
           room,
-          type: 'text',
+          type: mediaUrl ? type : 'text',
+          mediaUrl,
+          mediaFileName,
+          mediaSize,
+          mediaMime,
         });
 
         await message.populate('author', 'name avatar level role');
-
         io.to(room).emit('new_message', message);
       } catch (err) {
         console.error('[Socket] send_message error:', err.message);
-        socket.emit('error', { message: 'Failed to send message.' });
+        socket.emit('error', { message: 'Falha ao enviar mensagem.' });
       }
     });
 
-    // Typing indicator
+    // ── Typing ─────────────────────────────────────────────────
     socket.on('typing_start', ({ room = 'global' } = {}) => {
       socket.to(room).emit('user_typing', { userId: user._id, name: user.name });
     });
@@ -103,22 +113,20 @@ const chatHandler = (io) => {
       socket.to(room).emit('user_stopped_typing', { userId: user._id });
     });
 
-    // Disconnect
+    // ── Disconnect ─────────────────────────────────────────────
     socket.on('disconnect', () => {
-      console.log(`[Socket] ${user.name} disconnected`);
       const room = socket.currentRoom || 'global';
       onlineUsers.delete(socket.id);
 
       const roomUsers = Array.from(onlineUsers.values()).filter((u) => u.room === room);
       io.to(room).emit('online_users', roomUsers);
 
-      const systemMsg = {
+      socket.to(room).emit('system_message', {
         type: 'system',
-        content: `${user.name} left the chat`,
+        content: `${user.name} saiu do chat`,
         room,
         createdAt: new Date(),
-      };
-      socket.to(room).emit('system_message', systemMsg);
+      });
     });
   });
 };

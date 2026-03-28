@@ -314,39 +314,66 @@ export default function AdminContentPage() {
     if (selectedFile) {
       setIsUploading(true);
       setUploadProgress(0);
+
+      // ── Estratégia 1: upload direto no R2 via presigned URL ──────────────────
+      // Bypassa o servidor completamente → sem limite de tamanho, sem timeout de proxy
+      let presignedOk = false;
       try {
-        // Tenta upload direto no R2 via presigned URL (sem passar pelo servidor)
-        let presignOk = false;
-        try {
-          const presignRes = await contentApi.presignUpload(
-            selectedFile.name,
-            selectedFile.type || 'application/octet-stream'
+        const presignRes = await contentApi.presignUpload(
+          selectedFile.name,
+          selectedFile.type || 'application/octet-stream'
+        );
+        const { uploadUrl, fileKey, publicUrl } = presignRes.data;
+
+        await new Promise<void>((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+          xhr.upload.onprogress = (e) => {
+            if (e.total) setUploadProgress(Math.round((e.loaded * 100) / e.total));
+          };
+          xhr.onload = () =>
+            xhr.status >= 200 && xhr.status < 300
+              ? resolve()
+              : reject(new Error(`r2_status:${xhr.status}`));
+          // status=0 + onerror = CORS bloqueado pelo browser
+          xhr.onerror = () => reject(new Error('cors_blocked'));
+          xhr.open('PUT', uploadUrl);
+          xhr.setRequestHeader('Content-Type', selectedFile.type || 'application/octet-stream');
+          xhr.send(selectedFile);
+        });
+
+        filePayload = {
+          fileUrl: publicUrl,
+          fileKey,
+          fileSize: selectedFile.size,
+          mimeType: selectedFile.type,
+        };
+        presignedOk = true;
+      } catch (presignErr) {
+        const msg = (presignErr as Error).message || '';
+
+        if (msg === 'cors_blocked') {
+          // CORS não configurado no bucket R2
+          setUploadError(
+            'CORS não configurado no R2. Vá em Cloudflare → R2 → seu bucket → Settings → CORS Policy e adicione:\n[{"AllowedOrigins":["*"],"AllowedMethods":["PUT"],"AllowedHeaders":["Content-Type"]}]'
           );
-          const { uploadUrl, fileKey, publicUrl } = presignRes.data;
-
-          await new Promise<void>((resolve, reject) => {
-            const xhr = new XMLHttpRequest();
-            xhr.upload.onprogress = (e) => {
-              if (e.total) setUploadProgress(Math.round((e.loaded * 100) / e.total));
-            };
-            xhr.onload = () => {
-              if (xhr.status >= 200 && xhr.status < 300) resolve();
-              else reject(new Error(`R2 retornou ${xhr.status}`));
-            };
-            xhr.onerror = () => reject(new Error('Erro de rede'));
-            xhr.open('PUT', uploadUrl);
-            xhr.setRequestHeader('Content-Type', selectedFile.type || 'application/octet-stream');
-            xhr.send(selectedFile);
-          });
-
-          filePayload = { fileUrl: publicUrl, fileKey, fileSize: selectedFile.size, mimeType: selectedFile.type };
-          presignOk = true;
-        } catch (presignErr) {
-          console.warn('[upload] Presign falhou, tentando via servidor:', presignErr);
+          setIsUploading(false);
+          return;
         }
+        // Outro erro (R2 não configurado, etc.) → cai no fallback
+        console.warn('[upload] Presigned URL falhou:', msg);
+      }
 
-        // Fallback: upload via servidor (para quando R2 não está configurado)
-        if (!presignOk) {
+      // ── Estratégia 2: upload via servidor (fallback para arquivos pequenos) ──
+      if (!presignedOk) {
+        if (selectedFile.size > 100 * 1024 * 1024) {
+          setUploadError(
+            `Arquivo de ${formatBytes(selectedFile.size)} é muito grande para upload via servidor.\n` +
+            'Configure o R2 e o CORS do bucket para fazer uploads grandes diretamente.'
+          );
+          setIsUploading(false);
+          return;
+        }
+        try {
           setUploadProgress(0);
           const formData = new FormData();
           formData.append('file', selectedFile);
@@ -357,12 +384,16 @@ export default function AdminContentPage() {
             fileSize: uploadRes.data.fileSize,
             mimeType: uploadRes.data.mimeType,
           };
+        } catch (serverErr) {
+          const serverMsg =
+            (serverErr as { response?: { data?: { message?: string } } }).response?.data?.message ||
+            'Falha no upload via servidor.';
+          setUploadError(serverMsg);
+          setIsUploading(false);
+          return;
         }
-      } catch {
-        setUploadError('Falha no upload. Verifique se o R2 está configurado ou tente um arquivo menor.');
-        setIsUploading(false);
-        return;
       }
+
       setIsUploading(false);
     }
 

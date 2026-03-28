@@ -132,7 +132,11 @@ export interface Message {
   content: string;
   author: string | User;
   room: string;
-  type: 'text' | 'system';
+  type: 'text' | 'image' | 'file' | 'audio' | 'system';
+  mediaUrl?: string | null;
+  mediaFileName?: string | null;
+  mediaSize?: number;
+  mediaMime?: string | null;
   createdAt: string;
 }
 

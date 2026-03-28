@@ -243,19 +243,27 @@ export default function ProfilePage() {
             <div style={{ position: 'relative' }}>
               <div style={{
                 width: 72, height: 72,
-                background: avatarPreview
-                  ? `url(${avatarPreview}) center top / cover no-repeat`
-                  : user.avatar
-                    ? `url(${user.avatar}) center top / cover no-repeat, rgba(0,255,65,0.08)`
-                    : 'rgba(0,255,65,0.08)',
+                background: 'rgba(0,255,65,0.08)',
                 border: `2px solid ${levelInfo.color}`,
                 boxShadow: `0 0 12px ${levelInfo.color}44`,
                 borderRadius: '50%',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontSize: '1.4rem', fontWeight: 700, color: '#00ff41',
-                flexShrink: 0,
+                flexShrink: 0, overflow: 'hidden', position: 'relative',
               }}>
-                {!avatarPreview && !user.avatar && getInitials(user.name)}
+                <span style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1 }}>
+                  {getInitials(user.name)}
+                </span>
+                {(avatarPreview || user.avatar) && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    key={avatarPreview || user.avatar || ''}
+                    src={avatarPreview || user.avatar || ''}
+                    alt=""
+                    style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top', zIndex: 2 }}
+                    onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+                  />
+                )}
               </div>
               {/* Avatar upload overlay */}
               {isEditing && (

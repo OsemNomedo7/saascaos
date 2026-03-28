@@ -324,29 +324,41 @@ router.post('/presign-upload', auth, admin, async (req, res) => {
 });
 
 // POST /api/content/upload
-router.post('/upload', auth, admin, upload.single('file'), async (req, res) => {
+router.post('/upload', auth, admin, (req, res, next) => {
+  upload.single('file')(req, res, (err) => {
+    if (err?.code === 'LIMIT_FILE_SIZE') {
+      const limitLabel = useR2 ? '5 GB' : '200 MB';
+      const hint = !useR2
+        ? ' Configure as variáveis R2_* no servidor para suporte a arquivos maiores, ou use upload direto via presigned URL.'
+        : '';
+      return res.status(413).json({ message: `Arquivo muito grande. Limite do servidor: ${limitLabel}.${hint}` });
+    }
+    if (err) return res.status(500).json({ message: `Erro no upload: ${err.message}` });
+    next();
+  });
+}, async (req, res) => {
   try {
-    if (!req.file) return res.status(400).json({ message: 'No file uploaded.' });
+    if (!req.file) return res.status(400).json({ message: 'Nenhum arquivo enviado.' });
 
     const fileUrl = await processFileUpload(req.file);
 
     await Log.create({
       user: req.user._id,
       action: 'upload',
-      metadata: { filename: req.file.filename || req.file.public_id, size: req.file.size },
+      metadata: { filename: req.file.originalname, size: req.file.size },
     });
 
     res.json({
       message: 'File uploaded.',
       fileUrl,
-      fileKey: req.file.filename || req.file.public_id,
+      fileKey: req.file.key || req.file.filename || req.file.originalname,
       fileSize: req.file.size,
       mimeType: req.file.mimetype,
       originalName: req.file.originalname,
     });
   } catch (error) {
     console.error('Upload error:', error);
-    res.status(500).json({ message: 'Upload failed.' });
+    res.status(500).json({ message: 'Falha no upload: ' + error.message });
   }
 });
 
