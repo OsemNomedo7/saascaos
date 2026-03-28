@@ -1,8 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const multer = require('multer');
-const path = require('path');
-const { v4: uuidv4 } = require('uuid');
 const { body, validationResult } = require('express-validator');
 const Content = require('../models/Content');
 const Review = require('../models/Review');
@@ -11,25 +8,10 @@ const auth = require('../middlewares/auth');
 const admin = require('../middlewares/admin');
 const requireSubscription = require('../middlewares/subscription');
 const { addXp } = require('../utils/xp');
+const { imageUpload, fileUpload, getFileUrl } = require('../config/cloudinary');
 
-// Multer config
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/');
-  },
-  filename: (req, file, cb) => {
-    const unique = `${uuidv4()}${path.extname(file.originalname)}`;
-    cb(null, unique);
-  },
-});
-
-const upload = multer({
-  storage,
-  limits: { fileSize: 500 * 1024 * 1024 }, // 500MB
-  fileFilter: (req, file, cb) => {
-    cb(null, true);
-  },
-});
+const upload = fileUpload();
+const uploadImage = imageUpload();
 
 const LEVEL_ORDER = { iniciante: 0, intermediario: 1, avancado: 2, elite: 3 };
 
@@ -316,18 +298,18 @@ router.post('/upload', auth, admin, upload.single('file'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ message: 'No file uploaded.' });
 
-    const fileUrl = `${process.env.BACKEND_URL || 'http://localhost:5000'}/uploads/${req.file.filename}`;
+    const fileUrl = getFileUrl(req.file);
 
     await Log.create({
       user: req.user._id,
       action: 'upload',
-      metadata: { filename: req.file.filename, size: req.file.size },
+      metadata: { filename: req.file.filename || req.file.public_id, size: req.file.size },
     });
 
     res.json({
       message: 'File uploaded.',
       fileUrl,
-      fileKey: req.file.filename,
+      fileKey: req.file.filename || req.file.public_id,
       fileSize: req.file.size,
       mimeType: req.file.mimetype,
       originalName: req.file.originalname,
@@ -339,11 +321,11 @@ router.post('/upload', auth, admin, upload.single('file'), async (req, res) => {
 });
 
 // POST /api/content/upload-image
-router.post('/upload-image', auth, admin, upload.single('image'), async (req, res) => {
+router.post('/upload-image', auth, admin, uploadImage.single('image'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ message: 'No image uploaded.' });
 
-    const imageUrl = `${process.env.BACKEND_URL || 'http://localhost:5000'}/uploads/${req.file.filename}`;
+    const imageUrl = getFileUrl(req.file);
 
     res.json({ message: 'Image uploaded.', imageUrl, fileKey: req.file.filename });
   } catch (error) {

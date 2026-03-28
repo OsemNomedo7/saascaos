@@ -1,29 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const multer = require('multer');
-const path = require('path');
-const { v4: uuidv4 } = require('uuid');
 const { body, validationResult } = require('express-validator');
 const User = require('../models/User');
 const Log = require('../models/Log');
 const auth = require('../middlewares/auth');
 const admin = require('../middlewares/admin');
+const { imageUpload, getFileUrl } = require('../config/cloudinary');
 
-// Multer config for avatar/banner images
-const imageStorage = multer.diskStorage({
-  destination: (req, file, cb) => { cb(null, 'uploads/'); },
-  filename: (req, file, cb) => {
-    const unique = `${uuidv4()}${path.extname(file.originalname)}`;
-    cb(null, unique);
-  },
-});
-const uploadImage = multer({
-  storage: imageStorage,
-  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB - aceita qualquer tamanho
-  fileFilter: (req, file, cb) => {
-    cb(null, true); // aceita qualquer formato de imagem
-  },
-});
+const uploadImage = imageUpload();
 
 // GET /api/users - Admin: list all users
 router.get('/', auth, admin, async (req, res) => {
@@ -136,7 +120,7 @@ router.get('/me/downloads', auth, async (req, res) => {
 router.post('/me/avatar', auth, uploadImage.single('avatar'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ message: 'No image uploaded.' });
-    const avatarUrl = `${process.env.BACKEND_URL || 'http://localhost:5000'}/uploads/${req.file.filename}`;
+    const avatarUrl = getFileUrl(req.file);
     const user = await User.findByIdAndUpdate(req.user._id, { avatar: avatarUrl }, { new: true });
     res.json({ message: 'Avatar updated.', avatarUrl, user });
   } catch (error) {
@@ -149,7 +133,7 @@ router.post('/me/avatar', auth, uploadImage.single('avatar'), async (req, res) =
 router.post('/me/banner', auth, uploadImage.single('banner'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ message: 'No image uploaded.' });
-    const bannerUrl = `${process.env.BACKEND_URL || 'http://localhost:5000'}/uploads/${req.file.filename}`;
+    const bannerUrl = getFileUrl(req.file);
     const user = await User.findByIdAndUpdate(req.user._id, { bannerUrl }, { new: true });
     res.json({ message: 'Banner updated.', bannerUrl, user });
   } catch (error) {

@@ -59,6 +59,7 @@ const SkullMini = () => (
 export default function Sidebar() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
+  const [avatarImgError, setAvatarImgError] = React.useState(false);
   const { isConnected } = useSocket();
 
   const { data: subData } = useQuery({
@@ -238,9 +239,9 @@ export default function Sidebar() {
             flexShrink: 0,
             overflow: 'hidden',
           }}>
-            {user?.avatar ? (
+            {user?.avatar && !avatarImgError ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={user.avatar} alt={user.name} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top' }} onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
+              <img src={user.avatar} alt={user.name} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top' }} onError={() => setAvatarImgError(true)} />
             ) : (
               getInitials(user?.name || 'U')
             )}

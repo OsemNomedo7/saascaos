@@ -42,6 +42,7 @@ export default function ProfilePage() {
   const [bannerFile, setBannerFile] = useState<File | null>(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [uploadingBanner, setUploadingBanner] = useState(false);
+  const [avatarImgError, setAvatarImgError] = useState(false);
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
 
@@ -122,6 +123,8 @@ export default function ProfilePage() {
       setUploadingAvatar(true);
       try {
         await profileApi.uploadAvatar(avatarFile);
+        await refreshUser();
+        setAvatarImgError(false);
         setAvatarPreview(null);
         setAvatarFile(null);
       } catch {
@@ -251,9 +254,9 @@ export default function ProfilePage() {
                 {avatarPreview ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={avatarPreview} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top', display: 'block' }} />
-                ) : user.avatar ? (
+                ) : user.avatar && !avatarImgError ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={user.avatar} alt={user.name} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top', display: 'block' }} onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
+                  <img src={user.avatar} alt={user.name} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top', display: 'block' }} onError={() => setAvatarImgError(true)} />
                 ) : (
                   getInitials(user.name)
                 )}

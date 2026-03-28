@@ -40,46 +40,62 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#050a05', position: 'relative' }}>
-      {/* Global ambient orbs — vivid floating lights */}
+      {/* Global ambient orbs — aurora multicolor */}
       <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0, overflow: 'hidden' }}>
-        {/* Large top-right green orb */}
+        {/* Top-left: ciano intenso */}
         <div className="float-slow" style={{
-          position: 'absolute', width: 900, height: 900, borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(0,255,65,0.14) 0%, rgba(0,255,65,0.04) 40%, transparent 70%)',
-          top: '-25%', right: '-15%',
-          filter: 'blur(40px)',
+          position: 'absolute', width: 1000, height: 800, borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(0,210,255,0.22) 0%, rgba(0,180,255,0.08) 40%, transparent 70%)',
+          top: '-30%', left: '-15%',
+          filter: 'blur(50px)',
         }} />
-        {/* Large bottom-left cyan orb */}
+        {/* Top-right: roxo/violeta */}
         <div className="float-med" style={{
-          position: 'absolute', width: 700, height: 700, borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(0,212,255,0.12) 0%, rgba(0,212,255,0.03) 40%, transparent 70%)',
-          bottom: '-15%', left: '-10%',
+          position: 'absolute', width: 900, height: 700, borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(160,60,255,0.20) 0%, rgba(120,40,255,0.06) 40%, transparent 70%)',
+          top: '-20%', right: '-15%',
+          filter: 'blur(45px)',
+          animationDelay: '4s',
+        }} />
+        {/* Lado esquerdo: verde (menor presença) */}
+        <div className="float-slow" style={{
+          position: 'absolute', width: 600, height: 700, borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(0,255,100,0.15) 0%, rgba(0,200,60,0.04) 50%, transparent 70%)',
+          top: '30%', left: '-8%',
+          filter: 'blur(40px)',
+          animationDelay: '2s',
+        }} />
+        {/* Lado direito: azul elétrico */}
+        <div className="float-med" style={{
+          position: 'absolute', width: 700, height: 600, borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(0,100,255,0.18) 0%, rgba(0,80,220,0.05) 50%, transparent 70%)',
+          top: '25%', right: '-10%',
+          filter: 'blur(40px)',
+          animationDelay: '6s',
+        }} />
+        {/* Bottom-left: turquesa/teal */}
+        <div className="float-slow" style={{
+          position: 'absolute', width: 800, height: 700, borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(0,200,180,0.18) 0%, rgba(0,180,160,0.05) 50%, transparent 70%)',
+          bottom: '-20%', left: '-10%',
+          filter: 'blur(45px)',
+          animationDelay: '1s',
+        }} />
+        {/* Bottom-right: magenta/rosa */}
+        <div className="float-med" style={{
+          position: 'absolute', width: 700, height: 600, borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(255,0,160,0.14) 0%, rgba(220,0,120,0.04) 50%, transparent 70%)',
+          bottom: '-15%', right: '-10%',
+          filter: 'blur(40px)',
+          animationDelay: '8s',
+        }} />
+        {/* Centro: laranja quente suave */}
+        <div className="float-slow" style={{
+          position: 'absolute', width: 400, height: 350, borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(255,120,0,0.10) 0%, transparent 70%)',
+          top: '50%', left: '45%',
           filter: 'blur(35px)',
           animationDelay: '3s',
-        }} />
-        {/* Mid purple accent */}
-        <div className="float-slow" style={{
-          position: 'absolute', width: 500, height: 500, borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(180,80,255,0.09) 0%, rgba(180,80,255,0.02) 50%, transparent 70%)',
-          top: '35%', right: '-5%',
-          filter: 'blur(30px)',
-          animationDelay: '5s',
-        }} />
-        {/* Small mid-left green */}
-        <div className="float-med" style={{
-          position: 'absolute', width: 350, height: 350, borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(0,255,65,0.1) 0%, transparent 70%)',
-          top: '55%', left: '15%',
-          filter: 'blur(25px)',
-          animationDelay: '1.5s',
-        }} />
-        {/* Bottom-right cyan accent */}
-        <div className="float-slow" style={{
-          position: 'absolute', width: 400, height: 400, borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(0,212,255,0.08) 0%, transparent 70%)',
-          bottom: '5%', right: '10%',
-          filter: 'blur(28px)',
-          animationDelay: '7s',
         }} />
       </div>
 
