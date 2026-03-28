@@ -2,6 +2,12 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 const Subscription = require('../models/Subscription');
+const Commission = require('../models/Commission');
+
+// Preços dos planos em BRL
+const PLAN_PRICES = { weekly: 19.90, monthly: 49.90, lifetime: 99.90 };
+// Percentual de comissão (configurável via env)
+const COMMISSION_RATE = parseFloat(process.env.AFFILIATE_COMMISSION_RATE || '30');
 
 // Mapeia o nome do produto (SigiloPay) para o plano interno
 const mapProductToPlan = (productName = '') => {
@@ -95,6 +101,26 @@ router.post('/sigilopay', async (req, res) => {
     });
 
     console.log(`[Webhook SigiloPay] ✓ Assinatura criada: user=${email} plan=${plan} id=${subscription._id}`);
+
+    // Registrar comissão do afiliado (se houver)
+    if (user.referredBy) {
+      const saleAmount = PLAN_PRICES[plan] || transaction?.amount || 0;
+      const commissionAmount = parseFloat(((saleAmount * COMMISSION_RATE) / 100).toFixed(2));
+
+      await Commission.create({
+        affiliate: user.referredBy,
+        referredUser: user._id,
+        subscription: subscription._id,
+        plan,
+        saleAmount,
+        commissionRate: COMMISSION_RATE,
+        commissionAmount,
+        status: 'pending',
+      });
+
+      console.log(`[Webhook SigiloPay] ✓ Comissão registrada: afiliado=${user.referredBy} valor=R$${commissionAmount}`);
+    }
+
     return res.status(200).json({ message: 'Assinatura ativada com sucesso' });
 
   } catch (err) {

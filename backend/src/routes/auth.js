@@ -28,14 +28,25 @@ router.post(
     }
 
     try {
-      const { name, email, password } = req.body;
+      const { name, email, password, referralCode: refCode } = req.body;
 
       const existingUser = await User.findOne({ email });
       if (existingUser) {
         return res.status(409).json({ message: 'Email already in use.' });
       }
 
-      const user = await User.create({ name, email, password });
+      // Gerar código de afiliado único
+      const crypto = require('crypto');
+      const referralCode = crypto.randomBytes(4).toString('hex').toUpperCase();
+
+      // Verificar se veio de um link de afiliado
+      let referredBy = null;
+      if (refCode) {
+        const affiliateUser = await User.findOne({ referralCode: refCode });
+        if (affiliateUser) referredBy = affiliateUser._id;
+      }
+
+      const user = await User.create({ name, email, password, referralCode, referredBy });
 
       await Log.create({
         user: user._id,

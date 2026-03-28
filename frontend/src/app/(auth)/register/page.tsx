@@ -51,6 +51,10 @@ export default function RegisterPage() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
+  // Capturar código de afiliado da URL
+  const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+  const refCode = searchParams?.get('ref') || '';
+
   const { register, handleSubmit, watch, formState: { errors } } = useForm<RegisterForm>();
   const password = watch('password');
 
@@ -58,7 +62,7 @@ export default function RegisterPage() {
     setError('');
     setIsLoading(true);
     try {
-      await registerUser(data.name, data.email, data.password);
+      await registerUser(data.name, data.email, data.password, refCode || undefined);
       router.push('/dashboard');
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { message?: string } } };

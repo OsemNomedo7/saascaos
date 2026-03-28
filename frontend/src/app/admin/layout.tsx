@@ -5,7 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import {
   LayoutDashboard, Users, Library, CreditCard, FileText,
-  Terminal, LogOut, ChevronRight, AlertTriangle, Tag, Menu, X
+  Terminal, LogOut, ChevronRight, AlertTriangle, Tag, Menu, X, UserCheck
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { getInitials } from '@/lib/utils';
@@ -19,6 +19,7 @@ const adminNav = [
   { label: 'Categorias', href: '/admin/categories', icon: <FileText className="w-3.5 h-3.5" /> },
   { label: 'Assinaturas', href: '/admin/subscriptions', icon: <CreditCard className="w-3.5 h-3.5" /> },
   { label: 'Cupons', href: '/admin/coupons', icon: <Tag className="w-3.5 h-3.5" /> },
+  { label: 'Afiliados', href: '/admin/affiliates', icon: <UserCheck className="w-3.5 h-3.5" /> },
 ];
 
 const AdminSkull = () => (

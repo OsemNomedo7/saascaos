@@ -195,3 +195,9 @@ export const adminExtApi = {
 export const searchApi = {
   search: (params: Record<string, unknown>) => api.get('/search', { params }),
 };
+
+export const affiliatesApi = {
+  me: () => api.get('/affiliates/me'),
+  requestWithdrawal: (data: { pixKey: string; pixKeyType: string; name: string; cpf: string; amount: number; notes?: string }) =>
+    api.post('/affiliates/withdrawal', data),
+};

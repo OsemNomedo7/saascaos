@@ -22,6 +22,7 @@ const adminRoutes = require('./src/routes/admin');
 const searchRoutes = require('./src/routes/search');
 const notificationRoutes = require('./src/routes/notifications');
 const webhookRoutes = require('./src/routes/webhook');
+const affiliateRoutes = require('./src/routes/affiliates');
 
 const app = express();
 const server = http.createServer(app);
@@ -62,6 +63,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api', searchRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/webhooks', webhookRoutes); // SigiloPay: POST /api/webhooks/sigilopay
+app.use('/api/affiliates', affiliateRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

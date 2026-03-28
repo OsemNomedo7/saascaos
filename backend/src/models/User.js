@@ -63,6 +63,17 @@ const userSchema = new mongoose.Schema(
       website: { type: String, default: '' },
     },
     achievements: [{ type: String }],
+    referralCode: {
+      type: String,
+      unique: true,
+      sparse: true,
+      default: null,
+    },
+    referredBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null,
+    },
   },
   {
     timestamps: true,
