@@ -55,8 +55,7 @@ export function CountUp({ value, duration = 1500, suffix = '', prefix = '' }: Co
         cancelAnimationFrame(rafRef.current);
       }
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value, duration]);
+  }, [value, duration]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const formatted = Math.round(display).toLocaleString();
 

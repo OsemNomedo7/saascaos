@@ -245,7 +245,7 @@ export function NotificationBell() {
           <div style={dropdownStyle}>
             {/* Header */}
             <div style={dropHeaderStyle}>
-              <span style={dropTitleStyle}>// Notificações</span>
+              <span style={dropTitleStyle}>{'// Notificações'}</span>
               <button
                 className="notif-markall"
                 style={markAllBtnStyle}
