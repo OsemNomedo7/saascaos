@@ -11,7 +11,7 @@ import { contentApi, dropsApi, subscriptionsApi } from '@/lib/api';
 import { LevelBadge, PlanBadge, StatusBadge } from '@/components/ui/Badge';
 import { formatRelativeDate, getContentTypeIcon, getCountdown } from '@/lib/utils';
 import type { Content, Subscription } from '@/types';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 
 function CountdownTimer({ expiresAt }: { expiresAt: string }) {
   const [countdown, setCountdown] = useState(getCountdown(expiresAt));
@@ -56,11 +56,11 @@ export default function DashboardPage() {
   const activeDrops: Content[] = dropsData?.drops?.slice(0, 3) || [];
   const subscription = subData?.subscription as Subscription | null;
 
-  const quickLinks = [
-    { label: 'Conteúdo', href: '/content', icon: <Library className="w-5 h-5" />, color: '#00ff41', bg: 'rgba(0,255,65,0.07)', border: 'rgba(0,255,65,0.2)' },
-    { label: 'Comunidade', href: '/community', icon: <Users className="w-5 h-5" />, color: '#00d4ff', bg: 'rgba(0,212,255,0.07)', border: 'rgba(0,212,255,0.2)' },
-    { label: 'Drops', href: '/drops', icon: <Zap className="w-5 h-5" />, color: '#ffcc00', bg: 'rgba(255,204,0,0.07)', border: 'rgba(255,204,0,0.2)' },
-    { label: 'Planos', href: '/planos', icon: <Star className="w-5 h-5" />, color: '#cc66ff', bg: 'rgba(200,100,255,0.07)', border: 'rgba(200,100,255,0.2)' },
+  const quickLinks: { label: string; href: string; icon: React.ReactNode; color: string; bg: string; border: string; desc: string }[] = [
+    { label: 'Conteúdo', href: '/content', icon: <Library className="w-5 h-5" />, color: '#00ff41', bg: 'rgba(0,255,65,0.07)', border: 'rgba(0,255,65,0.2)', desc: 'Biblioteca completa' },
+    { label: 'Comunidade', href: '/community', icon: <Users className="w-5 h-5" />, color: '#00d4ff', bg: 'rgba(0,212,255,0.07)', border: 'rgba(0,212,255,0.2)', desc: 'Posts e discussões' },
+    { label: 'Drops', href: '/drops', icon: <Zap className="w-5 h-5" />, color: '#ffcc00', bg: 'rgba(255,204,0,0.07)', border: 'rgba(255,204,0,0.2)', desc: 'Conteúdo exclusivo' },
+    { label: 'Planos', href: '/planos', icon: <Star className="w-5 h-5" />, color: '#cc66ff', bg: 'rgba(200,100,255,0.07)', border: 'rgba(200,100,255,0.2)', desc: 'Assinar / Upgrade' },
   ];
 
   return (
@@ -225,8 +225,9 @@ export default function DashboardPage() {
                 {link.icon}
               </div>
               <div>
-                <p style={{ fontSize: '0.78rem', fontWeight: 600, color: link.color }}>{link.label}</p>
-                <ArrowRight className="w-3 h-3" style={{ color: link.color, opacity: 0.5, marginTop: 2 }} />
+                <p style={{ fontSize: '0.82rem', fontWeight: 600, color: link.color, fontFamily: 'JetBrains Mono, monospace' }}>{link.label}</p>
+                <p style={{ fontSize: '0.65rem', color: link.color, opacity: 0.5, margin: '2px 0 6px', fontFamily: 'Inter, sans-serif' }}>{link.desc}</p>
+                <ArrowRight className="w-3 h-3" style={{ color: link.color, opacity: 0.4 }} />
               </div>
             </div>
           </Link>

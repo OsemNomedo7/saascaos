@@ -39,11 +39,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   if (!isAuthenticated) return null;
 
   return (
-    <div className="flex min-h-screen bg-gray-950">
+    <div style={{ display: 'flex', minHeight: '100vh', background: '#050a05', position: 'relative' }}>
+      {/* Global ambient orbs */}
+      <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0, overflow: 'hidden' }}>
+        <div className="orb-green float-slow" style={{ width: 600, height: 600, top: '-15%', right: '-10%' }} />
+        <div className="orb-cyan float-med" style={{ width: 500, height: 500, bottom: '5%', left: '-8%', animationDelay: '2s' }} />
+        <div className="orb-green" style={{ width: 300, height: 300, top: '45%', right: '20%', opacity: 0.5 }} />
+        <div className="orb-orange" style={{ width: 250, height: 250, bottom: '20%', right: '-5%' }} />
+      </div>
+
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-40 bg-gray-950/80 backdrop-blur-sm lg:hidden"
+          style={{ position: 'fixed', inset: 0, zIndex: 40, background: 'rgba(5,10,5,0.85)', backdropFilter: 'blur(4px)' }}
+          className="lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -53,14 +62,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         className={`fixed inset-y-0 left-0 z-40 transform transition-transform duration-300 lg:relative lg:translate-x-0 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
+        style={{ position: 'relative', zIndex: 1 }}
       >
         <Sidebar />
       </div>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden', position: 'relative', zIndex: 1 }}>
         <Header onMenuToggle={() => setSidebarOpen(!sidebarOpen)} />
-        <main className="flex-1 overflow-auto p-4 md:p-6">
+        <main style={{ flex: 1, overflowY: 'auto', padding: '24px', paddingBottom: '40px' }}>
           {children}
         </main>
       </div>

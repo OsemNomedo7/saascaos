@@ -175,36 +175,65 @@ export default function ContentCard({ content, subscription, onDownload, onOpenM
         </div>
       )}
 
-      {/* Type badge top-left if no image */}
+      {/* Rich placeholder thumbnail when no image */}
       {allImages.length === 0 && (
-        <div style={{
-          padding: '10px 14px 0',
+        <div className={`thumb-${content.type in { programa:1, database:1, material:1, esquema:1, video:1 } ? content.type : 'outro'}`} style={{
+          position: 'relative',
+          aspectRatio: '16/9',
+          overflow: 'hidden',
           display: 'flex',
           alignItems: 'center',
+          justifyContent: 'center',
+          flexDirection: 'column',
           gap: 8,
         }}>
+          {/* Grid pattern overlay */}
           <div style={{
-            width: 36, height: 36, borderRadius: 4, flexShrink: 0,
-            background: `${typeColor}14`,
-            border: `1px solid ${typeColor}30`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '1.1rem',
+            position: 'absolute', inset: 0,
+            backgroundImage: `linear-gradient(rgba(${content.type === 'programa' ? '0,212,255' : content.type === 'database' ? '255,204,0' : content.type === 'material' ? '0,255,65' : content.type === 'esquema' ? '200,100,255' : content.type === 'video' ? '255,102,68' : '0,255,65'},0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(${content.type === 'programa' ? '0,212,255' : content.type === 'database' ? '255,204,0' : content.type === 'material' ? '0,255,65' : content.type === 'esquema' ? '200,100,255' : content.type === 'video' ? '255,102,68' : '0,255,65'},0.06) 1px, transparent 1px)`,
+            backgroundSize: '28px 28px',
+            pointerEvents: 'none',
+          }} />
+          {/* Glow orb */}
+          <div style={{
+            position: 'absolute',
+            width: '60%', height: '60%',
+            borderRadius: '50%',
+            background: `radial-gradient(circle, ${typeColor}18 0%, transparent 70%)`,
+            filter: 'blur(12px)',
+          }} />
+          {/* Type icon */}
+          <div style={{
+            fontSize: '2.2rem',
+            filter: `drop-shadow(0 0 12px ${typeColor}88)`,
+            position: 'relative',
+            opacity: isLocked ? 0.4 : 1,
           }}>
             {getContentTypeIcon(content.type)}
           </div>
+          {/* Type label */}
           <div style={{
             fontFamily: 'JetBrains Mono, monospace',
             fontSize: '0.6rem',
             fontWeight: 700,
-            letterSpacing: '0.15em',
+            letterSpacing: '0.2em',
             color: typeColor,
-            background: `${typeColor}14`,
-            border: `1px solid ${typeColor}30`,
+            background: `${typeColor}18`,
+            border: `1px solid ${typeColor}35`,
             borderRadius: 3,
-            padding: '2px 6px',
+            padding: '3px 8px',
+            position: 'relative',
+            textShadow: `0 0 8px ${typeColor}66`,
+            opacity: isLocked ? 0.4 : 1,
           }}>
             {getContentTypeLabel(content.type).toUpperCase()}
           </div>
+          {/* Lock overlay */}
+          {isLocked && (
+            <div className="thumb-overlay-lock">
+              <Lock style={{ width: 28, height: 28, color: isSubLocked ? '#ff4400' : '#ffcc00' }} />
+            </div>
+          )}
         </div>
       )}
 
