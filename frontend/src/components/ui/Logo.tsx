@@ -1,5 +1,3 @@
-import Image from 'next/image';
-
 interface LogoProps {
   size?: number;
   className?: string;
@@ -7,14 +5,13 @@ interface LogoProps {
 
 export default function Logo({ size = 120, className = '' }: LogoProps) {
   return (
-    <Image
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
       src="/logo.png"
       alt="Elite Trojan"
       width={size}
-      height={size}
       className={className}
-      style={{ mixBlendMode: 'screen', display: 'block' }}
-      priority
+      style={{ mixBlendMode: 'screen', display: 'block', height: 'auto' }}
     />
   );
 }
