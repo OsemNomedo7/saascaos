@@ -42,6 +42,7 @@ function FileUploadZone({
   existingFileUrl,
   existingFileName,
   isUploading,
+  uploadProgress,
   uploadError,
   onFileSelect,
   onClear,
@@ -50,6 +51,7 @@ function FileUploadZone({
   existingFileUrl?: string | null;
   existingFileName?: string | null;
   isUploading: boolean;
+  uploadProgress: number;
   uploadError: string;
   onFileSelect: (file: File) => void;
   onClear: () => void;
@@ -119,15 +121,20 @@ function FileUploadZone({
             </p>
           </div>
           {isUploading ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <div style={{
-                width: 14, height: 14,
-                border: '1.5px solid #00ff41',
-                borderTopColor: 'transparent',
-                borderRadius: '50%',
-                animation: 'spin 0.7s linear infinite',
-              }} />
-              <span style={{ fontSize: '0.62rem', color: '#00a828' }}>ENVIANDO...</span>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4, minWidth: 80 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <div style={{
+                  width: 12, height: 12,
+                  border: '1.5px solid #00ff41',
+                  borderTopColor: 'transparent',
+                  borderRadius: '50%',
+                  animation: 'spin 0.7s linear infinite',
+                }} />
+                <span style={{ fontSize: '0.62rem', color: '#00a828' }}>{uploadProgress}%</span>
+              </div>
+              <div style={{ width: 80, height: 3, background: 'rgba(0,255,65,0.1)', borderRadius: 2 }}>
+                <div style={{ width: `${uploadProgress}%`, height: '100%', background: '#00ff41', borderRadius: 2, transition: 'width 0.2s' }} />
+              </div>
             </div>
           ) : (
             <button type="button" onClick={onClear}
@@ -164,7 +171,7 @@ function FileUploadZone({
             Clique ou arraste um arquivo aqui
           </p>
           <p style={{ fontSize: '0.65rem', color: '#1a3020', lineHeight: 1.5 }}>
-            Programas (.exe, .msi), PDFs, ZIPs, Vídeos, Scripts, qualquer formato — máx. 500MB
+            Programas (.exe, .msi), PDFs, ZIPs, Vídeos, Scripts, qualquer formato — máx. 5GB
           </p>
         </div>
       )}
@@ -201,6 +208,7 @@ export default function AdminContentPage() {
   // File upload states
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadError, setUploadError] = useState('');
 
   // Image upload states
@@ -305,10 +313,11 @@ export default function AdminContentPage() {
     // Upload file first if selected
     if (selectedFile) {
       setIsUploading(true);
+      setUploadProgress(0);
       try {
         const formData = new FormData();
         formData.append('file', selectedFile);
-        const uploadRes = await contentApi.upload(formData);
+        const uploadRes = await contentApi.upload(formData, setUploadProgress);
         filePayload = {
           fileUrl: uploadRes.data.fileUrl,
           fileKey: uploadRes.data.fileKey,
@@ -623,6 +632,7 @@ export default function AdminContentPage() {
                 existingFileUrl={editModal.content?.fileUrl}
                 existingFileName={editModal.content?.fileKey}
                 isUploading={isUploading}
+                uploadProgress={uploadProgress}
                 uploadError={uploadError}
                 onFileSelect={(file) => { setSelectedFile(file); setUploadError(''); }}
                 onClear={() => { setSelectedFile(null); setUploadError(''); }}

@@ -69,9 +69,15 @@ export const contentApi = {
   update: (id: string, data: object) => api.put(`/content/${id}`, data),
   remove: (id: string) => api.delete(`/content/${id}`),
   download: (id: string) => api.post(`/content/${id}/download`),
-  upload: (formData: FormData) =>
+  upload: (formData: FormData, onProgress?: (percent: number) => void) =>
     api.post('/content/upload', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
+      timeout: 0,
+      maxContentLength: Infinity,
+      maxBodyLength: Infinity,
+      onUploadProgress: onProgress
+        ? (e) => { if (e.total) onProgress(Math.round((e.loaded * 100) / e.total)); }
+        : undefined,
     }),
   uploadImage: (formData: FormData) =>
     api.post('/content/upload-image', formData, {
