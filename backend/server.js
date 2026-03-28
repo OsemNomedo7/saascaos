@@ -61,7 +61,7 @@ app.use('/api/drops', dropRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api', searchRoutes);
 app.use('/api/notifications', notificationRoutes);
-app.use('/api/webhooks', webhookRoutes);
+app.use('/api/webhooks', webhookRoutes); // SigiloPay: POST /api/webhooks/sigilopay
 
 // Health check
 app.get('/api/health', (req, res) => {

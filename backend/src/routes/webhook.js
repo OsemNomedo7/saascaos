@@ -3,7 +3,7 @@ const router = express.Router();
 const User = require('../models/User');
 const Subscription = require('../models/Subscription');
 
-// Mapeia o nome do produto (InovaPay) para o plano interno
+// Mapeia o nome do produto (SigiloPay) para o plano interno
 const mapProductToPlan = (productName = '') => {
   const name = productName.toLowerCase();
   if (name.includes('semanal') || name.includes('weekly')) return 'weekly';
@@ -24,15 +24,15 @@ const calcEndDate = (plan) => {
   return now;
 };
 
-// POST /api/webhooks/inovapay
-router.post('/inovapay', async (req, res) => {
+// POST /api/webhooks/sigilopay
+router.post('/sigilopay', async (req, res) => {
   try {
     const { event, token, transaction, client, orderItems } = req.body;
 
     // Validar token de segurança
-    const webhookToken = process.env.INOVAPAY_WEBHOOK_TOKEN;
+    const webhookToken = process.env.SIGILOPAY_WEBHOOK_TOKEN;
     if (webhookToken && token !== webhookToken) {
-      console.warn('[Webhook] Token inválido recebido');
+      console.warn('[Webhook SigiloPay] Token inválido recebido');
       return res.status(401).json({ message: 'Token inválido' });
     }
 
@@ -41,14 +41,14 @@ router.post('/inovapay', async (req, res) => {
     const transactionStatus = (transaction?.status || '').toLowerCase();
 
     if (!approvedStatuses.includes(transactionStatus)) {
-      console.log(`[Webhook] Evento ignorado: event=${event} status=${transactionStatus}`);
+      console.log(`[Webhook SigiloPay] Evento ignorado: event=${event} status=${transactionStatus}`);
       return res.status(200).json({ message: 'Evento ignorado' });
     }
 
     // Pegar email do cliente
     const email = client?.email?.toLowerCase()?.trim();
     if (!email) {
-      console.warn('[Webhook] Email não encontrado no payload');
+      console.warn('[Webhook SigiloPay] Email não encontrado no payload');
       return res.status(400).json({ message: 'Email não encontrado' });
     }
 
@@ -56,15 +56,15 @@ router.post('/inovapay', async (req, res) => {
     const productName = orderItems?.[0]?.product?.name || '';
     const plan = mapProductToPlan(productName);
     if (!plan) {
-      console.warn(`[Webhook] Plano não identificado para produto: "${productName}"`);
+      console.warn(`[Webhook SigiloPay] Plano não identificado para produto: "${productName}"`);
       return res.status(400).json({ message: `Plano não identificado: ${productName}` });
     }
 
     // Buscar usuário pelo email
     const user = await User.findOne({ email });
     if (!user) {
-      console.warn(`[Webhook] Usuário não encontrado: ${email}`);
-      // Retorna 200 pra InovaPay não ficar reenviando
+      console.warn(`[Webhook SigiloPay] Usuário não encontrado: ${email}`);
+      // Retorna 200 pra SigiloPay não ficar reenviando
       return res.status(200).json({ message: 'Usuário não encontrado na plataforma' });
     }
 
@@ -87,18 +87,18 @@ router.post('/inovapay', async (req, res) => {
       amount: transaction?.amount || 0,
       currency: transaction?.currency || 'BRL',
       metadata: {
-        inovapayEvent: event,
-        inovapayTransactionId: transaction?.id,
+        sigilopayEvent: event,
+        sigilopayTransactionId: transaction?.id,
         productName,
         webhookReceivedAt: new Date().toISOString(),
       },
     });
 
-    console.log(`[Webhook] ✓ Assinatura criada: user=${email} plan=${plan} id=${subscription._id}`);
+    console.log(`[Webhook SigiloPay] ✓ Assinatura criada: user=${email} plan=${plan} id=${subscription._id}`);
     return res.status(200).json({ message: 'Assinatura ativada com sucesso' });
 
   } catch (err) {
-    console.error('[Webhook] Erro:', err.message);
+    console.error('[Webhook SigiloPay] Erro:', err.message);
     return res.status(500).json({ message: 'Erro interno' });
   }
 });
