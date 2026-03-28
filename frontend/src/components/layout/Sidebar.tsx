@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard, Library, Users, Zap,
   User, CreditCard, Terminal, LogOut, ChevronRight,
-  Shield, Hash, Heart, Download
+  Shield, Hash, Heart, Download, Star
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSocket } from '@/contexts/SocketContext';
@@ -36,6 +36,7 @@ const accountNav: NavItem[] = [
   { label: 'Perfil', href: '/profile', icon: <User className="w-3.5 h-3.5" /> },
   { label: 'Favoritos', href: '/favorites', icon: <Heart className="w-3.5 h-3.5" /> },
   { label: 'Histórico', href: '/history', icon: <Download className="w-3.5 h-3.5" /> },
+  { label: 'Níveis', href: '/niveis', icon: <Star className="w-3.5 h-3.5" /> },
 ];
 
 const adminNav: NavItem[] = [

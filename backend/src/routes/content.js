@@ -10,6 +10,7 @@ const Log = require('../models/Log');
 const auth = require('../middlewares/auth');
 const admin = require('../middlewares/admin');
 const requireSubscription = require('../middlewares/subscription');
+const { addXp } = require('../utils/xp');
 
 // Multer config
 const storage = multer.diskStorage({
@@ -213,6 +214,8 @@ router.post('/:id/download', auth, async (req, res) => {
       metadata: { title: content.title },
     });
 
+    addXp(req.user._id, 'download').catch(() => {});
+
     res.json({ message: 'Download registered.', fileUrl: content.fileUrl, externalLink: content.externalLink });
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });
@@ -277,6 +280,8 @@ router.post(
         { rating, comment: comment || '' },
         { upsert: true, new: true, runValidators: true }
       ).populate('user', 'name avatar level');
+
+      addXp(req.user._id, 'review').catch(() => {});
 
       res.status(201).json({ message: 'Review saved.', review });
     } catch (error) {

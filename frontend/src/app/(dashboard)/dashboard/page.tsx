@@ -65,6 +65,83 @@ export default function DashboardPage() {
 
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto' }} className="space-y-6">
+      {/* Hero Banner */}
+      <div style={{
+        padding: '28px 28px 24px',
+        background: 'linear-gradient(135deg, rgba(0,20,0,0.95) 0%, rgba(0,40,15,0.9) 40%, rgba(0,30,30,0.95) 100%)',
+        border: '1px solid rgba(0,255,65,0.18)',
+        borderRadius: 8,
+        position: 'relative',
+        overflow: 'hidden',
+      }}>
+        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,255,65,0.015) 3px, rgba(0,255,65,0.015) 4px)' }} />
+        <div style={{ position: 'absolute', top: -40, right: -40, width: 200, height: 200, borderRadius: '50%', background: 'radial-gradient(circle, rgba(0,255,65,0.07) 0%, transparent 70%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', bottom: -30, left: '35%', width: 160, height: 160, borderRadius: '50%', background: 'radial-gradient(circle, rgba(0,212,255,0.05) 0%, transparent 70%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: 'linear-gradient(90deg, transparent, rgba(0,255,65,0.4), transparent)' }} />
+
+        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+              <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#00ff41', boxShadow: '0 0 8px #00ff41', animation: 'pulse 2s infinite' }} />
+              <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.6rem', color: '#2a6a3a', letterSpacing: '0.2em' }}>
+                SISTEMA ATIVO // ELITE TROJAN v2.0
+              </span>
+            </div>
+            <h1 style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '1.6rem', fontWeight: 700, color: '#e0ffe8', margin: '0 0 6px', lineHeight: 1.2 }}>
+              Bem-vindo,{' '}
+              <span style={{ color: '#00ff41', textShadow: '0 0 16px rgba(0,255,65,0.6)' }}>
+                {user?.name?.split(' ')[0]}
+              </span>
+            </h1>
+            <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.7rem', color: '#4a7a5a', margin: '0 0 12px' }}>
+              {'> Acesso autorizado. Explore o conteúdo exclusivo da plataforma.'}
+            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+              <LevelBadge level={user?.level || 'iniciante'} />
+              {subscription && <PlanBadge plan={subscription.plan} />}
+              {!subscription && (
+                <Link href="/planos" style={{
+                  fontFamily: 'JetBrains Mono, monospace', fontSize: '0.62rem',
+                  color: '#ffcc00', textDecoration: 'none',
+                  background: 'rgba(255,204,0,0.06)', border: '1px solid rgba(255,204,0,0.2)',
+                  padding: '2px 8px', borderRadius: 3,
+                }}>
+                  ⚡ Sem plano — Assinar agora →
+                </Link>
+              )}
+            </div>
+          </div>
+
+          {user && (
+            <div style={{ textAlign: 'right', minWidth: 160 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 6, marginBottom: 6 }}>
+                <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.6rem', color: '#2a4d30', letterSpacing: '0.12em' }}>XP</span>
+                <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.9rem', fontWeight: 700, color: '#00ff41', textShadow: '0 0 8px rgba(0,255,65,0.5)' }}>
+                  {(user.xp || 0).toLocaleString()}
+                </span>
+              </div>
+              <div style={{ width: 160, height: 4, background: 'rgba(0,0,0,0.4)', borderRadius: 2, overflow: 'hidden' }}>
+                <div style={{
+                  height: '100%',
+                  width: `${Math.min(100, ((user.xp || 0) / (user.level === 'iniciante' ? 100 : user.level === 'intermediario' ? 500 : user.level === 'avancado' ? 2000 : 9999)) * 100)}%`,
+                  background: 'linear-gradient(90deg, #00ff41, #00d4ff)',
+                  boxShadow: '0 0 8px rgba(0,255,65,0.5)',
+                  borderRadius: 2,
+                }} />
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
+                <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.55rem', color: '#1a3020', textTransform: 'uppercase' }}>
+                  {user.level}
+                </span>
+                <Link href="/niveis" style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.55rem', color: '#2a5a4a', textDecoration: 'none' }}>
+                  ver níveis →
+                </Link>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* Header */}
       <div style={{
         padding: '20px 24px',

@@ -1,13 +1,12 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import {
   User, Calendar, Shield, Activity, CreditCard,
   Clock, Edit2, Save, X, Check, Twitter, Github,
-  Instagram, Globe, Upload, Star, Download, Eye,
-  ChevronRight, Zap, Image as ImageIcon
+  Instagram, Globe, ChevronRight, Zap
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { usersApi, subscriptionsApi, profileApi } from '@/lib/api';
@@ -37,12 +36,6 @@ export default function ProfilePage() {
   const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
-  const [bannerFile, setBannerFile] = useState<File | null>(null);
-  const [bannerPreview, setBannerPreview] = useState<string | null>(null);
-  const avatarInputRef = useRef<HTMLInputElement>(null);
-  const bannerInputRef = useRef<HTMLInputElement>(null);
 
   const { register, handleSubmit, reset, watch, formState: { errors } } = useForm<EditForm>({
     defaultValues: {
@@ -70,68 +63,24 @@ export default function ProfilePage() {
   });
 
   const updateProfile = useMutation({
-    mutationFn: async (data: EditForm) => {
-      // Upload avatar if selected
-      let avatarUrl = user?.avatar || '';
-      if (avatarFile) {
-        const formData = new FormData();
-        formData.append('avatar', avatarFile);
-        const res = await usersApi.update(user!._id, formData);
-        avatarUrl = res.data.user?.avatar || avatarUrl;
-      }
-
-      // Upload banner if selected
-      let bannerUrl = user?.bannerUrl || '';
-      if (bannerFile) {
-        // Use profileApi to update banner
-        const formData = new FormData();
-        formData.append('banner', bannerFile);
-        // For now send as URL (base64 or upload)
-        bannerUrl = bannerPreview || bannerUrl;
-      }
-
-      return profileApi.update({
-        name: data.name,
-        bio: data.bio,
-        bannerUrl: bannerUrl || undefined,
-        socialLinks: {
-          twitter: data.twitter || undefined,
-          github: data.github || undefined,
-          instagram: data.instagram || undefined,
-          website: data.website || undefined,
-        },
-      });
-    },
+    mutationFn: (data: EditForm) => profileApi.update({
+      name: data.name,
+      bio: data.bio,
+      socialLinks: {
+        twitter: data.twitter || undefined,
+        github: data.github || undefined,
+        instagram: data.instagram || undefined,
+        website: data.website || undefined,
+      },
+    }),
     onSuccess: async () => {
       await refreshUser();
       queryClient.invalidateQueries({ queryKey: ['auth-user'] });
       setIsEditing(false);
       setSaveSuccess(true);
-      setAvatarFile(null);
-      setAvatarPreview(null);
-      setBannerFile(null);
-      setBannerPreview(null);
       setTimeout(() => setSaveSuccess(false), 3000);
     },
   });
-
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setAvatarFile(file);
-    const reader = new FileReader();
-    reader.onload = (ev) => setAvatarPreview(ev.target?.result as string);
-    reader.readAsDataURL(file);
-  };
-
-  const handleBannerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setBannerFile(file);
-    const reader = new FileReader();
-    reader.onload = (ev) => setBannerPreview(ev.target?.result as string);
-    reader.readAsDataURL(file);
-  };
 
   const subscription = subData?.subscription as Subscription | null;
   const history = subData?.history as Subscription[] || [];
@@ -147,10 +96,6 @@ export default function ProfilePage() {
 
   const handleCancelEdit = () => {
     setIsEditing(false);
-    setAvatarFile(null);
-    setAvatarPreview(null);
-    setBannerFile(null);
-    setBannerPreview(null);
     reset({
       name: user?.name || '',
       bio: user?.bio || '',
@@ -162,9 +107,6 @@ export default function ProfilePage() {
   };
 
   if (!user) return null;
-
-  const currentAvatar = avatarPreview || user.avatar;
-  const currentBanner = bannerPreview || user.bannerUrl;
 
   return (
     <div style={{ maxWidth: 1000, margin: '0 auto' }}>
@@ -189,8 +131,8 @@ export default function ProfilePage() {
         {/* Banner */}
         <div style={{
           height: 140,
-          background: currentBanner
-            ? `url(${currentBanner}) center/cover no-repeat`
+          background: user.bannerUrl
+            ? `url(${user.bannerUrl}) center/cover no-repeat`
             : 'linear-gradient(135deg, rgba(0,255,65,0.08) 0%, rgba(0,212,255,0.06) 50%, rgba(0,0,0,0) 100%)',
           position: 'relative',
           overflow: 'hidden',
@@ -201,25 +143,6 @@ export default function ProfilePage() {
             backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.1) 2px, rgba(0,0,0,0.1) 4px)',
             pointerEvents: 'none',
           }} />
-          {isEditing && (
-            <>
-              <input ref={bannerInputRef} type="file" accept="image/*" onChange={handleBannerChange} style={{ display: 'none' }} />
-              <button
-                type="button"
-                onClick={() => bannerInputRef.current?.click()}
-                style={{
-                  position: 'absolute', top: 8, right: 8,
-                  padding: '5px 10px', borderRadius: 4,
-                  background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(0,255,65,0.3)',
-                  color: '#00ff41', fontSize: '0.65rem', cursor: 'pointer',
-                  fontFamily: 'JetBrains Mono, monospace',
-                  display: 'flex', alignItems: 'center', gap: 5,
-                }}
-              >
-                <ImageIcon style={{ width: 11, height: 11 }} /> TROCAR BANNER
-              </button>
-            </>
-          )}
         </div>
 
         {/* Avatar row */}
@@ -242,31 +165,13 @@ export default function ProfilePage() {
                 overflow: 'hidden',
                 flexShrink: 0,
               }}>
-                {currentAvatar ? (
+                {user.avatar ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={currentAvatar} alt={user.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <img src={user.avatar} alt={user.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 ) : (
                   getInitials(user.name)
                 )}
               </div>
-              {isEditing && (
-                <>
-                  <input ref={avatarInputRef} type="file" accept="image/*" onChange={handleAvatarChange} style={{ display: 'none' }} />
-                  <button
-                    type="button"
-                    onClick={() => avatarInputRef.current?.click()}
-                    style={{
-                      position: 'absolute', bottom: 0, right: 0,
-                      width: 22, height: 22, borderRadius: '50%',
-                      background: '#050a05', border: '1px solid #00ff41',
-                      color: '#00ff41', cursor: 'pointer',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    }}
-                  >
-                    <Upload style={{ width: 10, height: 10 }} />
-                  </button>
-                </>
-              )}
             </div>
 
             <div style={{ paddingBottom: 4 }}>

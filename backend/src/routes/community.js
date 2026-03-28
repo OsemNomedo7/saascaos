@@ -6,6 +6,7 @@ const Comment = require('../models/Comment');
 const auth = require('../middlewares/auth');
 const admin = require('../middlewares/admin');
 const requireSubscription = require('../middlewares/subscription');
+const { addXp } = require('../utils/xp');
 
 // GET /api/community/posts
 router.get('/posts', auth, requireSubscription, async (req, res) => {
@@ -73,6 +74,7 @@ router.post(
       const { title, content, category } = req.body;
       const post = await Post.create({ title, content, category: category || null, author: req.user._id });
       await post.populate('author', 'name avatar level role');
+      addXp(req.user._id, 'post').catch(() => {});
       res.status(201).json({ message: 'Post created.', post });
     } catch (error) {
       res.status(500).json({ message: 'Server error.' });
@@ -189,6 +191,8 @@ router.post(
 
       post.commentCount += 1;
       await post.save();
+
+      addXp(req.user._id, 'comment').catch(() => {});
 
       await comment.populate('author', 'name avatar level role');
       res.status(201).json({ message: 'Comment added.', comment });

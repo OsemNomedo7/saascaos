@@ -5,6 +5,7 @@ const { body, validationResult } = require('express-validator');
 const User = require('../models/User');
 const Log = require('../models/Log');
 const auth = require('../middlewares/auth');
+const { addXp } = require('../utils/xp');
 
 const generateToken = (userId) => {
   return jwt.sign({ id: userId }, process.env.JWT_SECRET || 'fallback_secret', {
@@ -43,6 +44,8 @@ router.post(
         userAgent: req.headers['user-agent'],
         metadata: { email },
       });
+
+      addXp(user._id, 'register').catch(() => {});
 
       const token = generateToken(user._id);
 
@@ -100,8 +103,16 @@ router.post(
         return res.status(401).json({ message: 'Invalid email or password.' });
       }
 
+      // XP por login diário (não repetir no mesmo dia)
+      const today = new Date().toDateString();
+      const lastLoginDate = user.lastLogin ? new Date(user.lastLogin).toDateString() : null;
+
       user.lastLogin = new Date();
       await user.save({ validateBeforeSave: false });
+
+      if (lastLoginDate !== today) {
+        addXp(user._id, 'login').catch(() => {});
+      }
 
       await Log.create({
         user: user._id,
@@ -136,7 +147,7 @@ router.post(
 // GET /api/auth/me
 router.get('/me', auth, async (req, res) => {
   try {
-    const user = await User.findById(req.user._id);
+    const user = await User.findById(req.user._id).select('+xp +achievements +bio +socialLinks +bannerUrl');
     if (!user) {
       return res.status(404).json({ message: 'User not found.' });
     }

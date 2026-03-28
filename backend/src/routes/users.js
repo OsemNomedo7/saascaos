@@ -116,8 +116,9 @@ router.get('/me/downloads', auth, async (req, res) => {
 // PUT /api/users/me/profile - update bio, socialLinks, bannerUrl
 router.put('/me/profile', auth, async (req, res) => {
   try {
-    const { bio, socialLinks, bannerUrl } = req.body;
+    const { name, bio, socialLinks, bannerUrl } = req.body;
     const updates = {};
+    if (name !== undefined && name.trim().length >= 2) updates.name = name.trim();
     if (bio !== undefined) updates.bio = bio;
     if (socialLinks !== undefined) updates.socialLinks = socialLinks;
     if (bannerUrl !== undefined) updates.bannerUrl = bannerUrl;

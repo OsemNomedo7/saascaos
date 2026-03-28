@@ -187,6 +187,41 @@ export default function ContentPage() {
         )}
       </div>
 
+      {/* Featured Banner */}
+      <div style={{
+        marginBottom: 20,
+        padding: '16px 20px',
+        background: 'linear-gradient(135deg, rgba(0,212,255,0.05) 0%, rgba(0,255,65,0.03) 60%, transparent 100%)',
+        border: '1px solid rgba(0,212,255,0.15)',
+        borderRadius: 6,
+        position: 'relative', overflow: 'hidden',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16,
+      }}>
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.4), transparent)' }} />
+        <div style={{ position: 'absolute', bottom: -20, right: -10, width: 120, height: 120, borderRadius: '50%', background: 'radial-gradient(circle, rgba(0,212,255,0.07) 0%, transparent 70%)', pointerEvents: 'none' }} />
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+            <span style={{ fontSize: '1rem' }}>💎</span>
+            <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.6rem', color: '#00d4ff', letterSpacing: '0.15em', fontWeight: 700 }}>
+              BIBLIOTECA EXCLUSIVA
+            </span>
+          </div>
+          <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.68rem', color: '#4a7a8a', margin: 0 }}>
+            Programas, ferramentas, databases e materiais premium — tudo em um só lugar.
+          </p>
+        </div>
+        {!hasSubscription && user?.role !== 'admin' && (
+          <Link href="/planos" style={{
+            fontFamily: 'JetBrains Mono, monospace', fontSize: '0.65rem', fontWeight: 700,
+            color: '#00d4ff', background: 'rgba(0,212,255,0.07)',
+            border: '1px solid rgba(0,212,255,0.25)', borderRadius: 4,
+            padding: '6px 14px', textDecoration: 'none', flexShrink: 0,
+          }}>
+            ASSINAR →
+          </Link>
+        )}
+      </div>
+
       {/* Search bar */}
       <div style={{ position: 'relative', marginBottom: 20 }}>
         <Search style={{
