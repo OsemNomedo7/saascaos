@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard, Library, Users, Zap,
   User, CreditCard, Terminal, LogOut, ChevronRight,
-  Shield, Hash, Heart, Download, Star
+  Shield, Hash, Heart, Download, Star, X
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSocket } from '@/contexts/SocketContext';
@@ -57,7 +57,7 @@ const SkullMini = () => (
   </svg>
 );
 
-export default function Sidebar() {
+export default function Sidebar({ onClose }: { onClose?: () => void }) {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const [avatarImgError, setAvatarImgError] = React.useState(false);
@@ -88,10 +88,25 @@ export default function Sidebar() {
       flexDirection: 'column',
     }}>
       {/* Logo */}
-      <div style={{ padding: '12px 16px', borderBottom: '1px solid rgba(0,120,255,0.1)', display: 'flex', justifyContent: 'center' }}>
-        <Link href="/dashboard" style={{ textDecoration: 'none', display: 'block' }}>
+      <div style={{ padding: '12px 16px', borderBottom: '1px solid rgba(0,120,255,0.1)', display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
+        <Link href="/dashboard" style={{ textDecoration: 'none', display: 'block' }} onClick={onClose}>
           <Logo size={160} />
         </Link>
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="lg:hidden"
+            style={{
+              position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)',
+              padding: 6, color: '#2a4d30', background: 'none', border: 'none',
+              cursor: 'pointer', transition: 'color 0.15s', borderRadius: 4,
+            }}
+            onMouseOver={e => (e.currentTarget.style.color = '#00ff41')}
+            onMouseOut={e => (e.currentTarget.style.color = '#2a4d30')}
+          >
+            <X className="w-4 h-4" />
+          </button>
+        )}
       </div>
 
       {/* Nav */}
@@ -105,6 +120,7 @@ export default function Sidebar() {
                 key={item.href}
                 href={item.href}
                 className={cn(isActive(item.href) ? 'nav-link-active' : 'nav-link')}
+                onClick={onClose}
               >
                 {item.icon}
                 <span>{item.label}</span>
@@ -125,6 +141,7 @@ export default function Sidebar() {
                 key={item.href}
                 href={item.href}
                 className={cn(isActive(item.href) ? 'nav-link-active' : 'nav-link')}
+                onClick={onClose}
               >
                 {item.icon}
                 <span>{item.label}</span>
@@ -146,6 +163,7 @@ export default function Sidebar() {
                   key={item.href}
                   href={item.href}
                   className={cn(isActive(item.href) ? 'nav-link-active' : 'nav-link')}
+                  onClick={onClose}
                   style={isActive(item.href) ? {
                     color: '#ff4400',
                     background: 'rgba(255,68,0,0.08)',

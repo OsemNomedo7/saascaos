@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import {
   LayoutDashboard, Users, Library, CreditCard, FileText,
-  Terminal, LogOut, ChevronRight, AlertTriangle, Tag
+  Terminal, LogOut, ChevronRight, AlertTriangle, Tag, Menu, X
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { getInitials } from '@/lib/utils';
@@ -38,6 +38,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter();
   const pathname = usePathname();
   const { user, isLoading, isAuthenticated, logout } = useAuth();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     if (!isLoading && (!isAuthenticated || user?.role !== 'admin')) {
@@ -68,8 +69,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#050a05' }}>
+      {/* Mobile overlay */}
+      {sidebarOpen && (
+        <div
+          className="lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+          style={{ position: 'fixed', inset: 0, zIndex: 40, background: 'rgba(5,10,5,0.85)', backdropFilter: 'blur(4px)' }}
+        />
+      )}
+
       {/* Admin Sidebar */}
-      <aside style={{
+      <aside
+        className={`fixed inset-y-0 left-0 z-40 transform transition-transform duration-300 lg:relative lg:translate-x-0 lg:z-auto ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
+        style={{
         width: 224,
         minHeight: '100vh',
         background: '#080808',
@@ -78,8 +90,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         flexDirection: 'column',
       }}>
         {/* Logo */}
-        <div style={{ padding: '12px 14px', borderBottom: '1px solid rgba(255,68,0,0.12)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-          <Link href="/admin" style={{ textDecoration: 'none', display: 'block' }}>
+        <div style={{ padding: '12px 14px', borderBottom: '1px solid rgba(255,68,0,0.12)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, position: 'relative' }}>
+          <Link href="/admin" style={{ textDecoration: 'none', display: 'block' }} onClick={() => setSidebarOpen(false)}>
             <Logo size={140} />
           </Link>
           <span style={{
@@ -90,6 +102,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             color: '#ff4400',
             textShadow: '0 0 8px rgba(255,68,0,0.4)',
           }}>ADMIN PANEL</span>
+          <button
+            onClick={() => setSidebarOpen(false)}
+            className="lg:hidden"
+            style={{
+              position: 'absolute', right: 8, top: 8,
+              padding: 4, color: '#3a1800', background: 'none', border: 'none',
+              cursor: 'pointer', transition: 'color 0.15s', borderRadius: 4,
+            }}
+            onMouseOver={e => (e.currentTarget.style.color = '#ff4400')}
+            onMouseOut={e => (e.currentTarget.style.color = '#3a1800')}
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
 
         {/* Nav */}
@@ -138,6 +163,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     (e.currentTarget as HTMLAnchorElement).style.borderColor = 'transparent';
                   }
                 }}
+              onClick={() => setSidebarOpen(false)}
               >
                 {item.icon}
                 <span>{item.label}</span>
@@ -148,7 +174,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
           {/* Back to user dashboard */}
           <div style={{ marginTop: 16, paddingTop: 12, borderTop: '1px solid rgba(255,68,0,0.08)' }}>
-            <Link href="/dashboard"
+            <Link href="/dashboard" onClick={() => setSidebarOpen(false)}
               style={{
                 display: 'flex', alignItems: 'center', gap: 10,
                 padding: '7px 10px', borderRadius: 4,
@@ -206,23 +232,39 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           borderBottom: '1px solid rgba(255,68,0,0.1)',
           display: 'flex',
           alignItems: 'center',
-          padding: '0 20px',
-          gap: 12,
+          padding: '0 12px 0 8px',
+          gap: 8,
           backdropFilter: 'blur(8px)',
+          position: 'sticky',
+          top: 0,
+          zIndex: 30,
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontFamily: 'JetBrains Mono, monospace', fontSize: '0.7rem' }}>
-            <span style={{ color: '#ff4400' }}>root</span>
-            <span style={{ color: '#3a3a3a' }}>@</span>
-            <span style={{ color: '#cc6600' }}>elite-trojan</span>
-            <span style={{ color: '#3a3a3a' }}>:~$</span>
-            <span style={{ color: '#555' }}>{pathname}</span>
+          {/* Mobile hamburger */}
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="lg:hidden"
+            style={{
+              padding: 6, color: '#3a1800', background: 'none', border: 'none',
+              cursor: 'pointer', transition: 'color 0.15s', borderRadius: 4, flexShrink: 0,
+            }}
+            onMouseOver={e => (e.currentTarget.style.color = '#ff4400')}
+            onMouseOut={e => (e.currentTarget.style.color = '#3a1800')}
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontFamily: 'JetBrains Mono, monospace', fontSize: '0.7rem', minWidth: 0, flex: 1, overflow: 'hidden' }}>
+            <span style={{ color: '#ff4400', flexShrink: 0 }}>root</span>
+            <span className="hidden sm:inline" style={{ color: '#3a3a3a' }}>@</span>
+            <span className="hidden sm:inline" style={{ color: '#cc6600' }}>elite-trojan</span>
+            <span style={{ color: '#3a3a3a', flexShrink: 0 }}>:~$</span>
+            <span style={{ color: '#555', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{pathname}</span>
           </div>
-          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
             <AlertTriangle className="w-3 h-3" style={{ color: '#ff4400', opacity: 0.6 }} />
-            <span style={{ fontSize: '0.58rem', color: '#3a1800', letterSpacing: '0.12em' }}>ZONA RESTRITA</span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginLeft: 8 }}>
+            <span className="hidden sm:inline" style={{ fontSize: '0.58rem', color: '#3a1800', letterSpacing: '0.12em' }}>ZONA RESTRITA</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginLeft: 4 }}>
               <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#00ff41', boxShadow: '0 0 5px #00ff41', animation: 'pulse 2s infinite' }} />
-              <span style={{ fontSize: '0.58rem', color: '#1a3020', letterSpacing: '0.1em' }}>SYSTEM ONLINE</span>
+              <span className="hidden sm:inline" style={{ fontSize: '0.58rem', color: '#1a3020', letterSpacing: '0.1em' }}>SYSTEM ONLINE</span>
             </div>
           </div>
         </div>

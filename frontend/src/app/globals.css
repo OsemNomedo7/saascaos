@@ -750,3 +750,76 @@ pre, code { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; }
   to   { opacity: 1; transform: translateY(0); }
 }
 .animate-count { animation: count-up 0.5s ease-out; }
+
+/* ─── Mobile responsiveness ─── */
+@media (max-width: 768px) {
+  /* Prevent horizontal overflow */
+  html, body {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+
+  /* Touch-friendly minimum sizes */
+  button, a[href], [role="button"] {
+    min-height: 36px;
+  }
+
+  /* Table becomes scrollable on mobile */
+  .table-hack {
+    font-size: 0.72rem;
+  }
+  .table-hack th,
+  .table-hack td {
+    padding: 8px 10px;
+  }
+
+  /* Responsive grid utilities */
+  .mobile-col-1 {
+    grid-template-columns: 1fr !important;
+  }
+  .mobile-stack {
+    flex-direction: column !important;
+  }
+  .mobile-full {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Stat number smaller on mobile */
+  .stat-number {
+    font-size: 1.5rem;
+  }
+
+  /* Reduce card padding on mobile */
+  .stat-card-hack {
+    padding: 12px;
+  }
+
+  /* Input font size prevents iOS zoom */
+  .input-hack,
+  .input-field,
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="search"],
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+
+  /* Section hack text smaller */
+  .section-hack {
+    font-size: 0.58rem;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Extra small screens */
+  .stat-number {
+    font-size: 1.25rem;
+  }
+  .glass-hacker-bright,
+  .glass-hacker {
+    border-radius: 6px;
+  }
+}
