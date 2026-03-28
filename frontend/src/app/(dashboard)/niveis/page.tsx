@@ -88,6 +88,24 @@ export default function NiveisPage() {
 
   return (
     <div style={{ maxWidth: 900, margin: '0 auto' }}>
+      {/* Visual Banner */}
+      <div style={{
+        marginBottom: 22, borderRadius: 8, overflow: 'hidden', position: 'relative', height: 130,
+        background: 'url(https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1400&q=80) center/cover no-repeat',
+        border: '1px solid rgba(200,100,255,0.2)',
+      }}>
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, rgba(8,0,15,0.94) 0%, rgba(20,0,35,0.85) 60%, rgba(0,0,0,0.5) 100%)' }} />
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(200,100,255,0.015) 3px, rgba(200,100,255,0.015) 4px)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: 'linear-gradient(90deg, transparent, rgba(200,100,255,0.5), transparent)' }} />
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', padding: '0 28px' }}>
+          <div>
+            <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.58rem', color: '#cc66ff', letterSpacing: '0.2em', margin: '0 0 5px', opacity: 0.7 }}>{'// ELITE TROJAN > PROGRESSÃO > NÍVEIS'}</p>
+            <h2 style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '1.3rem', fontWeight: 700, color: '#f0e0ff', margin: '0 0 4px', textShadow: '0 0 20px rgba(200,100,255,0.4)' }}>SISTEMA DE NÍVEIS</h2>
+            <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.65rem', color: '#7a4a9a', margin: 0 }}>{'> Ganhe XP, evolua seu perfil e desbloqueie conteúdo exclusivo'}</p>
+          </div>
+        </div>
+      </div>
+
       {/* Header */}
       <div style={{ marginBottom: 28 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>

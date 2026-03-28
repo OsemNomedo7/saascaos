@@ -68,7 +68,7 @@ export default function DashboardPage() {
       {/* Hero Banner */}
       <div style={{
         padding: '28px 28px 24px',
-        background: 'linear-gradient(135deg, rgba(0,20,0,0.95) 0%, rgba(0,40,15,0.9) 40%, rgba(0,30,30,0.95) 100%)',
+        background: 'linear-gradient(135deg, rgba(0,15,0,0.94) 0%, rgba(0,35,12,0.91) 40%, rgba(0,25,25,0.94) 100%), url(https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1400&q=80) center/cover no-repeat',
         border: '1px solid rgba(0,255,65,0.18)',
         borderRadius: 8,
         position: 'relative',

@@ -176,6 +176,27 @@ export default function DropsPage() {
 
   return (
     <div className="max-w-7xl mx-auto">
+      {/* Visual Banner */}
+      <div style={{
+        marginBottom: 22, borderRadius: 8, overflow: 'hidden', position: 'relative', height: 130,
+        background: 'url(https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1400&q=80) center/cover no-repeat',
+        border: '1px solid rgba(255,204,0,0.2)',
+      }}>
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, rgba(15,10,0,0.94) 0%, rgba(30,20,0,0.85) 60%, rgba(0,0,0,0.5) 100%)' }} />
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(255,204,0,0.015) 3px, rgba(255,204,0,0.015) 4px)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: 'linear-gradient(90deg, transparent, rgba(255,204,0,0.5), transparent)' }} />
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', padding: '0 28px', gap: 14 }}>
+          <div style={{ width: 42, height: 42, borderRadius: 8, background: 'rgba(255,204,0,0.1)', border: '1px solid rgba(255,204,0,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Zap style={{ width: 20, height: 20, color: '#ffcc00' }} />
+          </div>
+          <div>
+            <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.58rem', color: '#ffcc00', letterSpacing: '0.2em', margin: '0 0 5px', opacity: 0.7 }}>{'// ELITE TROJAN > DROPS > TEMPO LIMITADO'}</p>
+            <h2 style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '1.3rem', fontWeight: 700, color: '#fff8e0', margin: '0 0 4px', textShadow: '0 0 20px rgba(255,204,0,0.4)' }}>DROPS EXCLUSIVOS</h2>
+            <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.65rem', color: '#8a7a30', margin: 0 }}>{'> Conteúdo exclusivo por tempo limitado — não perca!'}</p>
+          </div>
+        </div>
+      </div>
+
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-2">

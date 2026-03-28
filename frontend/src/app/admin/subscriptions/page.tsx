@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
-import { Plus, CreditCard } from 'lucide-react';
-import { adminApi, subscriptionsApi } from '@/lib/api';
+import { Plus, CreditCard, Search } from 'lucide-react';
+import { adminApi, subscriptionsApi, usersApi } from '@/lib/api';
 import { PlanBadge, StatusBadge } from '@/components/ui/Badge';
 import { Modal } from '@/components/ui/Modal';
 import { formatDate, formatRelativeDate, formatCurrency } from '@/lib/utils';
@@ -22,6 +22,8 @@ export default function AdminSubscriptionsPage() {
   const [statusFilter, setStatusFilter] = useState('');
   const [planFilter, setPlanFilter] = useState('');
   const [activateModal, setActivateModal] = useState(false);
+  const [userSearch, setUserSearch] = useState('');
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ['admin-subscriptions', { page, statusFilter, planFilter }],
@@ -34,22 +36,44 @@ export default function AdminSubscriptionsPage() {
       }).then((r) => r.data),
   });
 
+  const { data: userSearchData } = useQuery({
+    queryKey: ['user-search-activation', userSearch],
+    queryFn: () => usersApi.list({ search: userSearch, limit: 8 }).then((r) => r.data),
+    enabled: userSearch.length >= 2,
+  });
+
   const activateManual = useMutation({
     mutationFn: (data: ManualActivateForm) =>
       subscriptionsApi.activateManual({ ...data, days: data.days || undefined }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-subscriptions'] });
       setActivateModal(false);
+      setSelectedUser(null);
+      setUserSearch('');
       reset();
     },
   });
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<ManualActivateForm>({
+  const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<ManualActivateForm>({
     defaultValues: { plan: 'monthly' },
   });
 
   const subscriptions: Subscription[] = data?.subscriptions || [];
   const pagination = data?.pagination;
+  const searchResults: User[] = userSearchData?.users || [];
+
+  const handleSelectUser = (user: User) => {
+    setSelectedUser(user);
+    setValue('userId', user._id);
+    setUserSearch('');
+  };
+
+  const handleCloseModal = () => {
+    setActivateModal(false);
+    setSelectedUser(null);
+    setUserSearch('');
+    reset();
+  };
 
   return (
     <div className="max-w-7xl mx-auto space-y-5">
@@ -173,20 +197,69 @@ export default function AdminSubscriptionsPage() {
       {/* Manual Activation Modal */}
       <Modal
         isOpen={activateModal}
-        onClose={() => { setActivateModal(false); reset(); }}
+        onClose={handleCloseModal}
         title="Manual Subscription Activation"
         description="Activate a subscription for a user without payment"
         size="md"
       >
         <form onSubmit={handleSubmit((data) => activateManual.mutate(data))} className="space-y-4">
+          {/* User search */}
           <div>
-            <label className="label-text">User ID *</label>
-            <input
-              {...register('userId', { required: 'Required' })}
-              type="text"
-              placeholder="MongoDB ObjectId"
-              className="input-field font-mono text-sm"
-            />
+            <label className="label-text">Search User *</label>
+            {selectedUser ? (
+              <div className="flex items-center justify-between p-3 bg-gray-800/60 border border-green-500/30 rounded-lg">
+                <div>
+                  <p className="text-sm font-medium text-gray-200">{selectedUser.name}</p>
+                  <p className="text-xs text-gray-500">{selectedUser.email}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => { setSelectedUser(null); setValue('userId', ''); }}
+                  className="text-xs text-gray-500 hover:text-red-400 transition-colors px-2 py-1"
+                >
+                  Trocar
+                </button>
+              </div>
+            ) : (
+              <div className="relative">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                  <input
+                    type="text"
+                    value={userSearch}
+                    onChange={(e) => setUserSearch(e.target.value)}
+                    placeholder="Buscar por nome ou email..."
+                    className="input-field pl-9"
+                  />
+                </div>
+                {userSearch.length >= 2 && searchResults.length > 0 && (
+                  <div className="absolute z-10 top-full left-0 right-0 mt-1 bg-gray-800 border border-gray-700 rounded-lg overflow-hidden shadow-xl">
+                    {searchResults.map((u) => (
+                      <button
+                        key={u._id}
+                        type="button"
+                        onClick={() => handleSelectUser(u)}
+                        className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-gray-700/60 transition-colors text-left"
+                      >
+                        <div className="w-7 h-7 rounded-full bg-gray-700 flex items-center justify-center text-xs font-medium text-gray-300 flex-shrink-0">
+                          {u.name.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-200">{u.name}</p>
+                          <p className="text-xs text-gray-500">{u.email}</p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {userSearch.length >= 2 && searchResults.length === 0 && (
+                  <div className="absolute z-10 top-full left-0 right-0 mt-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-500">
+                    Nenhum usuário encontrado
+                  </div>
+                )}
+              </div>
+            )}
+            <input type="hidden" {...register('userId', { required: 'Selecione um usuário' })} />
             {errors.userId && <p className="text-red-400 text-xs mt-1">{errors.userId.message}</p>}
           </div>
 
@@ -216,10 +289,10 @@ export default function AdminSubscriptionsPage() {
           )}
 
           <div className="flex gap-3 justify-end pt-2">
-            <button type="button" onClick={() => { setActivateModal(false); reset(); }} className="btn-secondary">
+            <button type="button" onClick={handleCloseModal} className="btn-secondary">
               Cancel
             </button>
-            <button type="submit" disabled={activateManual.isPending} className="btn-primary flex items-center gap-2">
+            <button type="submit" disabled={activateManual.isPending || !selectedUser} className="btn-primary flex items-center gap-2">
               {activateManual.isPending && (
                 <div className="w-4 h-4 border-2 border-gray-950 border-t-transparent rounded-full animate-spin" />
               )}

@@ -154,6 +154,16 @@ export const downloadsApi = {
 export const profileApi = {
   update: (data: object) => api.put('/users/me/profile', data),
   publicProfile: (userId: string) => api.get(`/users/${userId}/public`),
+  uploadAvatar: (file: File) => {
+    const formData = new FormData();
+    formData.append('avatar', file);
+    return api.post('/users/me/avatar', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+  },
+  uploadBanner: (file: File) => {
+    const formData = new FormData();
+    formData.append('banner', file);
+    return api.post('/users/me/banner', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+  },
 };
 
 export const adminExtApi = {

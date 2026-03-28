@@ -1,12 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import {
   User, Calendar, Shield, Activity, CreditCard,
   Clock, Edit2, Save, X, Check, Twitter, Github,
-  Instagram, Globe, ChevronRight, Zap
+  Instagram, Globe, ChevronRight, Zap, Camera, Image as ImageIcon
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { usersApi, subscriptionsApi, profileApi } from '@/lib/api';
@@ -36,6 +36,14 @@ export default function ProfilePage() {
   const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [bannerPreview, setBannerPreview] = useState<string | null>(null);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [bannerFile, setBannerFile] = useState<File | null>(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [uploadingBanner, setUploadingBanner] = useState(false);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const bannerInputRef = useRef<HTMLInputElement>(null);
 
   const { register, handleSubmit, reset, watch, formState: { errors } } = useForm<EditForm>({
     defaultValues: {
@@ -90,7 +98,51 @@ export default function ProfilePage() {
   const levelInfo = LEVEL_XP[user?.level || 'iniciante'];
   const xpPercent = Math.min(100, (xp / levelInfo.max) * 100);
 
-  const onSubmit = (data: EditForm) => {
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setAvatarFile(file);
+    const reader = new FileReader();
+    reader.onload = (ev) => setAvatarPreview(ev.target?.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  const handleBannerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setBannerFile(file);
+    const reader = new FileReader();
+    reader.onload = (ev) => setBannerPreview(ev.target?.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  const onSubmit = async (data: EditForm) => {
+    // Upload avatar if changed
+    if (avatarFile) {
+      setUploadingAvatar(true);
+      try {
+        await profileApi.uploadAvatar(avatarFile);
+        setAvatarPreview(null);
+        setAvatarFile(null);
+      } catch {
+        // continue even if avatar upload fails
+      } finally {
+        setUploadingAvatar(false);
+      }
+    }
+    // Upload banner if changed
+    if (bannerFile) {
+      setUploadingBanner(true);
+      try {
+        await profileApi.uploadBanner(bannerFile);
+        setBannerPreview(null);
+        setBannerFile(null);
+      } catch {
+        // continue even if banner upload fails
+      } finally {
+        setUploadingBanner(false);
+      }
+    }
     updateProfile.mutate(data);
   };
 
@@ -104,6 +156,10 @@ export default function ProfilePage() {
       instagram: user?.socialLinks?.instagram || '',
       website: user?.socialLinks?.website || '',
     });
+    setAvatarPreview(null);
+    setBannerPreview(null);
+    setAvatarFile(null);
+    setBannerFile(null);
   };
 
   if (!user) return null;
@@ -131,9 +187,11 @@ export default function ProfilePage() {
         {/* Banner */}
         <div style={{
           height: 140,
-          background: user.bannerUrl
-            ? `url(${user.bannerUrl}) center/cover no-repeat`
-            : 'linear-gradient(135deg, rgba(0,255,65,0.08) 0%, rgba(0,212,255,0.06) 50%, rgba(0,0,0,0) 100%)',
+          background: bannerPreview
+            ? `url(${bannerPreview}) center/cover no-repeat`
+            : user.bannerUrl
+              ? `url(${user.bannerUrl}) center/cover no-repeat`
+              : 'linear-gradient(135deg, rgba(0,255,65,0.08) 0%, rgba(0,212,255,0.06) 50%, rgba(0,0,0,0) 100%)',
           position: 'relative',
           overflow: 'hidden',
         }}>
@@ -143,6 +201,31 @@ export default function ProfilePage() {
             backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.1) 2px, rgba(0,0,0,0.1) 4px)',
             pointerEvents: 'none',
           }} />
+          {/* Banner upload button */}
+          {isEditing && (
+            <button
+              type="button"
+              onClick={() => bannerInputRef.current?.click()}
+              disabled={uploadingBanner}
+              style={{
+                position: 'absolute', bottom: 8, right: 8,
+                display: 'flex', alignItems: 'center', gap: 5,
+                padding: '5px 10px', borderRadius: 4, cursor: 'pointer',
+                background: 'rgba(0,0,0,0.7)', border: '1px solid rgba(0,255,65,0.4)',
+                color: '#00ff41', fontFamily: 'JetBrains Mono, monospace', fontSize: '0.62rem',
+              }}
+            >
+              <ImageIcon style={{ width: 11, height: 11 }} />
+              {uploadingBanner ? 'ENVIANDO...' : 'TROCAR BANNER'}
+            </button>
+          )}
+          <input
+            ref={bannerInputRef}
+            type="file"
+            accept="image/*"
+            style={{ display: 'none' }}
+            onChange={handleBannerChange}
+          />
         </div>
 
         {/* Avatar row */}
@@ -165,13 +248,39 @@ export default function ProfilePage() {
                 overflow: 'hidden',
                 flexShrink: 0,
               }}>
-                {user.avatar ? (
+                {avatarPreview ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={avatarPreview} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : user.avatar ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={user.avatar} alt={user.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 ) : (
                   getInitials(user.name)
                 )}
               </div>
+              {/* Avatar upload overlay */}
+              {isEditing && (
+                <button
+                  type="button"
+                  onClick={() => avatarInputRef.current?.click()}
+                  disabled={uploadingAvatar}
+                  style={{
+                    position: 'absolute', inset: 0, borderRadius: '50%',
+                    background: 'rgba(0,0,0,0.6)', border: 'none', cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: '#00ff41',
+                  }}
+                >
+                  <Camera style={{ width: 18, height: 18 }} />
+                </button>
+              )}
+              <input
+                ref={avatarInputRef}
+                type="file"
+                accept="image/*"
+                style={{ display: 'none' }}
+                onChange={handleAvatarChange}
+              />
             </div>
 
             <div style={{ paddingBottom: 4 }}>

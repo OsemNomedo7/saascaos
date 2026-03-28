@@ -1,10 +1,32 @@
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
+const path = require('path');
+const { v4: uuidv4 } = require('uuid');
 const { body, validationResult } = require('express-validator');
 const User = require('../models/User');
 const Log = require('../models/Log');
 const auth = require('../middlewares/auth');
 const admin = require('../middlewares/admin');
+
+// Multer config for avatar/banner images
+const imageStorage = multer.diskStorage({
+  destination: (req, file, cb) => { cb(null, 'uploads/'); },
+  filename: (req, file, cb) => {
+    const unique = `${uuidv4()}${path.extname(file.originalname)}`;
+    cb(null, unique);
+  },
+});
+const uploadImage = multer({
+  storage: imageStorage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  fileFilter: (req, file, cb) => {
+    if (!file.mimetype.startsWith('image/')) {
+      return cb(new Error('Only image files are allowed.'));
+    }
+    cb(null, true);
+  },
+});
 
 // GET /api/users - Admin: list all users
 router.get('/', auth, admin, async (req, res) => {
@@ -110,6 +132,32 @@ router.get('/me/downloads', auth, async (req, res) => {
     res.json({ history });
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });
+  }
+});
+
+// POST /api/users/me/avatar - upload avatar image
+router.post('/me/avatar', auth, uploadImage.single('avatar'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ message: 'No image uploaded.' });
+    const avatarUrl = `${process.env.BACKEND_URL || 'http://localhost:5000'}/uploads/${req.file.filename}`;
+    const user = await User.findByIdAndUpdate(req.user._id, { avatar: avatarUrl }, { new: true });
+    res.json({ message: 'Avatar updated.', avatarUrl, user });
+  } catch (error) {
+    console.error('Avatar upload error:', error);
+    res.status(500).json({ message: error.message || 'Upload failed.' });
+  }
+});
+
+// POST /api/users/me/banner - upload banner image
+router.post('/me/banner', auth, uploadImage.single('banner'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ message: 'No image uploaded.' });
+    const bannerUrl = `${process.env.BACKEND_URL || 'http://localhost:5000'}/uploads/${req.file.filename}`;
+    const user = await User.findByIdAndUpdate(req.user._id, { bannerUrl }, { new: true });
+    res.json({ message: 'Banner updated.', bannerUrl, user });
+  } catch (error) {
+    console.error('Banner upload error:', error);
+    res.status(500).json({ message: error.message || 'Upload failed.' });
   }
 });
 

@@ -114,6 +114,22 @@ export default function PlanosPage() {
 
   return (
     <div style={{ maxWidth: 960, margin: '0 auto' }}>
+      {/* Visual Banner */}
+      <div style={{
+        marginBottom: 28, borderRadius: 8, overflow: 'hidden', position: 'relative', height: 130,
+        background: 'url(https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1400&q=80) center/cover no-repeat',
+        border: '1px solid rgba(255,204,0,0.15)',
+      }}>
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(5,3,0,0.94) 0%, rgba(15,10,0,0.88) 50%, rgba(0,0,0,0.6) 100%)' }} />
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(255,204,0,0.012) 3px, rgba(255,204,0,0.012) 4px)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: 'linear-gradient(90deg, transparent, rgba(0,255,65,0.5), transparent)' }} />
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 6 }}>
+          <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.58rem', color: '#00ff41', letterSpacing: '0.25em', margin: 0, opacity: 0.7 }}>{'// ELITE TROJAN > ACESSO PREMIUM'}</p>
+          <h2 style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '1.4rem', fontWeight: 700, color: '#e0ffe8', margin: 0, textShadow: '0 0 24px rgba(0,255,65,0.4)', letterSpacing: '0.06em' }}>PLANOS E ASSINATURAS</h2>
+          <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.65rem', color: '#4a7a5a', margin: 0 }}>{'> Escolha o plano ideal e acesse todo o conteúdo exclusivo'}</p>
+        </div>
+      </div>
+
       {/* Header */}
       <div style={{ textAlign: 'center', marginBottom: 36 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 10 }}>
