@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import {
   Library, Users, Zap, TrendingUp, ArrowRight,
-  Download, Eye, Clock, Star, ChevronRight, Terminal
+  Download, Eye, Clock, Star, ChevronRight
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { contentApi, dropsApi, subscriptionsApi } from '@/lib/api';
@@ -144,54 +144,6 @@ export default function DashboardPage() {
               </div>
             </div>
           )}
-        </div>
-      </div>
-
-      {/* Header */}
-      <div style={{
-        padding: '20px 24px',
-        background: 'rgba(0,255,65,0.03)',
-        border: '1px solid rgba(0,255,65,0.12)',
-        borderRadius: 6,
-        position: 'relative',
-        overflow: 'hidden',
-      }}>
-        {/* Decorative top line */}
-        <div style={{
-          position: 'absolute', top: 0, left: 0, right: 0, height: 1,
-          background: 'linear-gradient(90deg, transparent, #00ff41, transparent)',
-          opacity: 0.5,
-        }} />
-
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-              <Terminal className="w-3.5 h-3.5" style={{ color: '#00ff41' }} />
-              <span style={{ fontSize: '0.65rem', color: '#2a4d30', letterSpacing: '0.15em' }}>
-                CONNECTION ESTABLISHED
-              </span>
-            </div>
-            <h1 style={{ fontSize: '1.4rem', fontWeight: 700, color: '#e0ffe8', lineHeight: 1.2 }}>
-              Bem-vindo,{' '}
-              <span style={{ color: '#00ff41', textShadow: '0 0 10px rgba(0,255,65,0.5)' }}>
-                {user?.name?.split(' ')[0]}
-              </span>
-            </h1>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6 }}>
-              <LevelBadge level={user?.level || 'iniciante'} />
-              {subscription && <PlanBadge plan={subscription.plan} />}
-              {!subscription && (
-                <Link href="/planos" style={{ fontSize: '0.7rem', color: '#ffcc00', textDecoration: 'none' }}>
-                  Sem plano ativo — Assinar agora →
-                </Link>
-              )}
-            </div>
-          </div>
-
-          <div style={{ textAlign: 'right' }} className="hidden sm:block">
-            <p style={{ fontSize: '0.6rem', color: '#1a3020', letterSpacing: '0.12em' }}>MEMBRO DESDE</p>
-            <p style={{ fontSize: '0.78rem', color: '#4d8c5a' }}>{formatRelativeDate(user?.createdAt)}</p>
-          </div>
         </div>
       </div>
 
