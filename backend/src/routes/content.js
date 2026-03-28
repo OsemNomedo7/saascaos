@@ -8,7 +8,7 @@ const auth = require('../middlewares/auth');
 const admin = require('../middlewares/admin');
 const requireSubscription = require('../middlewares/subscription');
 const { addXp } = require('../utils/xp');
-const { imageUpload, fileUpload, getFileUrl } = require('../config/storage');
+const { imageUpload, fileUpload, processImageUpload, processFileUpload, getFileUrl } = require('../config/storage');
 
 const upload = fileUpload();
 const uploadImage = imageUpload();
@@ -298,7 +298,7 @@ router.post('/upload', auth, admin, upload.single('file'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ message: 'No file uploaded.' });
 
-    const fileUrl = getFileUrl(req.file);
+    const fileUrl = await processFileUpload(req.file);
 
     await Log.create({
       user: req.user._id,
@@ -325,7 +325,7 @@ router.post('/upload-image', auth, admin, uploadImage.single('image'), async (re
   try {
     if (!req.file) return res.status(400).json({ message: 'No image uploaded.' });
 
-    const imageUrl = getFileUrl(req.file);
+    const imageUrl = await processImageUpload(req.file);
 
     res.json({ message: 'Image uploaded.', imageUrl, fileKey: req.file.filename });
   } catch (error) {

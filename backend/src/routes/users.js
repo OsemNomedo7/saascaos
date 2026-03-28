@@ -5,7 +5,7 @@ const User = require('../models/User');
 const Log = require('../models/Log');
 const auth = require('../middlewares/auth');
 const admin = require('../middlewares/admin');
-const { imageUpload, getFileUrl } = require('../config/storage');
+const { imageUpload, processImageUpload } = require('../config/storage');
 
 const uploadImage = imageUpload();
 
@@ -120,7 +120,8 @@ router.get('/me/downloads', auth, async (req, res) => {
 router.post('/me/avatar', auth, uploadImage.single('avatar'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ message: 'No image uploaded.' });
-    const avatarUrl = getFileUrl(req.file);
+    const avatarUrl = await processImageUpload(req.file);
+    console.log('[AVATAR] URL salva:', avatarUrl);
     const user = await User.findByIdAndUpdate(req.user._id, { avatar: avatarUrl }, { new: true });
     res.json({ message: 'Avatar updated.', avatarUrl, user });
   } catch (error) {
@@ -133,7 +134,7 @@ router.post('/me/avatar', auth, uploadImage.single('avatar'), async (req, res) =
 router.post('/me/banner', auth, uploadImage.single('banner'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ message: 'No image uploaded.' });
-    const bannerUrl = getFileUrl(req.file);
+    const bannerUrl = await processImageUpload(req.file);
     const user = await User.findByIdAndUpdate(req.user._id, { bannerUrl }, { new: true });
     res.json({ message: 'Banner updated.', bannerUrl, user });
   } catch (error) {
