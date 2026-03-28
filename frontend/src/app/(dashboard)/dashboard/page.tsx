@@ -67,17 +67,22 @@ export default function DashboardPage() {
     <div style={{ maxWidth: 1200, margin: '0 auto' }} className="space-y-6">
       {/* Hero Banner */}
       <div style={{
-        padding: '28px 28px 24px',
-        background: 'linear-gradient(135deg, rgba(0,15,0,0.94) 0%, rgba(0,35,12,0.91) 40%, rgba(0,25,25,0.94) 100%), url(https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1400&q=80) center/cover no-repeat',
-        border: '1px solid rgba(0,255,65,0.18)',
+        padding: '40px 32px 36px',
+        background: 'linear-gradient(160deg, rgba(0,8,0,0.72) 0%, rgba(0,20,8,0.68) 40%, rgba(0,15,20,0.72) 100%), url(https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1600&q=85) center/cover no-repeat',
+        border: '1px solid rgba(0,255,65,0.2)',
         borderRadius: 8,
         position: 'relative',
         overflow: 'hidden',
+        minHeight: 200,
       }}>
-        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,255,65,0.015) 3px, rgba(0,255,65,0.015) 4px)' }} />
-        <div style={{ position: 'absolute', top: -40, right: -40, width: 200, height: 200, borderRadius: '50%', background: 'radial-gradient(circle, rgba(0,255,65,0.07) 0%, transparent 70%)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', bottom: -30, left: '35%', width: 160, height: 160, borderRadius: '50%', background: 'radial-gradient(circle, rgba(0,212,255,0.05) 0%, transparent 70%)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: 'linear-gradient(90deg, transparent, rgba(0,255,65,0.4), transparent)' }} />
+        {/* Scanlines */}
+        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 3px)' }} />
+        {/* Neon glows */}
+        <div style={{ position: 'absolute', top: -60, right: -40, width: 300, height: 300, borderRadius: '50%', background: 'radial-gradient(circle, rgba(0,255,65,0.12) 0%, transparent 65%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', bottom: -40, left: '30%', width: 240, height: 240, borderRadius: '50%', background: 'radial-gradient(circle, rgba(0,212,255,0.08) 0%, transparent 65%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', top: -20, left: -40, width: 200, height: 200, borderRadius: '50%', background: 'radial-gradient(circle, rgba(150,80,255,0.06) 0%, transparent 65%)', pointerEvents: 'none' }} />
+        {/* Top accent line */}
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, transparent 0%, #00ff41 30%, #00d4ff 60%, transparent 100%)' }} />
 
         <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
           <div>

@@ -8,7 +8,11 @@ const auth = require('../middlewares/auth');
 const admin = require('../middlewares/admin');
 const requireSubscription = require('../middlewares/subscription');
 const { addXp } = require('../utils/xp');
-const { imageUpload, fileUpload, processImageUpload, processFileUpload, getFileUrl } = require('../config/storage');
+const { imageUpload, fileUpload, processImageUpload, processFileUpload, getFileUrl, useR2, r2Client } = require('../config/storage');
+const { PutObjectCommand } = require('@aws-sdk/client-s3');
+const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
+const { v4: uuidv4 } = require('uuid');
+const path = require('path');
 
 const upload = fileUpload();
 const uploadImage = imageUpload();
@@ -292,6 +296,32 @@ router.delete('/:id/reviews/:reviewId', auth, async (req, res) => {
 });
 
 // ────────────────────────── FILE UPLOADS ──────────────────────────
+
+// POST /api/content/presign-upload — gera URL assinada para upload direto no R2
+router.post('/presign-upload', auth, admin, async (req, res) => {
+  if (!useR2 || !r2Client) {
+    return res.status(400).json({ message: 'Cloudflare R2 não configurado. Configure as variáveis R2_* no servidor.' });
+  }
+  try {
+    const { filename, contentType } = req.body;
+    const ext = path.extname(filename || '').toLowerCase() || '.bin';
+    const fileKey = `files/${uuidv4()}${ext}`;
+
+    const command = new PutObjectCommand({
+      Bucket: process.env.R2_BUCKET_NAME,
+      Key: fileKey,
+      ContentType: contentType || 'application/octet-stream',
+    });
+
+    const uploadUrl = await getSignedUrl(r2Client, command, { expiresIn: 3600 });
+    const publicUrl = `${process.env.R2_PUBLIC_URL}/${fileKey}`;
+
+    res.json({ uploadUrl, fileKey, publicUrl });
+  } catch (error) {
+    console.error('Presign error:', error);
+    res.status(500).json({ message: 'Erro ao gerar URL de upload.' });
+  }
+});
 
 // POST /api/content/upload
 router.post('/upload', auth, admin, upload.single('file'), async (req, res) => {

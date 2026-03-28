@@ -75,12 +75,11 @@ export default function ContentCard({ content, subscription, onDownload, onOpenM
       if (externalLink) {
         window.open(externalLink, '_blank', 'noopener,noreferrer');
       } else if (fileUrl) {
-        const a = document.createElement('a');
-        a.href = fileUrl;
-        a.download = content.title;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+        if (fileUrl.includes('localhost') || fileUrl.includes('127.0.0.1')) {
+          setDownloadError('Arquivo não disponível. O admin precisa fazer re-upload do arquivo.');
+          return;
+        }
+        window.open(fileUrl, '_blank', 'noopener,noreferrer');
       }
 
       onDownload?.();

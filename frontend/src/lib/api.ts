@@ -69,6 +69,8 @@ export const contentApi = {
   update: (id: string, data: object) => api.put(`/content/${id}`, data),
   remove: (id: string) => api.delete(`/content/${id}`),
   download: (id: string) => api.post(`/content/${id}/download`),
+  presignUpload: (filename: string, contentType: string) =>
+    api.post('/content/presign-upload', { filename, contentType }),
   upload: (formData: FormData, onProgress?: (percent: number) => void) =>
     api.post('/content/upload', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },

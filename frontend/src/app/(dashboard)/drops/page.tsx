@@ -59,12 +59,8 @@ function DropCard({ drop }: { drop: Content }) {
       if (externalLink) {
         window.open(externalLink, '_blank', 'noopener,noreferrer');
       } else if (fileUrl) {
-        const a = document.createElement('a');
-        a.href = fileUrl;
-        a.download = drop.title;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+        if (fileUrl.includes('localhost') || fileUrl.includes('127.0.0.1')) return;
+        window.open(fileUrl, '_blank', 'noopener,noreferrer');
       }
     } catch (err) {
       console.error('Download error:', err);
@@ -178,11 +174,11 @@ export default function DropsPage() {
     <div className="max-w-7xl mx-auto">
       {/* Visual Banner */}
       <div style={{
-        marginBottom: 22, borderRadius: 8, overflow: 'hidden', position: 'relative', height: 190,
-        background: 'url(https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1400&q=80) center/cover no-repeat',
-        border: '1px solid rgba(255,204,0,0.2)',
+        marginBottom: 22, borderRadius: 8, overflow: 'hidden', position: 'relative', height: 220,
+        background: 'url(https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1600&q=85) center/cover no-repeat',
+        border: '1px solid rgba(255,204,0,0.22)',
       }}>
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, rgba(15,10,0,0.94) 0%, rgba(30,20,0,0.85) 60%, rgba(0,0,0,0.5) 100%)' }} />
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, rgba(15,10,0,0.80) 0%, rgba(30,20,0,0.60) 55%, rgba(0,0,0,0.25) 100%)' }} />
         <div style={{ position: 'absolute', inset: 0, backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(255,204,0,0.015) 3px, rgba(255,204,0,0.015) 4px)', pointerEvents: 'none' }} />
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: 'linear-gradient(90deg, transparent, rgba(255,204,0,0.5), transparent)' }} />
         <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', padding: '0 28px', gap: 14 }}>

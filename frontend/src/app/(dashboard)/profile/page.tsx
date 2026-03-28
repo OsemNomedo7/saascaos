@@ -190,12 +190,12 @@ export default function ProfilePage() {
       <div style={{ marginBottom: 20, borderRadius: 8, overflow: 'hidden', border: '1px solid rgba(0,255,65,0.15)', position: 'relative' }}>
         {/* Banner */}
         <div style={{
-          height: 140,
+          height: 200,
           background: bannerPreview
             ? `url(${bannerPreview}) center/cover no-repeat`
             : user.bannerUrl
               ? `url(${user.bannerUrl}) center/cover no-repeat`
-              : 'linear-gradient(135deg, rgba(0,255,65,0.08) 0%, rgba(0,212,255,0.06) 50%, rgba(0,0,0,0) 100%)',
+              : 'linear-gradient(135deg, rgba(0,30,15,0.9) 0%, rgba(0,20,35,0.85) 50%, rgba(10,5,30,0.9) 100%), url(https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80) center/cover no-repeat',
           position: 'relative',
           overflow: 'hidden',
         }}>
@@ -243,24 +243,19 @@ export default function ProfilePage() {
             <div style={{ position: 'relative' }}>
               <div style={{
                 width: 72, height: 72,
-                background: 'rgba(0,255,65,0.08)',
+                background: avatarPreview
+                  ? `url(${avatarPreview}) center top / cover no-repeat`
+                  : user.avatar
+                    ? `url(${user.avatar}) center top / cover no-repeat, rgba(0,255,65,0.08)`
+                    : 'rgba(0,255,65,0.08)',
                 border: `2px solid ${levelInfo.color}`,
                 boxShadow: `0 0 12px ${levelInfo.color}44`,
                 borderRadius: '50%',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontSize: '1.4rem', fontWeight: 700, color: '#00ff41',
-                overflow: 'hidden',
                 flexShrink: 0,
               }}>
-                {avatarPreview ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={avatarPreview} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top', display: 'block' }} />
-                ) : user.avatar && !avatarImgError ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={user.avatar} alt={user.name} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top', display: 'block' }} onError={() => setAvatarImgError(true)} />
-                ) : (
-                  getInitials(user.name)
-                )}
+                {!avatarPreview && !user.avatar && getInitials(user.name)}
               </div>
               {/* Avatar upload overlay */}
               {isEditing && (

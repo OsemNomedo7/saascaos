@@ -86,11 +86,11 @@ export default function ContentPage() {
         borderRadius: 8,
         overflow: 'hidden',
         position: 'relative',
-        height: 190,
-        background: 'url(https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1400&q=80) center/cover no-repeat',
-        border: '1px solid rgba(0,212,255,0.2)',
+        height: 220,
+        background: 'url(https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1600&q=85) center/cover no-repeat',
+        border: '1px solid rgba(0,212,255,0.22)',
       }}>
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, rgba(0,8,20,0.93) 0%, rgba(0,20,35,0.8) 60%, rgba(0,0,0,0.5) 100%)' }} />
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, rgba(0,8,20,0.82) 0%, rgba(0,20,35,0.6) 55%, rgba(0,0,0,0.25) 100%)' }} />
         <div style={{ position: 'absolute', inset: 0, backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,212,255,0.015) 3px, rgba(0,212,255,0.015) 4px)', pointerEvents: 'none' }} />
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.5), transparent)' }} />
         <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', padding: '0 28px', gap: 16 }}>

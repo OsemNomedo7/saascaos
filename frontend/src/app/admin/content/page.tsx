@@ -315,17 +315,51 @@ export default function AdminContentPage() {
       setIsUploading(true);
       setUploadProgress(0);
       try {
-        const formData = new FormData();
-        formData.append('file', selectedFile);
-        const uploadRes = await contentApi.upload(formData, setUploadProgress);
-        filePayload = {
-          fileUrl: uploadRes.data.fileUrl,
-          fileKey: uploadRes.data.fileKey,
-          fileSize: uploadRes.data.fileSize,
-          mimeType: uploadRes.data.mimeType,
-        };
+        // Tenta upload direto no R2 via presigned URL (sem passar pelo servidor)
+        let presignOk = false;
+        try {
+          const presignRes = await contentApi.presignUpload(
+            selectedFile.name,
+            selectedFile.type || 'application/octet-stream'
+          );
+          const { uploadUrl, fileKey, publicUrl } = presignRes.data;
+
+          await new Promise<void>((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.upload.onprogress = (e) => {
+              if (e.total) setUploadProgress(Math.round((e.loaded * 100) / e.total));
+            };
+            xhr.onload = () => {
+              if (xhr.status >= 200 && xhr.status < 300) resolve();
+              else reject(new Error(`R2 retornou ${xhr.status}`));
+            };
+            xhr.onerror = () => reject(new Error('Erro de rede'));
+            xhr.open('PUT', uploadUrl);
+            xhr.setRequestHeader('Content-Type', selectedFile.type || 'application/octet-stream');
+            xhr.send(selectedFile);
+          });
+
+          filePayload = { fileUrl: publicUrl, fileKey, fileSize: selectedFile.size, mimeType: selectedFile.type };
+          presignOk = true;
+        } catch (presignErr) {
+          console.warn('[upload] Presign falhou, tentando via servidor:', presignErr);
+        }
+
+        // Fallback: upload via servidor (para quando R2 não está configurado)
+        if (!presignOk) {
+          setUploadProgress(0);
+          const formData = new FormData();
+          formData.append('file', selectedFile);
+          const uploadRes = await contentApi.upload(formData, setUploadProgress);
+          filePayload = {
+            fileUrl: uploadRes.data.fileUrl,
+            fileKey: uploadRes.data.fileKey,
+            fileSize: uploadRes.data.fileSize,
+            mimeType: uploadRes.data.mimeType,
+          };
+        }
       } catch {
-        setUploadError('Falha no upload do arquivo. Verifique o tamanho e tente novamente.');
+        setUploadError('Falha no upload. Verifique se o R2 está configurado ou tente um arquivo menor.');
         setIsUploading(false);
         return;
       }

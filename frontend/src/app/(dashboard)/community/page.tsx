@@ -247,11 +247,11 @@ export default function CommunityPage() {
     <div className="max-w-3xl mx-auto">
       {/* Visual Banner */}
       <div style={{
-        marginBottom: 22, borderRadius: 8, overflow: 'hidden', position: 'relative', height: 190,
-        background: 'url(https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1400&q=80) center/cover no-repeat',
-        border: '1px solid rgba(0,255,65,0.2)',
+        marginBottom: 22, borderRadius: 8, overflow: 'hidden', position: 'relative', height: 220,
+        background: 'url(https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1600&q=85) center/cover no-repeat',
+        border: '1px solid rgba(0,255,65,0.22)',
       }}>
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, rgba(0,8,5,0.94) 0%, rgba(0,20,12,0.85) 60%, rgba(0,0,0,0.5) 100%)' }} />
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, rgba(0,8,5,0.80) 0%, rgba(0,20,12,0.60) 55%, rgba(0,0,0,0.25) 100%)' }} />
         <div style={{ position: 'absolute', inset: 0, backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,255,65,0.015) 3px, rgba(0,255,65,0.015) 4px)', pointerEvents: 'none' }} />
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: 'linear-gradient(90deg, transparent, rgba(0,255,65,0.5), transparent)' }} />
         <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 28px', gap: 14 }}>

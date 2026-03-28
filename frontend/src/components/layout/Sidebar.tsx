@@ -228,7 +228,9 @@ export default function Sidebar() {
           onMouseOut={e => (e.currentTarget.style.background = 'transparent')}>
           <div style={{
             width: 30, height: 30,
-            background: 'rgba(0,120,255,0.1)',
+            background: user?.avatar
+              ? `url(${user.avatar}) center top / cover no-repeat, rgba(0,120,255,0.1)`
+              : 'rgba(0,120,255,0.1)',
             border: '1px solid rgba(0,120,255,0.25)',
             borderRadius: '50%',
             display: 'flex',
@@ -238,14 +240,8 @@ export default function Sidebar() {
             fontWeight: 700,
             color: '#0096ff',
             flexShrink: 0,
-            overflow: 'hidden',
           }}>
-            {user?.avatar && !avatarImgError ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={user.avatar} alt={user.name} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top' }} onError={() => setAvatarImgError(true)} />
-            ) : (
-              getInitials(user?.name || 'U')
-            )}
+            {!user?.avatar && getInitials(user?.name || 'U')}
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <p style={{

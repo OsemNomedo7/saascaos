@@ -208,4 +208,5 @@ module.exports = {
   getFileUrl,
   useCloudinary,
   useR2,
+  r2Client,
 };
