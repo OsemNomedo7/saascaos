@@ -304,9 +304,16 @@ export default function ProfilePage() {
 
             <div style={{ paddingBottom: 4 }}>
               {avatarUploadError && (
-                <p style={{ fontSize: '0.62rem', color: '#ff4060', fontFamily: 'JetBrains Mono, monospace', marginBottom: 4, maxWidth: 200 }}>
-                  {avatarUploadError}
-                </p>
+                <div style={{
+                  fontSize: '0.65rem', color: '#ff4060',
+                  fontFamily: 'JetBrains Mono, monospace',
+                  background: 'rgba(255,40,60,0.1)',
+                  border: '1px solid rgba(255,40,60,0.3)',
+                  borderRadius: 4, padding: '4px 8px',
+                  marginBottom: 4, maxWidth: 240,
+                }}>
+                  ✗ {avatarUploadError}
+                </div>
               )}
               {isEditing ? (
                 <input

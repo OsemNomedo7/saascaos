@@ -75,11 +75,14 @@ export default function ContentCard({ content, subscription, onDownload, onOpenM
       if (externalLink) {
         window.open(externalLink, '_blank', 'noopener,noreferrer');
       } else if (fileUrl) {
-        if (fileUrl.includes('localhost') || fileUrl.includes('127.0.0.1')) {
-          setDownloadError('Arquivo não disponível. O admin precisa fazer re-upload do arquivo.');
-          return;
+        // Se a URL está apontando para localhost, redireciona para o backend real
+        let downloadUrl = fileUrl;
+        if (/https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?/.test(fileUrl)) {
+          const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+          const backendBase = apiBase.replace(/\/api\/?$/, '');
+          downloadUrl = fileUrl.replace(/https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?/, backendBase);
         }
-        window.open(fileUrl, '_blank', 'noopener,noreferrer');
+        window.open(downloadUrl, '_blank', 'noopener,noreferrer');
       }
 
       onDownload?.();
