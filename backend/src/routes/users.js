@@ -5,7 +5,7 @@ const User = require('../models/User');
 const Log = require('../models/Log');
 const auth = require('../middlewares/auth');
 const admin = require('../middlewares/admin');
-const { imageUpload, getFileUrl } = require('../config/cloudinary');
+const { imageUpload, getFileUrl } = require('../config/storage');
 
 const uploadImage = imageUpload();
 

@@ -8,7 +8,7 @@ const auth = require('../middlewares/auth');
 const admin = require('../middlewares/admin');
 const requireSubscription = require('../middlewares/subscription');
 const { addXp } = require('../utils/xp');
-const { imageUpload, fileUpload, getFileUrl } = require('../config/cloudinary');
+const { imageUpload, fileUpload, getFileUrl } = require('../config/storage');
 
 const upload = fileUpload();
 const uploadImage = imageUpload();
