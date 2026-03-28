@@ -68,7 +68,7 @@ export default function AdminAffiliatesPage() {
       {/* Header */}
       <div style={{ marginBottom: 24 }}>
         <h1 style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '1rem', fontWeight: 700, color: '#ff4400', letterSpacing: '0.1em', margin: '0 0 4px' }}>
-          // AFILIADOS
+          {'// AFILIADOS'}
         </h1>
         <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.65rem', color: '#3a1800' }}>
           Gerencie afiliados, comissões e saques
