@@ -133,6 +133,38 @@ export const adminApi = {
   revenue: () => api.get('/admin/revenue'),
 };
 
+export const notificationsApi = {
+  list: () => api.get('/notifications'),
+  markRead: (id: string) => api.post(`/notifications/${id}/read`),
+  markAllRead: () => api.post('/notifications/read-all'),
+  delete: (id: string) => api.delete(`/notifications/${id}`),
+};
+
+export const favoritesApi = {
+  ids: () => api.get('/users/me/favorites/ids'),
+  list: () => api.get('/users/me/favorites'),
+  add: (contentId: string) => api.post(`/users/me/favorites/${contentId}`),
+  remove: (contentId: string) => api.delete(`/users/me/favorites/${contentId}`),
+};
+
+export const downloadsApi = {
+  history: () => api.get('/users/me/downloads'),
+};
+
+export const profileApi = {
+  update: (data: object) => api.put('/users/me/profile', data),
+  publicProfile: (userId: string) => api.get(`/users/${userId}/public`),
+};
+
+export const adminExtApi = {
+  sendNotification: (data: object) => api.post('/admin/notify', data),
+  exportUsers: () => api.get('/admin/export/users', { responseType: 'blob' }),
+  coupons: () => api.get('/admin/coupons'),
+  createCoupon: (data: object) => api.post('/admin/coupons', data),
+  deleteCoupon: (id: string) => api.delete(`/admin/coupons/${id}`),
+  growth: () => api.get('/admin/stats/growth'),
+};
+
 export const searchApi = {
   search: (params: Record<string, unknown>) => api.get('/search', { params }),
 };

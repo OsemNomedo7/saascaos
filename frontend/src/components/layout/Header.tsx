@@ -2,10 +2,11 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, Bell, X, Menu, Terminal } from 'lucide-react';
+import { Search, X, Menu, Terminal, Command } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { searchApi } from '@/lib/api';
-import { getInitials, formatRelativeDate, truncateText } from '@/lib/utils';
+import { getInitials, truncateText } from '@/lib/utils';
+import { NotificationBell } from '@/components/notifications/NotificationBell';
 import type { Content } from '@/types';
 
 interface HeaderProps {
@@ -121,7 +122,7 @@ export default function Header({ onMenuToggle }: HeaderProps) {
                 background: 'rgba(5,10,5,0.6)',
                 border: '1px solid rgba(0,255,65,0.15)',
                 borderRadius: 4,
-                padding: '7px 32px 7px 34px',
+                padding: '7px 80px 7px 34px',
                 fontSize: '0.78rem',
                 color: '#a0c8a8',
                 fontFamily: 'JetBrains Mono, monospace',
@@ -138,6 +139,16 @@ export default function Header({ onMenuToggle }: HeaderProps) {
                 e.currentTarget.style.boxShadow = 'none';
               }}
             />
+            {/* Ctrl+K hint */}
+            <div style={{
+              position: 'absolute', right: searchQuery ? 30 : 10, top: '50%',
+              transform: 'translateY(-50%)',
+              display: 'flex', alignItems: 'center', gap: 2,
+              opacity: 0.4, pointerEvents: 'none',
+            }}>
+              <Command style={{ width: 10, height: 10, color: '#2a4d30' }} />
+              <span style={{ fontSize: '0.58rem', color: '#2a4d30', fontFamily: 'JetBrains Mono, monospace' }}>K</span>
+            </div>
             {searchQuery && (
               <button type="button" onClick={clearSearch}
                 style={{
@@ -191,7 +202,6 @@ export default function Header({ onMenuToggle }: HeaderProps) {
                       borderBottom: '1px solid rgba(0,255,65,0.06)',
                       background: 'none', border: 'none', cursor: 'pointer',
                       transition: 'background 0.15s',
-                      borderBottomStyle: 'solid',
                     }}
                     onMouseOver={e => (e.currentTarget.style.background = 'rgba(0,255,65,0.04)')}
                     onMouseOut={e => (e.currentTarget.style.background = 'none')}
@@ -254,22 +264,8 @@ export default function Header({ onMenuToggle }: HeaderProps) {
           <div style={{ width: 4, height: 4, borderRadius: '50%', background: '#00ff41', boxShadow: '0 0 5px #00ff41' }} />
         </div>
 
-        {/* Notifications */}
-        <button style={{
-          position: 'relative', padding: 7,
-          color: '#2a4d30', background: 'none', border: 'none',
-          cursor: 'pointer', transition: 'color 0.15s', borderRadius: 4,
-        }}
-          onMouseOver={e => (e.currentTarget.style.color = '#00ff41')}
-          onMouseOut={e => (e.currentTarget.style.color = '#2a4d30')}
-        >
-          <Bell className="w-4 h-4" />
-          <span style={{
-            position: 'absolute', top: 6, right: 6,
-            width: 5, height: 5, borderRadius: '50%',
-            background: '#00ff41', boxShadow: '0 0 6px #00ff41',
-          }} />
-        </button>
+        {/* NotificationBell */}
+        <NotificationBell />
 
         {/* User */}
         <div style={{

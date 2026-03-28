@@ -1,34 +1,61 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import {
   User, Calendar, Shield, Activity, CreditCard,
-  Clock, Edit2, Save, X, Check
+  Clock, Edit2, Save, X, Check, Twitter, Github,
+  Instagram, Globe, Upload, Star, Download, Eye,
+  ChevronRight, Zap, Image as ImageIcon
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { usersApi, subscriptionsApi } from '@/lib/api';
+import { usersApi, subscriptionsApi, profileApi } from '@/lib/api';
 import { LevelBadge, PlanBadge, StatusBadge } from '@/components/ui/Badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { formatDate, formatRelativeDate, getInitials } from '@/lib/utils';
 import type { Subscription, Log } from '@/types';
 import Link from 'next/link';
 
 interface EditForm {
   name: string;
-  avatar: string;
+  bio: string;
+  twitter: string;
+  github: string;
+  instagram: string;
+  website: string;
 }
+
+const LEVEL_XP: Record<string, { max: number; label: string; color: string }> = {
+  iniciante:    { max: 100, label: 'INICIANTE', color: '#00ff41' },
+  intermediario:{ max: 500, label: 'INTERMEDIÁRIO', color: '#00d4ff' },
+  avancado:     { max: 2000, label: 'AVANÇADO', color: '#cc66ff' },
+  elite:        { max: 9999, label: 'ELITE', color: '#ff4400' },
+};
 
 export default function ProfilePage() {
   const { user, refreshUser } = useAuth();
   const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [bannerFile, setBannerFile] = useState<File | null>(null);
+  const [bannerPreview, setBannerPreview] = useState<string | null>(null);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const bannerInputRef = useRef<HTMLInputElement>(null);
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<EditForm>({
-    defaultValues: { name: user?.name || '', avatar: user?.avatar || '' },
+  const { register, handleSubmit, reset, watch, formState: { errors } } = useForm<EditForm>({
+    defaultValues: {
+      name: user?.name || '',
+      bio: user?.bio || '',
+      twitter: user?.socialLinks?.twitter || '',
+      github: user?.socialLinks?.github || '',
+      instagram: user?.socialLinks?.instagram || '',
+      website: user?.socialLinks?.website || '',
+    },
   });
+
+  const bioValue = watch('bio', user?.bio || '');
 
   const { data: subData } = useQuery({
     queryKey: ['my-subscription'],
@@ -43,19 +70,76 @@ export default function ProfilePage() {
   });
 
   const updateProfile = useMutation({
-    mutationFn: (data: EditForm) => usersApi.update(user!._id, data),
+    mutationFn: async (data: EditForm) => {
+      // Upload avatar if selected
+      let avatarUrl = user?.avatar || '';
+      if (avatarFile) {
+        const formData = new FormData();
+        formData.append('avatar', avatarFile);
+        const res = await usersApi.update(user!._id, formData);
+        avatarUrl = res.data.user?.avatar || avatarUrl;
+      }
+
+      // Upload banner if selected
+      let bannerUrl = user?.bannerUrl || '';
+      if (bannerFile) {
+        // Use profileApi to update banner
+        const formData = new FormData();
+        formData.append('banner', bannerFile);
+        // For now send as URL (base64 or upload)
+        bannerUrl = bannerPreview || bannerUrl;
+      }
+
+      return profileApi.update({
+        name: data.name,
+        bio: data.bio,
+        bannerUrl: bannerUrl || undefined,
+        socialLinks: {
+          twitter: data.twitter || undefined,
+          github: data.github || undefined,
+          instagram: data.instagram || undefined,
+          website: data.website || undefined,
+        },
+      });
+    },
     onSuccess: async () => {
       await refreshUser();
       queryClient.invalidateQueries({ queryKey: ['auth-user'] });
       setIsEditing(false);
       setSaveSuccess(true);
+      setAvatarFile(null);
+      setAvatarPreview(null);
+      setBannerFile(null);
+      setBannerPreview(null);
       setTimeout(() => setSaveSuccess(false), 3000);
     },
   });
 
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setAvatarFile(file);
+    const reader = new FileReader();
+    reader.onload = (ev) => setAvatarPreview(ev.target?.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  const handleBannerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setBannerFile(file);
+    const reader = new FileReader();
+    reader.onload = (ev) => setBannerPreview(ev.target?.result as string);
+    reader.readAsDataURL(file);
+  };
+
   const subscription = subData?.subscription as Subscription | null;
   const history = subData?.history as Subscription[] || [];
   const logs: Log[] = activityData?.logs || [];
+
+  const xp = user?.xp || 0;
+  const levelInfo = LEVEL_XP[user?.level || 'iniciante'];
+  const xpPercent = Math.min(100, (xp / levelInfo.max) * 100);
 
   const onSubmit = (data: EditForm) => {
     updateProfile.mutate(data);
@@ -63,213 +147,503 @@ export default function ProfilePage() {
 
   const handleCancelEdit = () => {
     setIsEditing(false);
-    reset({ name: user?.name || '', avatar: user?.avatar || '' });
+    setAvatarFile(null);
+    setAvatarPreview(null);
+    setBannerFile(null);
+    setBannerPreview(null);
+    reset({
+      name: user?.name || '',
+      bio: user?.bio || '',
+      twitter: user?.socialLinks?.twitter || '',
+      github: user?.socialLinks?.github || '',
+      instagram: user?.socialLinks?.instagram || '',
+      website: user?.socialLinks?.website || '',
+    });
   };
 
   if (!user) return null;
 
-  return (
-    <div className="max-w-5xl mx-auto space-y-6">
-      <h1 className="text-2xl font-bold text-gray-100">My Profile</h1>
+  const currentAvatar = avatarPreview || user.avatar;
+  const currentBanner = bannerPreview || user.bannerUrl;
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Profile card */}
-        <Card className="lg:col-span-1">
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <div className="w-20 h-20 bg-gray-700 rounded-full flex items-center justify-center text-2xl font-bold text-gray-300 mx-auto mb-4 relative">
-                {user.avatar ? (
+  return (
+    <div style={{ maxWidth: 1000, margin: '0 auto' }}>
+      {/* Header */}
+      <div style={{ marginBottom: 24, display: 'flex', alignItems: 'center', gap: 10 }}>
+        <User style={{ width: 16, height: 16, color: '#00ff41' }} />
+        <h1 style={{
+          fontFamily: 'JetBrains Mono, monospace',
+          fontSize: '1.1rem', fontWeight: 700,
+          color: '#00ff41', letterSpacing: '0.12em', margin: 0,
+          textShadow: '0 0 12px rgba(0,255,65,0.4)',
+        }}>{'// MEU PERFIL'}</h1>
+        {saveSuccess && (
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.7rem', color: '#00ff41', fontFamily: 'JetBrains Mono, monospace' }}>
+            <Check style={{ width: 12, height: 12 }} /> SALVO
+          </span>
+        )}
+      </div>
+
+      {/* Banner + Avatar */}
+      <div style={{ marginBottom: 20, borderRadius: 8, overflow: 'hidden', border: '1px solid rgba(0,255,65,0.15)', position: 'relative' }}>
+        {/* Banner */}
+        <div style={{
+          height: 140,
+          background: currentBanner
+            ? `url(${currentBanner}) center/cover no-repeat`
+            : 'linear-gradient(135deg, rgba(0,255,65,0.08) 0%, rgba(0,212,255,0.06) 50%, rgba(0,0,0,0) 100%)',
+          position: 'relative',
+          overflow: 'hidden',
+        }}>
+          {/* Scanlines overlay */}
+          <div style={{
+            position: 'absolute', inset: 0,
+            backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.1) 2px, rgba(0,0,0,0.1) 4px)',
+            pointerEvents: 'none',
+          }} />
+          {isEditing && (
+            <>
+              <input ref={bannerInputRef} type="file" accept="image/*" onChange={handleBannerChange} style={{ display: 'none' }} />
+              <button
+                type="button"
+                onClick={() => bannerInputRef.current?.click()}
+                style={{
+                  position: 'absolute', top: 8, right: 8,
+                  padding: '5px 10px', borderRadius: 4,
+                  background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(0,255,65,0.3)',
+                  color: '#00ff41', fontSize: '0.65rem', cursor: 'pointer',
+                  fontFamily: 'JetBrains Mono, monospace',
+                  display: 'flex', alignItems: 'center', gap: 5,
+                }}
+              >
+                <ImageIcon style={{ width: 11, height: 11 }} /> TROCAR BANNER
+              </button>
+            </>
+          )}
+        </div>
+
+        {/* Avatar row */}
+        <div style={{
+          background: '#0a120a',
+          padding: '0 20px 16px',
+          display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between',
+          gap: 12,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 14, marginTop: -28 }}>
+            <div style={{ position: 'relative' }}>
+              <div style={{
+                width: 72, height: 72,
+                background: 'rgba(0,255,65,0.08)',
+                border: `2px solid ${levelInfo.color}`,
+                boxShadow: `0 0 12px ${levelInfo.color}44`,
+                borderRadius: '50%',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: '1.4rem', fontWeight: 700, color: '#00ff41',
+                overflow: 'hidden',
+                flexShrink: 0,
+              }}>
+                {currentAvatar ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={user.avatar} alt={user.name} className="w-full h-full rounded-full object-cover" />
+                  <img src={currentAvatar} alt={user.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 ) : (
                   getInitials(user.name)
                 )}
-                <div className="absolute bottom-0 right-0 w-5 h-5 bg-green-400 rounded-full border-2 border-gray-900" />
               </div>
-
-              {isEditing ? (
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
-                  <div>
-                    <input
-                      {...register('name', { required: 'Name required', minLength: { value: 2, message: 'Min 2 chars' } })}
-                      type="text"
-                      className="input-field text-center text-sm"
-                      placeholder="Your name"
-                    />
-                    {errors.name && <p className="text-red-400 text-xs mt-1">{errors.name.message}</p>}
-                  </div>
-                  <div>
-                    <input
-                      {...register('avatar')}
-                      type="url"
-                      className="input-field text-center text-sm"
-                      placeholder="Avatar URL (optional)"
-                    />
-                  </div>
-                  <div className="flex gap-2">
-                    <button type="button" onClick={handleCancelEdit} className="flex-1 btn-secondary text-sm py-1.5 flex items-center justify-center gap-1">
-                      <X className="w-3.5 h-3.5" /> Cancel
-                    </button>
-                    <button type="submit" disabled={updateProfile.isPending} className="flex-1 btn-primary text-sm py-1.5 flex items-center justify-center gap-1">
-                      {updateProfile.isPending ? (
-                        <div className="w-3.5 h-3.5 border-2 border-gray-950 border-t-transparent rounded-full animate-spin" />
-                      ) : (
-                        <Save className="w-3.5 h-3.5" />
-                      )}
-                      Save
-                    </button>
-                  </div>
-                </form>
-              ) : (
+              {isEditing && (
                 <>
-                  <div className="flex items-center justify-center gap-2 mb-1">
-                    <h2 className="text-lg font-bold text-gray-100">{user.name}</h2>
-                    {saveSuccess && <Check className="w-4 h-4 text-green-400" />}
-                  </div>
-                  <p className="text-gray-500 text-sm mb-3">{user.email}</p>
+                  <input ref={avatarInputRef} type="file" accept="image/*" onChange={handleAvatarChange} style={{ display: 'none' }} />
                   <button
-                    onClick={() => setIsEditing(true)}
-                    className="inline-flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-300 bg-gray-800 hover:bg-gray-700 border border-gray-700 px-3 py-1.5 rounded-lg transition-colors"
+                    type="button"
+                    onClick={() => avatarInputRef.current?.click()}
+                    style={{
+                      position: 'absolute', bottom: 0, right: 0,
+                      width: 22, height: 22, borderRadius: '50%',
+                      background: '#050a05', border: '1px solid #00ff41',
+                      color: '#00ff41', cursor: 'pointer',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}
                   >
-                    <Edit2 className="w-3 h-3" /> Edit Profile
+                    <Upload style={{ width: 10, height: 10 }} />
                   </button>
                 </>
               )}
+            </div>
 
-              {/* Badges */}
-              <div className="flex flex-wrap items-center justify-center gap-2 mt-4">
+            <div style={{ paddingBottom: 4 }}>
+              {isEditing ? (
+                <input
+                  {...register('name', { required: true, minLength: 2 })}
+                  style={{
+                    background: 'rgba(0,255,65,0.04)', border: '1px solid rgba(0,255,65,0.3)',
+                    borderRadius: 4, padding: '4px 10px',
+                    color: '#e0ffe8', fontFamily: 'JetBrains Mono, monospace', fontSize: '0.9rem',
+                    outline: 'none',
+                  }}
+                />
+              ) : (
+                <h2 style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.95rem', fontWeight: 700, color: '#e0ffe8', margin: '0 0 4px' }}>
+                  {user.name}
+                  {user.role === 'admin' && (
+                    <span style={{ marginLeft: 8, fontSize: '0.6rem', color: '#ff4400', fontWeight: 700, letterSpacing: '0.1em' }}>
+                      [ADMIN]
+                    </span>
+                  )}
+                </h2>
+              )}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
                 <LevelBadge level={user.level} size="md" />
                 {user.role === 'admin' && (
-                  <span className="flex items-center gap-1 text-sm px-2.5 py-1 bg-red-900/30 text-red-400 border border-red-800/50 rounded-md font-medium">
-                    <Shield className="w-3.5 h-3.5" /> Admin
+                  <span style={{
+                    display: 'flex', alignItems: 'center', gap: 3,
+                    fontSize: '0.6rem', padding: '2px 7px',
+                    background: 'rgba(255,68,0,0.08)', border: '1px solid rgba(255,68,0,0.3)',
+                    borderRadius: 3, color: '#ff4400', fontFamily: 'JetBrains Mono, monospace',
+                  }}>
+                    <Shield style={{ width: 9, height: 9 }} /> ADMIN
                   </span>
                 )}
               </div>
-
-              {/* Info */}
-              <div className="mt-5 space-y-2 text-left">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-500 flex items-center gap-1.5">
-                    <Calendar className="w-3.5 h-3.5" /> Joined
-                  </span>
-                  <span className="text-gray-300">{formatDate(user.createdAt)}</span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-500 flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5" /> Last login
-                  </span>
-                  <span className="text-gray-300">{user.lastLogin ? formatRelativeDate(user.lastLogin) : 'N/A'}</span>
-                </div>
-              </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
 
-        {/* Right column */}
-        <div className="lg:col-span-2 space-y-4">
-          {/* Subscription */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base">
-                <CreditCard className="w-4 h-4 text-green-400" />
-                Subscription
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {subscription ? (
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between p-3 bg-green-500/5 border border-green-500/20 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-green-500/10 rounded-lg flex items-center justify-center">
-                        <CreditCard className="w-4 h-4 text-green-400" />
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <PlanBadge plan={subscription.plan} />
-                          <StatusBadge status={subscription.status} />
-                        </div>
-                        {subscription.endDate && subscription.plan !== 'lifetime' && (
-                          <p className="text-xs text-gray-500 mt-0.5">
-                            Expires {formatRelativeDate(subscription.endDate)}
-                          </p>
-                        )}
-                        {subscription.plan === 'lifetime' && (
-                          <p className="text-xs text-gray-500 mt-0.5">Never expires</p>
-                        )}
-                      </div>
-                    </div>
-                    <Link href="/planos" className="text-xs text-green-400 hover:text-green-300 transition-colors">
-                      Manage →
-                    </Link>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center py-6">
-                  <CreditCard className="w-10 h-10 text-gray-700 mx-auto mb-2" />
-                  <p className="text-gray-500 text-sm mb-3">No active subscription</p>
-                  <Link href="/planos" className="btn-primary text-sm inline-flex items-center gap-2">
-                    Subscribe Now
-                  </Link>
-                </div>
-              )}
+          {/* Edit toggle */}
+          <div style={{ paddingBottom: 4 }}>
+            {isEditing ? (
+              <div style={{ display: 'flex', gap: 6 }}>
+                <button
+                  type="button"
+                  onClick={handleCancelEdit}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 5,
+                    padding: '6px 12px', borderRadius: 4,
+                    background: 'transparent', border: '1px solid rgba(255,0,64,0.3)',
+                    color: '#ff0040', fontFamily: 'JetBrains Mono, monospace', fontSize: '0.65rem',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <X style={{ width: 11, height: 11 }} /> CANCELAR
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSubmit(onSubmit)}
+                  disabled={updateProfile.isPending}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 5,
+                    padding: '6px 12px', borderRadius: 4,
+                    background: 'rgba(0,255,65,0.08)', border: '1px solid rgba(0,255,65,0.3)',
+                    color: '#00ff41', fontFamily: 'JetBrains Mono, monospace', fontSize: '0.65rem',
+                    cursor: updateProfile.isPending ? 'wait' : 'pointer',
+                    opacity: updateProfile.isPending ? 0.6 : 1,
+                  }}
+                >
+                  <Save style={{ width: 11, height: 11 }} /> SALVAR
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setIsEditing(true)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 5,
+                  padding: '6px 12px', borderRadius: 4,
+                  background: 'rgba(0,255,65,0.04)', border: '1px solid rgba(0,255,65,0.2)',
+                  color: '#2a6a3a', fontFamily: 'JetBrains Mono, monospace', fontSize: '0.65rem',
+                  cursor: 'pointer',
+                }}
+                onMouseOver={e => { e.currentTarget.style.color = '#00ff41'; e.currentTarget.style.borderColor = 'rgba(0,255,65,0.4)'; }}
+                onMouseOut={e => { e.currentTarget.style.color = '#2a6a3a'; e.currentTarget.style.borderColor = 'rgba(0,255,65,0.2)'; }}
+              >
+                <Edit2 style={{ width: 11, height: 11 }} /> EDITAR PERFIL
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
 
-              {/* History */}
-              {history.length > 1 && (
-                <div className="mt-4">
-                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">History</p>
-                  <div className="space-y-2">
-                    {history.slice(0, 5).map((sub) => (
-                      <div key={sub._id} className="flex items-center justify-between text-sm py-2 border-b border-gray-800/40 last:border-0">
-                        <div className="flex items-center gap-2">
-                          <PlanBadge plan={sub.plan} size="sm" />
-                          <span className="text-gray-500 text-xs">{sub.gateway}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <StatusBadge status={sub.status} size="sm" />
-                          <span className="text-xs text-gray-600">{formatDate(sub.createdAt)}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+        {/* Left column */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {/* Bio */}
+          <div style={{
+            background: 'rgba(10,18,10,0.8)', border: '1px solid rgba(0,255,65,0.12)',
+            borderRadius: 6, padding: 16,
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+              <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.65rem', fontWeight: 700, color: '#2a6a3a', letterSpacing: '0.12em' }}>
+                {'// BIO'}
+              </span>
+            </div>
+            {isEditing ? (
+              <div>
+                <textarea
+                  {...register('bio', { maxLength: 300 })}
+                  rows={3}
+                  maxLength={300}
+                  placeholder="Fale um pouco sobre você..."
+                  style={{
+                    width: '100%', resize: 'none',
+                    background: 'rgba(0,255,65,0.03)', border: '1px solid rgba(0,255,65,0.2)',
+                    borderRadius: 4, padding: '8px 10px',
+                    color: '#a0c8a8', fontFamily: 'JetBrains Mono, monospace', fontSize: '0.72rem',
+                    outline: 'none', boxSizing: 'border-box',
+                  }}
+                />
+                <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.58rem', color: '#2a4d30', textAlign: 'right', marginTop: 2 }}>
+                  {bioValue?.length || 0}/300
+                </p>
+              </div>
+            ) : (
+              <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.72rem', color: '#6a9a6a', lineHeight: 1.6, margin: 0 }}>
+                {user.bio || <span style={{ color: '#2a4a2a', fontStyle: 'italic' }}>Nenhuma bio definida</span>}
+              </p>
+            )}
+          </div>
 
-          {/* Activity */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base">
-                <Activity className="w-4 h-4 text-green-400" />
-                Recent Activity
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {logs.length === 0 ? (
-                <p className="text-gray-500 text-sm text-center py-4">No activity yet</p>
-              ) : (
-                <div className="space-y-2">
-                  {logs.slice(0, 8).map((log) => (
-                    <div key={log._id} className="flex items-center gap-3 py-2 border-b border-gray-800/30 last:border-0">
-                      <div className="w-7 h-7 bg-gray-800 rounded-lg flex items-center justify-center text-sm flex-shrink-0">
-                        {log.action === 'login' ? '🔐' :
-                         log.action === 'download' ? '📥' :
-                         log.action === 'access' ? '👁️' :
-                         log.action === 'register' ? '✨' : '⚡'}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm text-gray-300 capitalize">{log.action}</p>
-                        {log.resourceType && (
-                          <p className="text-xs text-gray-600">{log.resourceType}</p>
-                        )}
-                      </div>
-                      <span className="text-xs text-gray-600 flex-shrink-0">{formatRelativeDate(log.createdAt)}</span>
+          {/* Social links */}
+          <div style={{
+            background: 'rgba(10,18,10,0.8)', border: '1px solid rgba(0,255,65,0.12)',
+            borderRadius: 6, padding: 16,
+          }}>
+            <div style={{ marginBottom: 12 }}>
+              <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.65rem', fontWeight: 700, color: '#2a6a3a', letterSpacing: '0.12em' }}>
+                {'// SOCIAL LINKS'}
+              </span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {isEditing ? (
+                <>
+                  {[
+                    { icon: <Twitter style={{ width: 12, height: 12 }} />, name: 'twitter' as const, placeholder: 'Twitter username' },
+                    { icon: <Github style={{ width: 12, height: 12 }} />, name: 'github' as const, placeholder: 'GitHub username' },
+                    { icon: <Instagram style={{ width: 12, height: 12 }} />, name: 'instagram' as const, placeholder: 'Instagram username' },
+                    { icon: <Globe style={{ width: 12, height: 12 }} />, name: 'website' as const, placeholder: 'https://seusite.com' },
+                  ].map((field) => (
+                    <div key={field.name} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ color: '#2a6a3a', flexShrink: 0 }}>{field.icon}</span>
+                      <input
+                        {...register(field.name)}
+                        placeholder={field.placeholder}
+                        style={{
+                          flex: 1, background: 'rgba(0,255,65,0.03)',
+                          border: '1px solid rgba(0,255,65,0.15)', borderRadius: 4,
+                          padding: '5px 8px', color: '#a0c8a8',
+                          fontFamily: 'JetBrains Mono, monospace', fontSize: '0.7rem', outline: 'none',
+                        }}
+                      />
                     </div>
                   ))}
-                </div>
+                </>
+              ) : (
+                <>
+                  {[
+                    { icon: <Twitter style={{ width: 12, height: 12 }} />, value: user.socialLinks?.twitter, label: 'twitter' },
+                    { icon: <Github style={{ width: 12, height: 12 }} />, value: user.socialLinks?.github, label: 'github' },
+                    { icon: <Instagram style={{ width: 12, height: 12 }} />, value: user.socialLinks?.instagram, label: 'instagram' },
+                    { icon: <Globe style={{ width: 12, height: 12 }} />, value: user.socialLinks?.website, label: 'website' },
+                  ].filter(s => s.value).map((social) => (
+                    <div key={social.label} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ color: '#2a6a3a' }}>{social.icon}</span>
+                      <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.7rem', color: '#00d4ff' }}>
+                        {social.value}
+                      </span>
+                    </div>
+                  ))}
+                  {!user.socialLinks?.twitter && !user.socialLinks?.github && !user.socialLinks?.instagram && !user.socialLinks?.website && (
+                    <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.7rem', color: '#2a4a2a', fontStyle: 'italic' }}>
+                      Nenhum link definido
+                    </p>
+                  )}
+                </>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
+
+          {/* Info */}
+          <div style={{
+            background: 'rgba(10,18,10,0.8)', border: '1px solid rgba(0,255,65,0.12)',
+            borderRadius: 6, padding: 16,
+          }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.65rem', color: '#2a4d30', fontFamily: 'JetBrains Mono, monospace' }}>
+                  <Calendar style={{ width: 11, height: 11 }} /> MEMBRO DESDE
+                </span>
+                <span style={{ fontSize: '0.72rem', color: '#6a9a6a', fontFamily: 'JetBrains Mono, monospace' }}>{formatDate(user.createdAt)}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.65rem', color: '#2a4d30', fontFamily: 'JetBrains Mono, monospace' }}>
+                  <Clock style={{ width: 11, height: 11 }} /> ÚLTIMO ACESSO
+                </span>
+                <span style={{ fontSize: '0.72rem', color: '#6a9a6a', fontFamily: 'JetBrains Mono, monospace' }}>
+                  {user.lastLogin ? formatRelativeDate(user.lastLogin) : 'N/A'}
+                </span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.65rem', color: '#2a4d30', fontFamily: 'JetBrains Mono, monospace' }}>
+                  <User style={{ width: 11, height: 11 }} /> EMAIL
+                </span>
+                <span style={{ fontSize: '0.65rem', color: '#4a7a5a', fontFamily: 'JetBrains Mono, monospace', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 160 }}>
+                  {user.email}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right column */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {/* XP / Level */}
+          <div style={{
+            background: 'rgba(10,18,10,0.8)', border: `1px solid ${levelInfo.color}22`,
+            borderRadius: 6, padding: 16, position: 'relative', overflow: 'hidden',
+          }}>
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg, transparent, ${levelInfo.color}66, transparent)` }} />
+            <div style={{ marginBottom: 12 }}>
+              <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.65rem', fontWeight: 700, color: levelInfo.color, letterSpacing: '0.12em', opacity: 0.7 }}>
+                {'// XP & NÍVEL'}
+              </span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+              <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '1.2rem', fontWeight: 700, color: levelInfo.color, textShadow: `0 0 12px ${levelInfo.color}66` }}>
+                {xp.toLocaleString()} XP
+              </span>
+              <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.65rem', color: `${levelInfo.color}88` }}>
+                {levelInfo.label}
+              </span>
+            </div>
+            <div style={{ height: 6, background: 'rgba(0,0,0,0.3)', borderRadius: 3, overflow: 'hidden' }}>
+              <div style={{
+                height: '100%', width: `${xpPercent}%`,
+                background: `linear-gradient(90deg, ${levelInfo.color}, ${levelInfo.color}aa)`,
+                boxShadow: `0 0 8px ${levelInfo.color}66`,
+                borderRadius: 3,
+                transition: 'width 1s ease',
+              }} />
+            </div>
+            <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.58rem', color: '#2a4d30', marginTop: 5 }}>
+              {xp} / {levelInfo.max} XP para próximo nível
+            </p>
+          </div>
+
+          {/* Achievements */}
+          {user.achievements && user.achievements.length > 0 && (
+            <div style={{
+              background: 'rgba(10,18,10,0.8)', border: '1px solid rgba(0,212,255,0.15)',
+              borderRadius: 6, padding: 16,
+            }}>
+              <div style={{ marginBottom: 12 }}>
+                <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.65rem', fontWeight: 700, color: '#00d4ff', letterSpacing: '0.12em', opacity: 0.7 }}>
+                  {'// CONQUISTAS'}
+                </span>
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                {user.achievements.map((a, i) => (
+                  <span key={i} style={{
+                    padding: '3px 8px', borderRadius: 3,
+                    background: 'rgba(0,212,255,0.06)', border: '1px solid rgba(0,212,255,0.2)',
+                    fontFamily: 'JetBrains Mono, monospace', fontSize: '0.62rem', color: '#00d4ff',
+                  }}>
+                    🏆 {a}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Subscription */}
+          <div style={{
+            background: 'rgba(10,18,10,0.8)', border: '1px solid rgba(0,255,65,0.15)',
+            borderRadius: 6, padding: 16,
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+              <CreditCard style={{ width: 13, height: 13, color: '#00ff41' }} />
+              <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.65rem', fontWeight: 700, color: '#2a6a3a', letterSpacing: '0.12em' }}>
+                {'// ASSINATURA'}
+              </span>
+            </div>
+            {subscription ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span style={{ fontSize: '0.65rem', color: '#2a4d30', fontFamily: 'JetBrains Mono, monospace' }}>PLANO</span>
+                  <PlanBadge plan={subscription.plan} />
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span style={{ fontSize: '0.65rem', color: '#2a4d30', fontFamily: 'JetBrains Mono, monospace' }}>STATUS</span>
+                  <StatusBadge status={subscription.status} />
+                </div>
+                {subscription.endDate && subscription.plan !== 'lifetime' && (
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span style={{ fontSize: '0.65rem', color: '#2a4d30', fontFamily: 'JetBrains Mono, monospace' }}>EXPIRA</span>
+                    <span style={{ fontSize: '0.7rem', color: '#6a9a6a', fontFamily: 'JetBrains Mono, monospace' }}>{formatRelativeDate(subscription.endDate)}</span>
+                  </div>
+                )}
+                <Link href="/planos" style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
+                  padding: '6px', borderRadius: 4, marginTop: 4,
+                  background: 'rgba(0,255,65,0.04)', border: '1px solid rgba(0,255,65,0.15)',
+                  fontFamily: 'JetBrains Mono, monospace', fontSize: '0.62rem', color: '#2a6a3a',
+                  textDecoration: 'none',
+                }}>
+                  Gerenciar plano <ChevronRight style={{ width: 10, height: 10 }} />
+                </Link>
+              </div>
+            ) : (
+              <div style={{ textAlign: 'center' }}>
+                <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.7rem', color: '#2a4d30', marginBottom: 10 }}>
+                  Sem assinatura ativa
+                </p>
+                <Link href="/planos" style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 5,
+                  padding: '7px 14px', borderRadius: 4,
+                  background: 'rgba(0,255,65,0.08)', border: '1px solid rgba(0,255,65,0.3)',
+                  fontFamily: 'JetBrains Mono, monospace', fontSize: '0.68rem', fontWeight: 700,
+                  color: '#00ff41', textDecoration: 'none',
+                }}>
+                  <Zap style={{ width: 11, height: 11 }} /> ASSINAR AGORA
+                </Link>
+              </div>
+            )}
+          </div>
+
+          {/* Recent activity */}
+          <div style={{
+            background: 'rgba(10,18,10,0.8)', border: '1px solid rgba(0,255,65,0.12)',
+            borderRadius: 6, padding: 16,
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+              <Activity style={{ width: 13, height: 13, color: '#00ff41' }} />
+              <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.65rem', fontWeight: 700, color: '#2a6a3a', letterSpacing: '0.12em' }}>
+                {'// ATIVIDADE RECENTE'}
+              </span>
+            </div>
+            {logs.length === 0 ? (
+              <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.7rem', color: '#2a4a2a', textAlign: 'center', padding: '12px 0' }}>
+                Sem atividade registrada
+              </p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {logs.slice(0, 6).map((log) => (
+                  <div key={log._id} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div style={{
+                      width: 24, height: 24, borderRadius: 3, flexShrink: 0,
+                      background: 'rgba(0,255,65,0.05)', border: '1px solid rgba(0,255,65,0.12)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem',
+                    }}>
+                      {log.action === 'login' ? '🔐' : log.action === 'download' ? '📥' : log.action === 'access' ? '👁️' : log.action === 'register' ? '✨' : '⚡'}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.65rem', color: '#6a9a6a', margin: 0, textTransform: 'uppercase' }}>
+                        {log.action}
+                      </p>
+                    </div>
+                    <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.58rem', color: '#1a3020' }}>
+                      {formatRelativeDate(log.createdAt)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

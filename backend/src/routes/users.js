@@ -43,6 +43,111 @@ router.get('/', auth, admin, async (req, res) => {
   }
 });
 
+// GET /api/users/me/favorites
+router.get('/me/favorites', auth, async (req, res) => {
+  try {
+    const Favorite = require('../models/Favorite');
+    const favorites = await Favorite.find({ user: req.user._id })
+      .sort({ createdAt: -1 })
+      .populate({ path: 'content', populate: { path: 'category', select: 'name slug color icon' } });
+    res.json({ favorites: favorites.map(f => f.content).filter(Boolean) });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error.' });
+  }
+});
+
+// GET /api/users/me/favorites/ids - just return array of content IDs user has favorited
+router.get('/me/favorites/ids', auth, async (req, res) => {
+  try {
+    const Favorite = require('../models/Favorite');
+    const favs = await Favorite.find({ user: req.user._id }).select('content');
+    res.json({ ids: favs.map(f => f.content.toString()) });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error.' });
+  }
+});
+
+// POST /api/users/me/favorites/:contentId
+router.post('/me/favorites/:contentId', auth, async (req, res) => {
+  try {
+    const Favorite = require('../models/Favorite');
+    await Favorite.findOneAndDelete({ user: req.user._id, content: req.params.contentId });
+    const fav = await Favorite.create({ user: req.user._id, content: req.params.contentId });
+    res.status(201).json({ message: 'Added to favorites.', favorite: fav });
+  } catch (error) {
+    if (error.code === 11000) return res.status(409).json({ message: 'Already favorited.' });
+    res.status(500).json({ message: 'Server error.' });
+  }
+});
+
+// DELETE /api/users/me/favorites/:contentId
+router.delete('/me/favorites/:contentId', auth, async (req, res) => {
+  try {
+    const Favorite = require('../models/Favorite');
+    await Favorite.findOneAndDelete({ user: req.user._id, content: req.params.contentId });
+    res.json({ message: 'Removed from favorites.' });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error.' });
+  }
+});
+
+// GET /api/users/me/downloads - download history from logs
+router.get('/me/downloads', auth, async (req, res) => {
+  try {
+    const Content = require('../models/Content');
+    const logs = await Log.find({ user: req.user._id, action: 'download' })
+      .sort({ createdAt: -1 })
+      .limit(50)
+      .lean();
+    const contentIds = [...new Set(logs.map(l => l.resourceId?.toString()).filter(Boolean))];
+    const contents = await Content.find({ _id: { $in: contentIds }, isActive: true })
+      .populate('category', 'name slug color icon');
+    const contentMap = {};
+    contents.forEach(c => { contentMap[c._id.toString()] = c; });
+    const history = logs
+      .map(l => ({ ...contentMap[l.resourceId?.toString()], downloadedAt: l.createdAt }))
+      .filter(c => c._id);
+    res.json({ history });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error.' });
+  }
+});
+
+// PUT /api/users/me/profile - update bio, socialLinks, bannerUrl
+router.put('/me/profile', auth, async (req, res) => {
+  try {
+    const { bio, socialLinks, bannerUrl } = req.body;
+    const updates = {};
+    if (bio !== undefined) updates.bio = bio;
+    if (socialLinks !== undefined) updates.socialLinks = socialLinks;
+    if (bannerUrl !== undefined) updates.bannerUrl = bannerUrl;
+    const user = await User.findByIdAndUpdate(req.user._id, updates, { new: true });
+    res.json({ message: 'Profile updated.', user });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error.' });
+  }
+});
+
+// GET /api/users/:id/public - public profile
+router.get('/:id/public', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).select(
+      'name avatar bannerUrl bio level xp achievements socialLinks createdAt'
+    );
+    if (!user) return res.status(404).json({ message: 'User not found.' });
+
+    const Review = require('../models/Review');
+    const [downloadCount, reviewCount] = await Promise.all([
+      Log.countDocuments({ user: user._id, action: 'download' }),
+      Review.countDocuments({ user: user._id }),
+    ]);
+
+    res.json({ user, stats: { downloads: downloadCount, reviews: reviewCount } });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error.' });
+  }
+});
+
 // GET /api/users/:id
 router.get('/:id', auth, async (req, res) => {
   try {
@@ -80,7 +185,7 @@ router.put(
         return res.status(403).json({ message: 'Access denied.' });
       }
 
-      const allowedFields = ['name', 'avatar'];
+      const allowedFields = ['name', 'avatar', 'bio', 'bannerUrl', 'socialLinks'];
       if (req.user.role === 'admin') {
         allowedFields.push('email', 'isActive', 'role');
       }

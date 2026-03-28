@@ -1,15 +1,13 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { Check, Zap, Star, Crown, CreditCard, Loader2 } from 'lucide-react';
+import { Check, Zap, Star, Crown, CreditCard, Loader2, Shield } from 'lucide-react';
 import { subscriptionsApi } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { PlanBadge, StatusBadge } from '@/components/ui/Badge';
-import { Card } from '@/components/ui/Card';
 import { formatRelativeDate, formatCurrency } from '@/lib/utils';
 import type { Subscription } from '@/types';
-import { useState } from 'react';
 
 interface Plan {
   key: string;
@@ -18,8 +16,8 @@ interface Plan {
   period: string;
   icon: React.ReactNode;
   color: string;
-  gradient: string;
-  border: string;
+  borderColor: string;
+  glowColor: string;
   description: string;
   features: string[];
   highlight?: boolean;
@@ -28,60 +26,60 @@ interface Plan {
 const plans: Plan[] = [
   {
     key: 'weekly',
-    name: 'Semanal',
+    name: 'SEMANAL',
     price: 9.99,
-    period: '/ week',
-    icon: <Zap className="w-6 h-6" />,
-    color: 'text-cyan-400',
-    gradient: 'from-cyan-500/10 to-cyan-900/5',
-    border: 'border-cyan-500/20 hover:border-cyan-500/40',
-    description: 'Perfect to test the platform',
+    period: '/ semana',
+    icon: <Zap style={{ width: 20, height: 20 }} />,
+    color: '#00d4ff',
+    borderColor: 'rgba(0,212,255,0.25)',
+    glowColor: 'rgba(0,212,255,0.1)',
+    description: 'Acesso completo por 7 dias',
     features: [
-      'Full access for 7 days',
-      'All content library',
-      'Community forum',
-      'Live chat',
-      'Time-limited drops',
+      'Acesso completo por 7 dias',
+      'Biblioteca completa de conteúdo',
+      'Fórum da comunidade',
+      'Chat ao vivo',
+      'Drops com limite de tempo',
     ],
   },
   {
     key: 'monthly',
-    name: 'Mensal',
+    name: 'MENSAL',
     price: 29.99,
-    period: '/ month',
-    icon: <Star className="w-6 h-6" />,
-    color: 'text-green-400',
-    gradient: 'from-green-500/15 to-green-900/5',
-    border: 'border-green-500/30 hover:border-green-500/60',
-    description: 'Most popular — best value',
+    period: '/ mês',
+    icon: <Star style={{ width: 20, height: 20 }} />,
+    color: '#00ff41',
+    borderColor: 'rgba(0,255,65,0.4)',
+    glowColor: 'rgba(0,255,65,0.08)',
+    description: 'Mais popular — melhor custo-benefício',
     features: [
-      'Full access for 30 days',
-      'All content library',
-      'Community forum & chat',
-      'Exclusive drops',
-      'Priority support',
-      'Level progression',
+      'Acesso completo por 30 dias',
+      'Biblioteca completa de conteúdo',
+      'Fórum e chat da comunidade',
+      'Drops exclusivos',
+      'Suporte prioritário',
+      'Progressão de nível',
     ],
     highlight: true,
   },
   {
     key: 'lifetime',
-    name: 'Vitalício',
+    name: 'VITALÍCIO',
     price: 99.99,
-    period: 'one-time',
-    icon: <Crown className="w-6 h-6" />,
-    color: 'text-yellow-400',
-    gradient: 'from-yellow-500/10 to-yellow-900/5',
-    border: 'border-yellow-500/20 hover:border-yellow-500/40',
-    description: 'Pay once, access forever',
+    period: 'pagamento único',
+    icon: <Crown style={{ width: 20, height: 20 }} />,
+    color: '#ffcc00',
+    borderColor: 'rgba(255,204,0,0.25)',
+    glowColor: 'rgba(255,204,0,0.06)',
+    description: 'Pague uma vez, acesse para sempre',
     features: [
-      'Lifetime access',
-      'All current & future content',
-      'VIP community access',
-      'All drops forever',
-      'Elite support',
-      'Early access to new features',
-      'Exclusive Elite badge',
+      'Acesso vitalício',
+      'Todo conteúdo atual e futuro',
+      'Acesso VIP à comunidade',
+      'Todos os drops para sempre',
+      'Suporte Elite',
+      'Acesso antecipado a novos recursos',
+      'Badge exclusivo Elite',
     ],
   },
 ];
@@ -102,38 +100,61 @@ export default function PlanosPage() {
     onSuccess: (data) => {
       setCheckoutError('');
       setCheckoutSuccess(
-        `Checkout created! In production, you would be redirected to the payment page. (ID: ${data.data.subscription._id})`
+        `Checkout criado! Em produção, você seria redirecionado para o pagamento. (ID: ${data.data.subscription._id})`
       );
       setTimeout(() => setCheckoutSuccess(''), 8000);
     },
     onError: (err: unknown) => {
       const axiosErr = err as { response?: { data?: { message?: string } } };
-      setCheckoutError(axiosErr.response?.data?.message || 'Failed to create checkout.');
+      setCheckoutError(axiosErr.response?.data?.message || 'Falha ao criar checkout.');
     },
   });
 
   const subscription = subData?.subscription as Subscription | null;
 
   return (
-    <div className="max-w-5xl mx-auto">
+    <div style={{ maxWidth: 960, margin: '0 auto' }}>
       {/* Header */}
-      <div className="text-center mb-10">
-        <h1 className="text-3xl font-bold text-gray-100 mb-3">
-          Choose your{' '}
-          <span className="text-gradient-green">plan</span>
+      <div style={{ textAlign: 'center', marginBottom: 36 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 10 }}>
+          <Shield style={{ width: 14, height: 14, color: '#00ff41' }} />
+          <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.62rem', color: '#2a4a2a', letterSpacing: '0.2em' }}>
+            SISTEMA DE ASSINATURAS
+          </span>
+          <Shield style={{ width: 14, height: 14, color: '#00ff41' }} />
+        </div>
+        <h1 style={{
+          fontFamily: 'JetBrains Mono, monospace',
+          fontSize: '1.6rem', fontWeight: 700,
+          color: '#00ff41',
+          textShadow: '0 0 20px rgba(0,255,65,0.5)',
+          margin: '0 0 8px',
+          letterSpacing: '0.08em',
+        }}>
+          {'// ESCOLHA SEU PLANO'}
         </h1>
-        <p className="text-gray-400 max-w-md mx-auto">
-          Get full access to the platform with exclusive content, active community and premium features.
+        <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.72rem', color: '#4a7a5a', maxWidth: 400, margin: '0 auto' }}>
+          {'> Acesso completo à plataforma com conteúdo exclusivo,'}
+          <br />
+          {'  comunidade ativa e recursos premium.'}
         </p>
 
         {subscription && (
-          <div className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-green-500/10 border border-green-500/20 rounded-full">
-            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-            <span className="text-sm text-green-400">Active plan: </span>
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: 8,
+            marginTop: 16, padding: '8px 16px',
+            background: 'rgba(0,255,65,0.05)',
+            border: '1px solid rgba(0,255,65,0.25)',
+            borderRadius: 4,
+          }}>
+            <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#00ff41', boxShadow: '0 0 6px #00ff41', animation: 'pulse 2s infinite' }} />
+            <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.68rem', color: '#4a7a5a' }}>Plano ativo:</span>
             <PlanBadge plan={subscription.plan} />
             <StatusBadge status={subscription.status} />
             {subscription.endDate && subscription.plan !== 'lifetime' && (
-              <span className="text-xs text-gray-500">· expires {formatRelativeDate(subscription.endDate)}</span>
+              <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.6rem', color: '#2a4d30' }}>
+                · expira {formatRelativeDate(subscription.endDate)}
+              </span>
             )}
           </div>
         )}
@@ -141,102 +162,204 @@ export default function PlanosPage() {
 
       {/* Alerts */}
       {checkoutError && (
-        <div className="mb-6 p-4 bg-red-900/30 border border-red-800/50 rounded-xl text-red-400 text-sm">
-          {checkoutError}
+        <div style={{
+          marginBottom: 20, padding: '12px 16px',
+          background: 'rgba(255,0,64,0.06)', border: '1px solid rgba(255,0,64,0.25)',
+          borderRadius: 4, fontFamily: 'JetBrains Mono, monospace', fontSize: '0.72rem', color: '#ff0040',
+        }}>
+          ⚠ {checkoutError}
         </div>
       )}
       {checkoutSuccess && (
-        <div className="mb-6 p-4 bg-green-900/30 border border-green-800/50 rounded-xl text-green-400 text-sm">
-          {checkoutSuccess}
+        <div style={{
+          marginBottom: 20, padding: '12px 16px',
+          background: 'rgba(0,255,65,0.05)', border: '1px solid rgba(0,255,65,0.25)',
+          borderRadius: 4, fontFamily: 'JetBrains Mono, monospace', fontSize: '0.72rem', color: '#00ff41',
+        }}>
+          ✓ {checkoutSuccess}
         </div>
       )}
 
-      {/* Plans */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* Plans grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
         {plans.map((plan) => {
           const isCurrentPlan = subscription?.plan === plan.key && subscription?.status === 'active';
 
           return (
             <div
               key={plan.key}
-              className={`relative rounded-xl border bg-gradient-to-br ${plan.gradient} ${plan.border} transition-all duration-200 ${
-                plan.highlight ? 'scale-105 shadow-lg shadow-green-500/10' : ''
-              }`}
+              style={{
+                background: plan.highlight ? `linear-gradient(135deg, ${plan.glowColor}, rgba(10,18,10,0.95))` : 'rgba(10,18,10,0.8)',
+                border: `1px solid ${plan.borderColor}`,
+                borderRadius: 8,
+                padding: 24,
+                position: 'relative',
+                overflow: 'hidden',
+                boxShadow: plan.highlight ? `0 0 30px ${plan.glowColor}, inset 0 0 40px ${plan.glowColor}` : 'none',
+                transform: plan.highlight ? 'scale(1.03)' : 'none',
+                transition: 'transform 0.2s, box-shadow 0.2s',
+              }}
+              onMouseOver={e => {
+                if (!plan.highlight) {
+                  (e.currentTarget as HTMLDivElement).style.boxShadow = `0 0 20px ${plan.glowColor}`;
+                  (e.currentTarget as HTMLDivElement).style.borderColor = plan.color;
+                }
+              }}
+              onMouseOut={e => {
+                if (!plan.highlight) {
+                  (e.currentTarget as HTMLDivElement).style.boxShadow = 'none';
+                  (e.currentTarget as HTMLDivElement).style.borderColor = plan.borderColor;
+                }
+              }}
             >
+              {/* Decorative top line */}
+              <div style={{
+                position: 'absolute', top: 0, left: 0, right: 0, height: 2,
+                background: `linear-gradient(90deg, transparent, ${plan.color}, transparent)`,
+              }} />
+
               {plan.highlight && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span className="bg-green-500 text-gray-950 text-xs font-bold px-3 py-1 rounded-full">
-                    MOST POPULAR
-                  </span>
+                <div style={{
+                  position: 'absolute', top: 10, right: -20,
+                  background: plan.color, color: '#050a05',
+                  fontFamily: 'JetBrains Mono, monospace', fontSize: '0.6rem', fontWeight: 700,
+                  padding: '3px 28px', transform: 'rotate(40deg)',
+                  letterSpacing: '0.1em',
+                }}>
+                  POPULAR
                 </div>
               )}
 
-              <div className="p-6">
-                {/* Plan header */}
-                <div className={`w-12 h-12 rounded-xl mb-4 flex items-center justify-center ${plan.color} bg-gray-800/50`}>
-                  {plan.icon}
-                </div>
-
-                <h3 className={`text-xl font-bold mb-1 ${plan.color}`}>{plan.name}</h3>
-                <p className="text-gray-500 text-sm mb-4">{plan.description}</p>
-
-                <div className="flex items-baseline gap-1 mb-6">
-                  <span className="text-3xl font-bold text-gray-100">{formatCurrency(plan.price)}</span>
-                  <span className="text-gray-500 text-sm">{plan.period}</span>
-                </div>
-
-                {/* Features */}
-                <ul className="space-y-2.5 mb-6">
-                  {plan.features.map((feature, i) => (
-                    <li key={i} className="flex items-start gap-2.5 text-sm">
-                      <Check className={`w-4 h-4 flex-shrink-0 mt-0.5 ${plan.color}`} />
-                      <span className="text-gray-300">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                {/* CTA */}
-                {isCurrentPlan ? (
-                  <button disabled className="w-full py-3 rounded-xl font-semibold text-sm bg-gray-700 text-gray-500 cursor-default flex items-center justify-center gap-2">
-                    <Check className="w-4 h-4" /> Current Plan
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => checkout.mutate(plan.key)}
-                    disabled={checkout.isPending}
-                    className={`w-full py-3 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2 ${
-                      plan.highlight
-                        ? 'bg-green-500 hover:bg-green-400 text-gray-950 hover:shadow-green-glow'
-                        : 'bg-gray-800 hover:bg-gray-700 text-gray-200 border border-gray-700 hover:border-gray-600'
-                    }`}
-                  >
-                    {checkout.isPending && checkout.variables === plan.key ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <CreditCard className="w-4 h-4" />
-                    )}
-                    Subscribe
-                  </button>
-                )}
+              {/* Icon */}
+              <div style={{
+                width: 40, height: 40, borderRadius: 6, marginBottom: 16,
+                background: `${plan.glowColor || plan.color}20`,
+                border: `1px solid ${plan.borderColor}`,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: plan.color,
+                boxShadow: `0 0 12px ${plan.glowColor || plan.color}40`,
+              }}>
+                {plan.icon}
               </div>
+
+              <h3 style={{
+                fontFamily: 'JetBrains Mono, monospace', fontSize: '0.9rem',
+                fontWeight: 700, color: plan.color,
+                letterSpacing: '0.15em', marginBottom: 4,
+                textShadow: `0 0 10px ${plan.color}66`,
+              }}>
+                {plan.name}
+              </h3>
+              <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.65rem', color: '#2a4d30', marginBottom: 16 }}>
+                {plan.description}
+              </p>
+
+              {/* Price */}
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginBottom: 20 }}>
+                <span style={{
+                  fontFamily: 'JetBrains Mono, monospace', fontSize: '2rem',
+                  fontWeight: 700, color: '#e0ffe8',
+                  textShadow: `0 0 14px ${plan.color}44`,
+                }}>
+                  {formatCurrency(plan.price)}
+                </span>
+                <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.65rem', color: '#2a4d30' }}>
+                  {plan.period}
+                </span>
+              </div>
+
+              {/* Features */}
+              <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {plan.features.map((feature, i) => (
+                  <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+                    <Check style={{ width: 12, height: 12, flexShrink: 0, marginTop: 2, color: plan.color }} />
+                    <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.68rem', color: '#6a9a6a', lineHeight: 1.5 }}>
+                      {feature}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+
+              {/* CTA */}
+              {isCurrentPlan ? (
+                <div style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                  padding: '10px', borderRadius: 4,
+                  background: 'rgba(0,255,65,0.04)', border: '1px solid rgba(0,255,65,0.2)',
+                  fontFamily: 'JetBrains Mono, monospace', fontSize: '0.7rem', fontWeight: 700,
+                  color: '#2a6a3a', letterSpacing: '0.1em',
+                }}>
+                  <Check style={{ width: 13, height: 13, color: '#00ff41' }} />
+                  PLANO ATUAL
+                </div>
+              ) : (
+                <button
+                  onClick={() => checkout.mutate(plan.key)}
+                  disabled={checkout.isPending}
+                  style={{
+                    width: '100%', padding: '10px', borderRadius: 4,
+                    cursor: checkout.isPending ? 'wait' : 'pointer',
+                    fontFamily: 'JetBrains Mono, monospace', fontSize: '0.72rem', fontWeight: 700,
+                    letterSpacing: '0.1em',
+                    background: plan.highlight ? plan.color : 'transparent',
+                    color: plan.highlight ? '#050a05' : plan.color,
+                    border: `1px solid ${plan.borderColor}`,
+                    boxShadow: plan.highlight ? `0 0 15px ${plan.color}44` : 'none',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+                    transition: 'all 0.2s',
+                    opacity: checkout.isPending ? 0.7 : 1,
+                  }}
+                  onMouseOver={e => {
+                    if (!plan.highlight && !checkout.isPending) {
+                      (e.currentTarget as HTMLButtonElement).style.background = `${plan.color}14`;
+                      (e.currentTarget as HTMLButtonElement).style.boxShadow = `0 0 12px ${plan.color}33`;
+                    }
+                  }}
+                  onMouseOut={e => {
+                    if (!plan.highlight) {
+                      (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
+                      (e.currentTarget as HTMLButtonElement).style.boxShadow = 'none';
+                    }
+                  }}
+                >
+                  {checkout.isPending && checkout.variables === plan.key ? (
+                    <Loader2 style={{ width: 14, height: 14, animation: 'spin 0.8s linear infinite' }} />
+                  ) : (
+                    <CreditCard style={{ width: 14, height: 14 }} />
+                  )}
+                  ASSINAR
+                </button>
+              )}
             </div>
           );
         })}
       </div>
 
       {/* FAQ */}
-      <div className="mt-12 p-6 bg-gray-900/60 border border-gray-800/60 rounded-xl">
-        <h2 className="text-lg font-semibold text-gray-200 mb-4">Frequently Asked Questions</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div style={{
+        marginTop: 36, padding: '20px 24px',
+        background: 'rgba(10,18,10,0.8)', border: '1px solid rgba(0,255,65,0.1)',
+        borderRadius: 6,
+      }}>
+        <div style={{ marginBottom: 16 }}>
+          <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.68rem', fontWeight: 700, color: '#2a6a3a', letterSpacing: '0.12em' }}>
+            {'// PERGUNTAS FREQUENTES'}
+          </span>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
           {[
-            { q: 'Can I cancel anytime?', a: 'Yes. Weekly and monthly plans can be cancelled before renewal.' },
-            { q: 'What payment methods are accepted?', a: 'We accept credit cards, debit cards and PIX via Stripe and MercadoPago.' },
-            { q: 'Is the lifetime plan really forever?', a: 'Yes! Pay once and get access to all content on the platform forever.' },
-            { q: 'What happens if my plan expires?', a: 'You lose access to content but keep your community account.' },
+            { q: 'Posso cancelar a qualquer momento?', a: 'Sim. Planos semanais e mensais podem ser cancelados antes da renovação.' },
+            { q: 'Quais métodos de pagamento são aceitos?', a: 'Aceitamos cartões de crédito, débito e PIX via Stripe e MercadoPago.' },
+            { q: 'O plano vitalício é realmente para sempre?', a: 'Sim! Pague uma vez e tenha acesso a todo o conteúdo da plataforma para sempre.' },
+            { q: 'O que acontece se meu plano expirar?', a: 'Você perde acesso ao conteúdo mas mantém sua conta na comunidade.' },
           ].map((item, i) => (
-            <div key={i} className="space-y-1">
-              <p className="text-sm font-medium text-gray-300">{item.q}</p>
-              <p className="text-sm text-gray-500">{item.a}</p>
+            <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.72rem', fontWeight: 600, color: '#a0c8a8', margin: 0 }}>
+                {'> '}{item.q}
+              </p>
+              <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.65rem', color: '#4a6a4a', margin: 0, lineHeight: 1.6 }}>
+                {item.a}
+              </p>
             </div>
           ))}
         </div>

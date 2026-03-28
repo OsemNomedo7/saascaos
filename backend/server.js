@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const http = require('http');
 const path = require('path');
+const fs = require('fs');
 const { Server } = require('socket.io');
 const cors = require('cors');
 const cron = require('node-cron');
@@ -19,6 +20,7 @@ const communityRoutes = require('./src/routes/community');
 const dropRoutes = require('./src/routes/drops');
 const adminRoutes = require('./src/routes/admin');
 const searchRoutes = require('./src/routes/search');
+const notificationRoutes = require('./src/routes/notifications');
 
 const app = express();
 const server = http.createServer(app);
@@ -33,6 +35,9 @@ const io = new Server(server, {
 
 // Connect to MongoDB
 connectDB();
+
+// Ensure uploads directory exists
+if (!fs.existsSync('uploads')) { fs.mkdirSync('uploads', { recursive: true }); }
 
 // Trust proxy (necessário no Render/Railway para IPs corretos)
 app.set('trust proxy', 1);
@@ -61,6 +66,7 @@ app.use('/api/community', communityRoutes);
 app.use('/api/drops', dropRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api', searchRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

@@ -53,6 +53,16 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    bio: { type: String, default: '', maxlength: 300 },
+    bannerUrl: { type: String, default: null },
+    xp: { type: Number, default: 0 },
+    socialLinks: {
+      twitter: { type: String, default: '' },
+      github: { type: String, default: '' },
+      instagram: { type: String, default: '' },
+      website: { type: String, default: '' },
+    },
+    achievements: [{ type: String }],
   },
   {
     timestamps: true,

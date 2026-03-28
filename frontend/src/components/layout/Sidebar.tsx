@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard, Library, Users, Zap,
   User, CreditCard, Terminal, LogOut, ChevronRight,
-  Shield, Hash
+  Shield, Hash, Heart, Download
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSocket } from '@/contexts/SocketContext';
@@ -34,6 +34,8 @@ const userNav: NavItem[] = [
 
 const accountNav: NavItem[] = [
   { label: 'Perfil', href: '/profile', icon: <User className="w-3.5 h-3.5" /> },
+  { label: 'Favoritos', href: '/favorites', icon: <Heart className="w-3.5 h-3.5" /> },
+  { label: 'Histórico', href: '/history', icon: <Download className="w-3.5 h-3.5" /> },
 ];
 
 const adminNav: NavItem[] = [
@@ -137,6 +139,9 @@ export default function Sidebar() {
               >
                 {item.icon}
                 <span>{item.label}</span>
+                {isActive(item.href) && (
+                  <ChevronRight className="w-3 h-3 ml-auto opacity-50" />
+                )}
               </Link>
             ))}
           </div>

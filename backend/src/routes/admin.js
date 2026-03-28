@@ -183,4 +183,113 @@ router.get('/revenue', auth, admin, async (req, res) => {
   }
 });
 
+// POST /api/admin/notify - send notification to users
+router.post('/notify', auth, admin, async (req, res) => {
+  try {
+    const Notification = require('../models/Notification');
+    const { title, message, type = 'system', link, target = 'all', plan } = req.body;
+    if (!title || !message) return res.status(400).json({ message: 'Title and message required.' });
+
+    let userQuery = { isActive: true, isBanned: false };
+    if (target === 'subscribers') {
+      const subs = await Subscription.find({ status: 'active' }).select('user');
+      userQuery._id = { $in: subs.map(s => s.user) };
+    }
+    const users = await User.find(userQuery).select('_id');
+    const notifications = users.map(u => ({ user: u._id, type, title, message, link }));
+    await Notification.insertMany(notifications);
+    res.json({ message: `Sent to ${users.length} users.`, count: users.length });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error.' });
+  }
+});
+
+// GET /api/admin/export/users - CSV export
+router.get('/export/users', auth, admin, async (req, res) => {
+  try {
+    const users = await User.find({}).select('name email level role isActive isBanned createdAt').lean();
+    const subs = await Subscription.find({ status: 'active' }).select('user plan endDate').lean();
+    const subMap = {};
+    subs.forEach(s => { subMap[s.user.toString()] = s; });
+
+    const header = 'ID,Name,Email,Level,Role,Active,Banned,Plan,Joined\n';
+    const rows = users.map(u => {
+      const sub = subMap[u._id.toString()];
+      return [
+        u._id,
+        u.name,
+        u.email,
+        u.level,
+        u.role,
+        u.isActive,
+        u.isBanned,
+        sub?.plan || 'none',
+        new Date(u.createdAt).toISOString(),
+      ].join(',');
+    }).join('\n');
+
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename="users.csv"');
+    res.send(header + rows);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error.' });
+  }
+});
+
+// GET /api/admin/coupons
+router.get('/coupons', auth, admin, async (req, res) => {
+  try {
+    const Coupon = require('../models/Coupon');
+    const coupons = await Coupon.find().sort({ createdAt: -1 }).populate('createdBy', 'name');
+    res.json({ coupons });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error.' });
+  }
+});
+
+// POST /api/admin/coupons
+router.post('/coupons', auth, admin, async (req, res) => {
+  try {
+    const Coupon = require('../models/Coupon');
+    const coupon = await Coupon.create({ ...req.body, createdBy: req.user._id });
+    res.status(201).json({ message: 'Coupon created.', coupon });
+  } catch (error) {
+    if (error.code === 11000) return res.status(409).json({ message: 'Coupon code already exists.' });
+    res.status(500).json({ message: 'Server error.' });
+  }
+});
+
+// DELETE /api/admin/coupons/:id
+router.delete('/coupons/:id', auth, admin, async (req, res) => {
+  try {
+    const Coupon = require('../models/Coupon');
+    await Coupon.findByIdAndUpdate(req.params.id, { isActive: false });
+    res.json({ message: 'Coupon deactivated.' });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error.' });
+  }
+});
+
+// GET /api/admin/stats/growth - user + subscription growth for charts
+router.get('/stats/growth', auth, admin, async (req, res) => {
+  try {
+    const days = 30;
+    const results = [];
+    for (let i = days - 1; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      const start = new Date(date); start.setHours(0, 0, 0, 0);
+      const end = new Date(date); end.setHours(23, 59, 59, 999);
+      const [newUsers, newSubs] = await Promise.all([
+        User.countDocuments({ createdAt: { $gte: start, $lte: end } }),
+        Subscription.countDocuments({ createdAt: { $gte: start, $lte: end } }),
+      ]);
+      results.push({ date: start.toISOString().slice(0, 10), newUsers, newSubs });
+    }
+    res.json({ growth: results });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error.' });
+  }
+});
+
 module.exports = router;

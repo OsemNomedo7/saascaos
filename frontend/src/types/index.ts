@@ -18,6 +18,16 @@ export interface User {
   lastLogin?: string;
   createdAt: string;
   updatedAt: string;
+  bio?: string;
+  bannerUrl?: string | null;
+  xp?: number;
+  socialLinks?: {
+    twitter?: string;
+    github?: string;
+    instagram?: string;
+    website?: string;
+  };
+  achievements?: string[];
 }
 
 export interface Subscription {
@@ -166,4 +176,38 @@ export interface Plans {
   weekly: Plan;
   monthly: Plan;
   lifetime: Plan;
+}
+
+export interface Notification {
+  _id: string;
+  user: string;
+  type: 'content' | 'drop' | 'system' | 'achievement' | 'subscription';
+  title: string;
+  message: string;
+  isRead: boolean;
+  link: string | null;
+  relatedId: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Favorite {
+  _id: string;
+  user: string;
+  content: Content;
+  createdAt: string;
+}
+
+export interface Coupon {
+  _id: string;
+  code: string;
+  description: string;
+  discountPercent: number;
+  planRestriction: 'weekly' | 'monthly' | 'lifetime' | 'all';
+  maxUses: number | null;
+  usedCount: number;
+  expiresAt: string | null;
+  isActive: boolean;
+  createdBy: string | User;
+  createdAt: string;
 }
