@@ -28,17 +28,21 @@ if (!fs.existsSync(uploadsDir)) {
 
 // ─── Cloudinary ───────────────────────────────────────────────────────────────
 
+const cloudName   = process.env.CLOUDINARY_CLOUD_NAME   || '';
+const cloudApiKey = process.env.CLOUDINARY_API_KEY      || '';
+const cloudSecret = process.env.CLOUDINARY_API_SECRET   || '';
+
 const useCloudinary = !!(
-  process.env.CLOUDINARY_CLOUD_NAME &&
-  process.env.CLOUDINARY_API_KEY &&
-  process.env.CLOUDINARY_API_SECRET
+  cloudName && !cloudName.startsWith('your_') &&
+  cloudApiKey && !cloudApiKey.startsWith('your_') &&
+  cloudSecret && !cloudSecret.startsWith('your_')
 );
 
 if (useCloudinary) {
   cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key:    process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
+    cloud_name: cloudName,
+    api_key:    cloudApiKey,
+    api_secret: cloudSecret,
   });
   console.log('[storage] ✓ Cloudinary configurado:', process.env.CLOUDINARY_CLOUD_NAME);
 } else {

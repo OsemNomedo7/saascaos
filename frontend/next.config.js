@@ -3,13 +3,20 @@ const nextConfig = {
   images: {
     domains: [
       'localhost',
-      'your-bucket.s3.amazonaws.com',
-      'your-bucket.s3.us-east-1.amazonaws.com',
+      'res.cloudinary.com',
       'via.placeholder.com',
       'avatars.githubusercontent.com',
       'lh3.googleusercontent.com',
     ],
     remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.r2.dev',
+      },
       {
         protocol: 'https',
         hostname: '**.amazonaws.com',

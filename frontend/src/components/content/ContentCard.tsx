@@ -75,20 +75,30 @@ export default function ContentCard({ content, subscription, onDownload, onOpenM
       if (externalLink) {
         window.open(externalLink, '_blank', 'noopener,noreferrer');
       } else if (fileUrl) {
-        // Se a URL está apontando para localhost, redireciona para o backend real
         let downloadUrl = fileUrl;
+        // Corrige URLs apontando para localhost em produção
         if (/https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?/.test(fileUrl)) {
           const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
           const backendBase = apiBase.replace(/\/api\/?$/, '');
           downloadUrl = fileUrl.replace(/https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?/, backendBase);
         }
-        window.open(downloadUrl, '_blank', 'noopener,noreferrer');
+        // Usa anchor com download para forçar download ao invés de abrir no browser
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = content.title || 'download';
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      } else {
+        throw new Error('Arquivo não disponível. Re-envie o conteúdo pelo painel admin.');
       }
 
       onDownload?.();
     } catch (err: unknown) {
-      const e = err as { response?: { data?: { message?: string } } };
-      setDownloadError(e?.response?.data?.message || 'Erro ao baixar');
+      const e = err as { response?: { data?: { message?: string } }; message?: string };
+      setDownloadError(e?.response?.data?.message || e?.message || 'Erro ao baixar');
     } finally {
       setIsDownloading(false);
     }

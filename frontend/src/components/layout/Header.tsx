@@ -283,12 +283,17 @@ export default function Header({ onMenuToggle }: HeaderProps) {
             color: '#00ff41',
             overflow: 'hidden',
             flexShrink: 0,
+            position: 'relative',
           }}>
-            {user?.avatar ? (
+            <span style={{ position: 'absolute' }}>{getInitials(user?.name || 'U')}</span>
+            {user?.avatar && (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={user.avatar} alt={user.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            ) : (
-              getInitials(user?.name || 'U')
+              <img
+                src={user.avatar}
+                alt={user.name}
+                style={{ position: 'absolute', width: '100%', height: '100%', objectFit: 'cover' }}
+                onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+              />
             )}
           </div>
           <div className="hidden sm:block">

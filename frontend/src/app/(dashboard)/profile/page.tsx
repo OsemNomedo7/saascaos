@@ -271,28 +271,28 @@ export default function ProfilePage() {
                   />
                 )}
               </div>
-              {/* Avatar upload overlay — only in edit mode */}
-              {isEditing && (
-                <button
-                  type="button"
-                  onClick={() => avatarInputRef.current?.click()}
-                  disabled={uploadingAvatar}
-                  title="Trocar foto de perfil"
-                  style={{
-                    position: 'absolute', inset: 0, borderRadius: '50%',
-                    background: 'rgba(0,0,0,0.6)',
-                    border: 'none', cursor: uploadingAvatar ? 'default' : 'pointer',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: '#00ff41',
-                  }}
-                >
-                  {uploadingAvatar ? (
-                    <div style={{ width: 18, height: 18, border: '2px solid #00ff41', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
-                  ) : (
-                    <Camera style={{ width: 18, height: 18 }} />
-                  )}
-                </button>
-              )}
+              {/* Avatar upload overlay — sempre visível */}
+              <button
+                type="button"
+                onClick={() => avatarInputRef.current?.click()}
+                disabled={uploadingAvatar}
+                title="Trocar foto de perfil"
+                style={{
+                  position: 'absolute', inset: 0, borderRadius: '50%',
+                  background: uploadingAvatar ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0)',
+                  border: 'none', cursor: uploadingAvatar ? 'default' : 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: '#00ff41', transition: 'background 0.2s',
+                }}
+                onMouseEnter={e => { if (!uploadingAvatar) (e.currentTarget as HTMLButtonElement).style.background = 'rgba(0,0,0,0.6)'; }}
+                onMouseLeave={e => { if (!uploadingAvatar) (e.currentTarget as HTMLButtonElement).style.background = 'rgba(0,0,0,0)'; }}
+              >
+                {uploadingAvatar ? (
+                  <div style={{ width: 18, height: 18, border: '2px solid #00ff41', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
+                ) : (
+                  <Camera style={{ width: 18, height: 18 }} />
+                )}
+              </button>
               <input
                 ref={avatarInputRef}
                 type="file"
