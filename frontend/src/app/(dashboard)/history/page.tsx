@@ -108,9 +108,9 @@ export default function HistoryPage() {
                     <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.75rem', color: '#a0c8a8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', margin: 0 }}>
                       {title}
                     </p>
-                    {entry.metadata?.fileSize && (
+                    {typeof entry.metadata?.fileSize === 'number' && (
                       <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.58rem', color: '#2a4d30', margin: '1px 0 0' }}>
-                        {formatBytes(entry.metadata.fileSize as number)}
+                        {formatBytes(entry.metadata.fileSize)}
                       </p>
                     )}
                   </div>
