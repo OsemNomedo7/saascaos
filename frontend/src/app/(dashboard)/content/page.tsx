@@ -86,7 +86,7 @@ export default function ContentPage() {
         borderRadius: 8,
         overflow: 'hidden',
         position: 'relative',
-        height: 130,
+        height: 190,
         background: 'url(https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1400&q=80) center/cover no-repeat',
         border: '1px solid rgba(0,212,255,0.2)',
       }}>

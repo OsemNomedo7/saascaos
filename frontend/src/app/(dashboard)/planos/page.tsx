@@ -116,7 +116,7 @@ export default function PlanosPage() {
     <div style={{ maxWidth: 960, margin: '0 auto' }}>
       {/* Visual Banner */}
       <div style={{
-        marginBottom: 28, borderRadius: 8, overflow: 'hidden', position: 'relative', height: 130,
+        marginBottom: 28, borderRadius: 8, overflow: 'hidden', position: 'relative', height: 190,
         background: 'url(https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1400&q=80) center/cover no-repeat',
         border: '1px solid rgba(255,204,0,0.15)',
       }}>

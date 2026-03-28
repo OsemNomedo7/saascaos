@@ -124,7 +124,8 @@ export default function ContentCard({ content, subscription, onDownload, onOpenM
           <img
             src={allImages[imgIndex]}
             alt={content.title}
-            style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: isLocked ? 0.4 : 1 }}
+            style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', opacity: isLocked ? 0.4 : 1, display: 'block' }}
+            onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
           />
           {allImages.length > 1 && (
             <>

@@ -247,7 +247,7 @@ export default function CommunityPage() {
     <div className="max-w-3xl mx-auto">
       {/* Visual Banner */}
       <div style={{
-        marginBottom: 22, borderRadius: 8, overflow: 'hidden', position: 'relative', height: 130,
+        marginBottom: 22, borderRadius: 8, overflow: 'hidden', position: 'relative', height: 190,
         background: 'url(https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1400&q=80) center/cover no-repeat',
         border: '1px solid rgba(0,255,65,0.2)',
       }}>

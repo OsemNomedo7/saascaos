@@ -178,7 +178,7 @@ export default function DropsPage() {
     <div className="max-w-7xl mx-auto">
       {/* Visual Banner */}
       <div style={{
-        marginBottom: 22, borderRadius: 8, overflow: 'hidden', position: 'relative', height: 130,
+        marginBottom: 22, borderRadius: 8, overflow: 'hidden', position: 'relative', height: 190,
         background: 'url(https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1400&q=80) center/cover no-repeat',
         border: '1px solid rgba(255,204,0,0.2)',
       }}>

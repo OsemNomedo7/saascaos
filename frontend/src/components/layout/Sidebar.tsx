@@ -240,7 +240,7 @@ export default function Sidebar() {
           }}>
             {user?.avatar ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={user.avatar} alt={user.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img src={user.avatar} alt={user.name} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top' }} onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
             ) : (
               getInitials(user?.name || 'U')
             )}

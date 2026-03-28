@@ -90,7 +90,7 @@ export default function NiveisPage() {
     <div style={{ maxWidth: 900, margin: '0 auto' }}>
       {/* Visual Banner */}
       <div style={{
-        marginBottom: 22, borderRadius: 8, overflow: 'hidden', position: 'relative', height: 130,
+        marginBottom: 22, borderRadius: 8, overflow: 'hidden', position: 'relative', height: 190,
         background: 'url(https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1400&q=80) center/cover no-repeat',
         border: '1px solid rgba(200,100,255,0.2)',
       }}>

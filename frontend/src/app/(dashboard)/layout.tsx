@@ -40,12 +40,47 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#050a05', position: 'relative' }}>
-      {/* Global ambient orbs */}
+      {/* Global ambient orbs — vivid floating lights */}
       <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0, overflow: 'hidden' }}>
-        <div className="orb-green float-slow" style={{ width: 600, height: 600, top: '-15%', right: '-10%' }} />
-        <div className="orb-cyan float-med" style={{ width: 500, height: 500, bottom: '5%', left: '-8%', animationDelay: '2s' }} />
-        <div className="orb-green" style={{ width: 300, height: 300, top: '45%', right: '20%', opacity: 0.5 }} />
-        <div className="orb-orange" style={{ width: 250, height: 250, bottom: '20%', right: '-5%' }} />
+        {/* Large top-right green orb */}
+        <div className="float-slow" style={{
+          position: 'absolute', width: 900, height: 900, borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(0,255,65,0.14) 0%, rgba(0,255,65,0.04) 40%, transparent 70%)',
+          top: '-25%', right: '-15%',
+          filter: 'blur(40px)',
+        }} />
+        {/* Large bottom-left cyan orb */}
+        <div className="float-med" style={{
+          position: 'absolute', width: 700, height: 700, borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(0,212,255,0.12) 0%, rgba(0,212,255,0.03) 40%, transparent 70%)',
+          bottom: '-15%', left: '-10%',
+          filter: 'blur(35px)',
+          animationDelay: '3s',
+        }} />
+        {/* Mid purple accent */}
+        <div className="float-slow" style={{
+          position: 'absolute', width: 500, height: 500, borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(180,80,255,0.09) 0%, rgba(180,80,255,0.02) 50%, transparent 70%)',
+          top: '35%', right: '-5%',
+          filter: 'blur(30px)',
+          animationDelay: '5s',
+        }} />
+        {/* Small mid-left green */}
+        <div className="float-med" style={{
+          position: 'absolute', width: 350, height: 350, borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(0,255,65,0.1) 0%, transparent 70%)',
+          top: '55%', left: '15%',
+          filter: 'blur(25px)',
+          animationDelay: '1.5s',
+        }} />
+        {/* Bottom-right cyan accent */}
+        <div className="float-slow" style={{
+          position: 'absolute', width: 400, height: 400, borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(0,212,255,0.08) 0%, transparent 70%)',
+          bottom: '5%', right: '10%',
+          filter: 'blur(28px)',
+          animationDelay: '7s',
+        }} />
       </div>
 
       {/* Mobile sidebar overlay */}

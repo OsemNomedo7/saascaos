@@ -27,24 +27,74 @@
   html { @apply scroll-smooth; }
 
   body {
-    background-color: var(--bg);
+    background-color: #040b04;
     color: var(--text-primary);
     font-family: 'Inter', 'JetBrains Mono', sans-serif;
     min-height: 100vh;
-    background-image:
-      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(0, 255, 65, 0.06) 0%, transparent 60%),
-      radial-gradient(ellipse 40% 30% at 90% 80%, rgba(0, 212, 255, 0.03) 0%, transparent 50%);
     overflow-x: hidden;
+    position: relative;
   }
 
+  /* Background mesh animado — múltiplas camadas */
   body::before {
     content: '';
     position: fixed;
     inset: 0;
-    background: url('https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1920&q=30') center/cover no-repeat;
-    opacity: 0.035;
+    z-index: -2;
+    background:
+      radial-gradient(ellipse 120% 80% at 15% 10%, rgba(0, 255, 65, 0.13) 0%, transparent 55%),
+      radial-gradient(ellipse 90% 70% at 85% 15%, rgba(0, 212, 255, 0.09) 0%, transparent 50%),
+      radial-gradient(ellipse 70% 60% at 10% 85%, rgba(0, 212, 255, 0.07) 0%, transparent 50%),
+      radial-gradient(ellipse 80% 50% at 80% 80%, rgba(180, 80, 255, 0.06) 0%, transparent 55%),
+      radial-gradient(ellipse 50% 40% at 50% 50%, rgba(0, 255, 65, 0.04) 0%, transparent 60%),
+      #040b04;
+    animation: bg-breathe 18s ease-in-out infinite alternate;
     pointer-events: none;
+  }
+
+  /* Grid de pontos subtis */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
     z-index: -1;
+    background-image:
+      radial-gradient(circle, rgba(0, 255, 65, 0.18) 1px, transparent 1px);
+    background-size: 40px 40px;
+    opacity: 0.18;
+    pointer-events: none;
+    mask-image: radial-gradient(ellipse 100% 100% at 50% 50%, black 30%, transparent 80%);
+    -webkit-mask-image: radial-gradient(ellipse 100% 100% at 50% 50%, black 30%, transparent 80%);
+  }
+
+  @keyframes bg-breathe {
+    0% {
+      background:
+        radial-gradient(ellipse 120% 80% at 15% 10%, rgba(0, 255, 65, 0.13) 0%, transparent 55%),
+        radial-gradient(ellipse 90% 70% at 85% 15%, rgba(0, 212, 255, 0.09) 0%, transparent 50%),
+        radial-gradient(ellipse 70% 60% at 10% 85%, rgba(0, 212, 255, 0.07) 0%, transparent 50%),
+        radial-gradient(ellipse 80% 50% at 80% 80%, rgba(180, 80, 255, 0.06) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 40% at 50% 50%, rgba(0, 255, 65, 0.04) 0%, transparent 60%),
+        #040b04;
+    }
+    50% {
+      background:
+        radial-gradient(ellipse 100% 90% at 25% 20%, rgba(0, 255, 65, 0.16) 0%, transparent 55%),
+        radial-gradient(ellipse 110% 60% at 75% 5%, rgba(0, 212, 255, 0.11) 0%, transparent 50%),
+        radial-gradient(ellipse 80% 70% at 5% 75%, rgba(0, 212, 255, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse 90% 60% at 90% 70%, rgba(180, 80, 255, 0.08) 0%, transparent 55%),
+        radial-gradient(ellipse 60% 50% at 45% 55%, rgba(0, 255, 65, 0.05) 0%, transparent 60%),
+        #040b04;
+    }
+    100% {
+      background:
+        radial-gradient(ellipse 140% 70% at 5% 30%, rgba(0, 255, 65, 0.11) 0%, transparent 55%),
+        radial-gradient(ellipse 80% 80% at 95% 25%, rgba(0, 212, 255, 0.07) 0%, transparent 50%),
+        radial-gradient(ellipse 90% 55% at 20% 90%, rgba(0, 212, 255, 0.09) 0%, transparent 50%),
+        radial-gradient(ellipse 70% 65% at 70% 90%, rgba(180, 80, 255, 0.05) 0%, transparent 55%),
+        radial-gradient(ellipse 55% 45% at 55% 45%, rgba(0, 255, 65, 0.06) 0%, transparent 60%),
+        #040b04;
+    }
   }
 
   ::-webkit-scrollbar { width: 4px; height: 4px; }
