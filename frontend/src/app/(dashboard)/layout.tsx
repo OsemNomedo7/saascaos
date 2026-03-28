@@ -86,7 +86,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* Main content */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden', position: 'relative', zIndex: 1 }}>
         <Header onMenuToggle={() => setSidebarOpen(!sidebarOpen)} />
-        <main style={{ flex: 1, overflowY: 'auto', padding: '24px', paddingBottom: '40px' }}>
+        <main style={{ flex: 1, overflowY: 'auto', padding: 'clamp(12px, 3vw, 24px)', paddingBottom: '40px' }}>
           {children}
         </main>
       </div>

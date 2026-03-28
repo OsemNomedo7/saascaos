@@ -12,6 +12,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useSocket } from '@/contexts/SocketContext';
 import { LevelBadge, PlanBadge } from '@/components/ui/Badge';
 import { getInitials } from '@/lib/utils';
+import Logo from '@/components/ui/Logo';
 import { useQuery } from '@tanstack/react-query';
 import { subscriptionsApi } from '@/lib/api';
 import type { Subscription } from '@/types';
@@ -87,24 +88,9 @@ export default function Sidebar() {
       flexDirection: 'column',
     }}>
       {/* Logo */}
-      <div style={{ padding: '20px 16px 16px', borderBottom: '1px solid rgba(0,120,255,0.1)' }}>
-        <Link href="/dashboard" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
-          <SkullMini />
-          <div>
-            <div style={{
-              fontFamily: 'JetBrains Mono, monospace',
-              fontSize: '0.82rem',
-              fontWeight: 700,
-              letterSpacing: '0.18em',
-              color: '#0096ff',
-              textShadow: '0 0 8px rgba(0,120,255,0.5)',
-            }}>
-              ELITE TROJAN
-            </div>
-            <div style={{ fontSize: '0.58rem', color: '#0d1f38', letterSpacing: '0.12em', marginTop: 1 }}>
-              v2.0.0 // SISTEMA
-            </div>
-          </div>
+      <div style={{ padding: '12px 16px', borderBottom: '1px solid rgba(0,120,255,0.1)', display: 'flex', justifyContent: 'center' }}>
+        <Link href="/dashboard" style={{ textDecoration: 'none', display: 'block' }}>
+          <Logo size={110} />
         </Link>
       </div>
 

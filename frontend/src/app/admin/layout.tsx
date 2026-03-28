@@ -10,6 +10,7 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { getInitials } from '@/lib/utils';
 import { cn } from '@/lib/utils';
+import Logo from '@/components/ui/Logo';
 
 const adminNav = [
   { label: 'Dashboard', href: '/admin', icon: <LayoutDashboard className="w-3.5 h-3.5" /> },
@@ -77,25 +78,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         flexDirection: 'column',
       }}>
         {/* Logo */}
-        <div style={{ padding: '18px 14px 14px', borderBottom: '1px solid rgba(255,68,0,0.12)' }}>
-          <Link href="/admin" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
-            <AdminSkull />
-            <div>
-              <div style={{
-                fontFamily: 'JetBrains Mono, monospace',
-                fontSize: '0.72rem',
-                fontWeight: 700,
-                letterSpacing: '0.14em',
-                color: '#ff4400',
-                textShadow: '0 0 8px rgba(255,68,0,0.5)',
-              }}>
-                ADMIN PANEL
-              </div>
-              <div style={{ fontSize: '0.58rem', color: '#3a1800', letterSpacing: '0.1em', marginTop: 1 }}>
-                ELITE TROJAN
-              </div>
-            </div>
+        <div style={{ padding: '12px 14px', borderBottom: '1px solid rgba(255,68,0,0.12)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+          <Link href="/admin" style={{ textDecoration: 'none', display: 'block' }}>
+            <Logo size={100} />
           </Link>
+          <span style={{
+            fontFamily: 'JetBrains Mono, monospace',
+            fontSize: '0.58rem',
+            fontWeight: 700,
+            letterSpacing: '0.2em',
+            color: '#ff4400',
+            textShadow: '0 0 8px rgba(255,68,0,0.4)',
+          }}>ADMIN PANEL</span>
         </div>
 
         {/* Nav */}

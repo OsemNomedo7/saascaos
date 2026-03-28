@@ -7,6 +7,7 @@ import { useForm } from 'react-hook-form';
 import { Eye, EyeOff, UserPlus, CheckCircle, ChevronRight } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import MatrixRain from '@/components/ui/MatrixRain';
+import Logo from '@/components/ui/Logo';
 
 interface RegisterForm {
   name: string;
@@ -100,17 +101,8 @@ export default function RegisterPage() {
         {/* Left: Info panel */}
         <div className="hidden md:flex flex-col">
           {/* Logo */}
-          <div className="flex items-center gap-3 mb-8">
-            <SkullIcon size={32} />
-            <div>
-              <div className="text-lg font-bold tracking-widest glow-text"
-                style={{ fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.2em' }}>
-                ELITE TROJAN
-              </div>
-              <div className="text-xs" style={{ color: '#1a3020', letterSpacing: '0.15em' }}>
-                v2.0.0 // SISTEMA EXCLUSIVO
-              </div>
-            </div>
+          <div className="mb-6">
+            <Logo size={140} />
           </div>
 
           <h2 className="text-2xl font-bold mb-2" style={{ color: '#e0ffe8', letterSpacing: '0.02em' }}>
@@ -154,12 +146,8 @@ export default function RegisterPage() {
         {/* Right: Form */}
         <div>
           {/* Mobile logo */}
-          <div className="flex items-center gap-3 mb-6 md:hidden">
-            <SkullIcon size={24} />
-            <span className="text-base font-bold glow-text tracking-widest"
-              style={{ fontFamily: 'JetBrains Mono, monospace' }}>
-              ELITE TROJAN
-            </span>
+          <div className="flex justify-center mb-6 md:hidden">
+            <Logo size={120} />
           </div>
 
           <div className="glass-hacker-bright p-7"

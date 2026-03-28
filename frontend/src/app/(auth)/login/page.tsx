@@ -7,6 +7,7 @@ import { useForm } from 'react-hook-form';
 import { Eye, EyeOff, AlertTriangle, LogIn } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import MatrixRain from '@/components/ui/MatrixRain';
+import Logo from '@/components/ui/Logo';
 
 interface LoginForm {
   email: string;
@@ -90,14 +91,8 @@ export default function LoginPage() {
       <div className="relative z-20 w-full max-w-md animate-fade-up">
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
-          <div className="mb-4">
-            <SkullIcon />
-          </div>
-          <h1 className="text-2xl font-bold tracking-widest uppercase glow-text"
-            style={{ fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.25em' }}>
-            ELITE TROJAN
-          </h1>
-          <p className="text-xs mt-2 tracking-widest" style={{ color: '#2a4d30', letterSpacing: '0.3em' }}>
+          <Logo size={160} />
+          <p className="text-xs mt-1 tracking-widest" style={{ color: '#2a4d30', letterSpacing: '0.3em' }}>
             [ AUTHORIZED ACCESS ONLY ]
           </p>
         </div>
