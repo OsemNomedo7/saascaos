@@ -726,7 +726,7 @@ export default function ChatPage() {
           ))}
           {globalOnlineUsers.length === 0 && (
             <p style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: '0.6rem', color: '#0d2040', textAlign: 'center', padding: '20px 0' }}>
-              // nenhum usuário online
+              {'// nenhum usuário online'}
             </p>
           )}
         </div>
