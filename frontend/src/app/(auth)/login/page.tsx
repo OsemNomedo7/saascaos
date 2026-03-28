@@ -91,7 +91,7 @@ export default function LoginPage() {
       <div className="relative z-20 w-full max-w-md animate-fade-up">
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
-          <Logo size={160} />
+          <Logo size={280} />
           <p className="text-xs mt-1 tracking-widest" style={{ color: '#2a4d30', letterSpacing: '0.3em' }}>
             [ AUTHORIZED ACCESS ONLY ]
           </p>

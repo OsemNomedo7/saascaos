@@ -90,7 +90,7 @@ export default function Sidebar() {
       {/* Logo */}
       <div style={{ padding: '12px 16px', borderBottom: '1px solid rgba(0,120,255,0.1)', display: 'flex', justifyContent: 'center' }}>
         <Link href="/dashboard" style={{ textDecoration: 'none', display: 'block' }}>
-          <Logo size={110} />
+          <Logo size={160} />
         </Link>
       </div>
 

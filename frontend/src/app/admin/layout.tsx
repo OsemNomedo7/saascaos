@@ -80,7 +80,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Logo */}
         <div style={{ padding: '12px 14px', borderBottom: '1px solid rgba(255,68,0,0.12)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
           <Link href="/admin" style={{ textDecoration: 'none', display: 'block' }}>
-            <Logo size={100} />
+            <Logo size={140} />
           </Link>
           <span style={{
             fontFamily: 'JetBrains Mono, monospace',

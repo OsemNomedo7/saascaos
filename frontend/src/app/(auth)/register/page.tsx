@@ -102,7 +102,7 @@ export default function RegisterPage() {
         <div className="hidden md:flex flex-col">
           {/* Logo */}
           <div className="mb-6">
-            <Logo size={140} />
+            <Logo size={190} />
           </div>
 
           <h2 className="text-2xl font-bold mb-2" style={{ color: '#e0ffe8', letterSpacing: '0.02em' }}>
@@ -147,7 +147,7 @@ export default function RegisterPage() {
         <div>
           {/* Mobile logo */}
           <div className="flex justify-center mb-6 md:hidden">
-            <Logo size={120} />
+            <Logo size={160} />
           </div>
 
           <div className="glass-hacker-bright p-7"
