@@ -333,7 +333,16 @@ router.post('/upload', auth, admin, (req, res, next) => {
         : '';
       return res.status(413).json({ message: `Arquivo muito grande. Limite do servidor: ${limitLabel}.${hint}` });
     }
-    if (err) return res.status(500).json({ message: `Erro no upload: ${err.message}` });
+    if (err) {
+      const msg = err.message || '';
+      // Credential length error from AWS SDK → R2 keys are invalid in env vars
+      if (msg.includes('Credential') && msg.includes('length')) {
+        return res.status(500).json({
+          message: 'Credenciais R2 inválidas. Verifique as variáveis R2_ACCESS_KEY_ID e R2_SECRET_ACCESS_KEY no Render (Access Key ID deve ter 32 caracteres).'
+        });
+      }
+      return res.status(500).json({ message: `Erro no upload: ${msg}` });
+    }
     next();
   });
 }, async (req, res) => {

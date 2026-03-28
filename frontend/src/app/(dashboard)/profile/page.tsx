@@ -45,7 +45,7 @@ export default function ProfilePage() {
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
 
-  const { register, handleSubmit, reset, watch, formState: { errors } } = useForm<EditForm>({
+  const { register, handleSubmit, reset, watch } = useForm<EditForm>({
     defaultValues: {
       name: user?.name || '',
       bio: user?.bio || '',
@@ -207,26 +207,28 @@ export default function ProfilePage() {
             backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.1) 2px, rgba(0,0,0,0.1) 4px)',
             pointerEvents: 'none',
           }} />
-          {/* Banner upload button — always visible */}
-          <button
-            type="button"
-            onClick={() => !uploadingBanner && bannerInputRef.current?.click()}
-            disabled={uploadingBanner}
-            style={{
-              position: 'absolute', bottom: 8, right: 8,
-              display: 'flex', alignItems: 'center', gap: 5,
-              padding: '5px 10px', borderRadius: 4, cursor: uploadingBanner ? 'default' : 'pointer',
-              background: 'rgba(0,0,0,0.7)', border: '1px solid rgba(0,255,65,0.4)',
-              color: '#00ff41', fontFamily: 'JetBrains Mono, monospace', fontSize: '0.62rem',
-            }}
-          >
-            {uploadingBanner ? (
-              <div style={{ width: 11, height: 11, border: '1.5px solid #00ff41', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
-            ) : (
-              <ImageIcon style={{ width: 11, height: 11 }} />
-            )}
-            {uploadingBanner ? 'ENVIANDO...' : 'TROCAR BANNER'}
-          </button>
+          {/* Banner upload button — only in edit mode */}
+          {isEditing && (
+            <button
+              type="button"
+              onClick={() => bannerInputRef.current?.click()}
+              disabled={uploadingBanner}
+              style={{
+                position: 'absolute', bottom: 8, right: 8,
+                display: 'flex', alignItems: 'center', gap: 5,
+                padding: '5px 10px', borderRadius: 4, cursor: uploadingBanner ? 'default' : 'pointer',
+                background: 'rgba(0,0,0,0.7)', border: '1px solid rgba(0,255,65,0.4)',
+                color: '#00ff41', fontFamily: 'JetBrains Mono, monospace', fontSize: '0.62rem',
+              }}
+            >
+              {uploadingBanner ? (
+                <div style={{ width: 11, height: 11, border: '1.5px solid #00ff41', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
+              ) : (
+                <ImageIcon style={{ width: 11, height: 11 }} />
+              )}
+              {uploadingBanner ? 'ENVIANDO...' : 'TROCAR BANNER'}
+            </button>
+          )}
           <input
             ref={bannerInputRef}
             type="file"
@@ -269,26 +271,28 @@ export default function ProfilePage() {
                   />
                 )}
               </div>
-              {/* Avatar upload overlay — always visible */}
-              <button
-                type="button"
-                onClick={() => !uploadingAvatar && avatarInputRef.current?.click()}
-                disabled={uploadingAvatar}
-                title="Trocar foto de perfil"
-                style={{
-                  position: 'absolute', inset: 0, borderRadius: '50%',
-                  background: 'rgba(0,0,0,0.45)',
-                  border: 'none', cursor: uploadingAvatar ? 'default' : 'pointer',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  color: '#00ff41',
-                }}
-              >
-                {uploadingAvatar ? (
-                  <div style={{ width: 18, height: 18, border: '2px solid #00ff41', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
-                ) : (
-                  <Camera style={{ width: 18, height: 18 }} />
-                )}
-              </button>
+              {/* Avatar upload overlay — only in edit mode */}
+              {isEditing && (
+                <button
+                  type="button"
+                  onClick={() => avatarInputRef.current?.click()}
+                  disabled={uploadingAvatar}
+                  title="Trocar foto de perfil"
+                  style={{
+                    position: 'absolute', inset: 0, borderRadius: '50%',
+                    background: 'rgba(0,0,0,0.6)',
+                    border: 'none', cursor: uploadingAvatar ? 'default' : 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: '#00ff41',
+                  }}
+                >
+                  {uploadingAvatar ? (
+                    <div style={{ width: 18, height: 18, border: '2px solid #00ff41', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
+                  ) : (
+                    <Camera style={{ width: 18, height: 18 }} />
+                  )}
+                </button>
+              )}
               <input
                 ref={avatarInputRef}
                 type="file"

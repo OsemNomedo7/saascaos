@@ -38,11 +38,20 @@ if (useCloudinary) {
 
 // ─── Cloudflare R2 ───────────────────────────────────────────────────────────
 
+// R2 access keys must be 32 chars; secret keys must be ≥ 32 chars.
+// If keys are present but invalid length, disable R2 to avoid runtime credential errors.
+const r2AccessKey    = process.env.R2_ACCESS_KEY_ID    || '';
+const r2SecretKey    = process.env.R2_SECRET_ACCESS_KEY || '';
+const r2AccessValid  = r2AccessKey.length >= 20;
+const r2SecretValid  = r2SecretKey.length >= 20;
+
 const useR2 = !!(
   process.env.R2_ACCOUNT_ID &&
-  process.env.R2_ACCESS_KEY_ID &&
-  process.env.R2_SECRET_ACCESS_KEY &&
-  process.env.R2_BUCKET_NAME
+  r2AccessKey &&
+  r2SecretKey &&
+  process.env.R2_BUCKET_NAME &&
+  r2AccessValid &&
+  r2SecretValid
 );
 
 let r2Client = null;
@@ -51,13 +60,15 @@ if (useR2) {
     region: 'auto',
     endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
     credentials: {
-      accessKeyId:     process.env.R2_ACCESS_KEY_ID,
-      secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+      accessKeyId:     r2AccessKey,
+      secretAccessKey: r2SecretKey,
     },
   });
   console.log('[storage] ✓ Cloudflare R2 pronto, bucket:', process.env.R2_BUCKET_NAME);
+} else if (r2AccessKey && (!r2AccessValid || !r2SecretValid)) {
+  console.warn('[storage] ✗ R2 credenciais com tamanho inválido (ACCESS_KEY deve ter ≥20 chars). Fallback para Cloudinary/disco.');
 } else {
-  console.log('[storage] ✗ R2 não configurado — fallback: disco local');
+  console.log('[storage] ✗ R2 não configurado — fallback: Cloudinary/disco');
 }
 
 // ─── Disco local (fallback) ───────────────────────────────────────────────────
