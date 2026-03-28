@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { Check, Zap, Star, Crown, CreditCard, Loader2, Shield } from 'lucide-react';
+import React from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Check, Zap, Star, Crown, CreditCard, Shield } from 'lucide-react';
 import { subscriptionsApi } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { PlanBadge, StatusBadge } from '@/components/ui/Badge';
@@ -21,13 +21,14 @@ interface Plan {
   description: string;
   features: string[];
   highlight?: boolean;
+  checkoutUrl: string;
 }
 
 const plans: Plan[] = [
   {
     key: 'weekly',
     name: 'SEMANAL',
-    price: 9.99,
+    price: 19.90,
     period: '/ semana',
     icon: <Zap style={{ width: 20, height: 20 }} />,
     color: '#00d4ff',
@@ -41,11 +42,12 @@ const plans: Plan[] = [
       'Chat ao vivo',
       'Drops com limite de tempo',
     ],
+    checkoutUrl: 'https://pay.inovapaypagamentoseguro.site/checkout/cmnavd8j600lr1zmykyct2wda?offer=6H2RWU4',
   },
   {
     key: 'monthly',
     name: 'MENSAL',
-    price: 29.99,
+    price: 49.90,
     period: '/ mês',
     icon: <Star style={{ width: 20, height: 20 }} />,
     color: '#00ff41',
@@ -61,11 +63,12 @@ const plans: Plan[] = [
       'Progressão de nível',
     ],
     highlight: true,
+    checkoutUrl: 'https://pay.inovapaypagamentoseguro.site/checkout/cmnavry8800pw1smywwtvqimx?offer=I3PTVHA',
   },
   {
     key: 'lifetime',
     name: 'VITALÍCIO',
-    price: 99.99,
+    price: 99.90,
     period: 'pagamento único',
     icon: <Crown style={{ width: 20, height: 20 }} />,
     color: '#ffcc00',
@@ -81,33 +84,17 @@ const plans: Plan[] = [
       'Acesso antecipado a novos recursos',
       'Badge exclusivo Elite',
     ],
+    checkoutUrl: 'https://pay.inovapaypagamentoseguro.site/checkout/cmnaw5ge7003i1ro424ciajvv?offer=OE6AKV4',
   },
 ];
 
 export default function PlanosPage() {
   const { user } = useAuth();
-  const [checkoutError, setCheckoutError] = useState('');
-  const [checkoutSuccess, setCheckoutSuccess] = useState('');
 
   const { data: subData } = useQuery({
     queryKey: ['my-subscription'],
     queryFn: () => subscriptionsApi.my().then((r) => r.data),
     enabled: !!user,
-  });
-
-  const checkout = useMutation({
-    mutationFn: (plan: string) => subscriptionsApi.checkout({ plan, gateway: 'stripe' }),
-    onSuccess: (data) => {
-      setCheckoutError('');
-      setCheckoutSuccess(
-        `Checkout criado! Em produção, você seria redirecionado para o pagamento. (ID: ${data.data.subscription._id})`
-      );
-      setTimeout(() => setCheckoutSuccess(''), 8000);
-    },
-    onError: (err: unknown) => {
-      const axiosErr = err as { response?: { data?: { message?: string } } };
-      setCheckoutError(axiosErr.response?.data?.message || 'Falha ao criar checkout.');
-    },
   });
 
   const subscription = subData?.subscription as Subscription | null;
@@ -175,26 +162,6 @@ export default function PlanosPage() {
           </div>
         )}
       </div>
-
-      {/* Alerts */}
-      {checkoutError && (
-        <div style={{
-          marginBottom: 20, padding: '12px 16px',
-          background: 'rgba(255,0,64,0.06)', border: '1px solid rgba(255,0,64,0.25)',
-          borderRadius: 4, fontFamily: 'JetBrains Mono, monospace', fontSize: '0.72rem', color: '#ff0040',
-        }}>
-          ⚠ {checkoutError}
-        </div>
-      )}
-      {checkoutSuccess && (
-        <div style={{
-          marginBottom: 20, padding: '12px 16px',
-          background: 'rgba(0,255,65,0.05)', border: '1px solid rgba(0,255,65,0.25)',
-          borderRadius: 4, fontFamily: 'JetBrains Mono, monospace', fontSize: '0.72rem', color: '#00ff41',
-        }}>
-          ✓ {checkoutSuccess}
-        </div>
-      )}
 
       {/* Plans grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
@@ -309,12 +276,12 @@ export default function PlanosPage() {
                   PLANO ATUAL
                 </div>
               ) : (
-                <button
-                  onClick={() => checkout.mutate(plan.key)}
-                  disabled={checkout.isPending}
+                <a
+                  href={plan.checkoutUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   style={{
                     width: '100%', padding: '10px', borderRadius: 4,
-                    cursor: checkout.isPending ? 'wait' : 'pointer',
                     fontFamily: 'JetBrains Mono, monospace', fontSize: '0.72rem', fontWeight: 700,
                     letterSpacing: '0.1em',
                     background: plan.highlight ? plan.color : 'transparent',
@@ -323,28 +290,24 @@ export default function PlanosPage() {
                     boxShadow: plan.highlight ? `0 0 15px ${plan.color}44` : 'none',
                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
                     transition: 'all 0.2s',
-                    opacity: checkout.isPending ? 0.7 : 1,
+                    textDecoration: 'none',
                   }}
                   onMouseOver={e => {
-                    if (!plan.highlight && !checkout.isPending) {
-                      (e.currentTarget as HTMLButtonElement).style.background = `${plan.color}14`;
-                      (e.currentTarget as HTMLButtonElement).style.boxShadow = `0 0 12px ${plan.color}33`;
+                    if (!plan.highlight) {
+                      (e.currentTarget as HTMLAnchorElement).style.background = `${plan.color}14`;
+                      (e.currentTarget as HTMLAnchorElement).style.boxShadow = `0 0 12px ${plan.color}33`;
                     }
                   }}
                   onMouseOut={e => {
                     if (!plan.highlight) {
-                      (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
-                      (e.currentTarget as HTMLButtonElement).style.boxShadow = 'none';
+                      (e.currentTarget as HTMLAnchorElement).style.background = 'transparent';
+                      (e.currentTarget as HTMLAnchorElement).style.boxShadow = 'none';
                     }
                   }}
                 >
-                  {checkout.isPending && checkout.variables === plan.key ? (
-                    <Loader2 style={{ width: 14, height: 14, animation: 'spin 0.8s linear infinite' }} />
-                  ) : (
-                    <CreditCard style={{ width: 14, height: 14 }} />
-                  )}
+                  <CreditCard style={{ width: 14, height: 14 }} />
                   ASSINAR
-                </button>
+                </a>
               )}
             </div>
           );
