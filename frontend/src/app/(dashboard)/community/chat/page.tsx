@@ -209,10 +209,10 @@ export default function ChatPage() {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
-  const typingTimer = useRef<ReturnType<typeof setTimeout>>();
+  const typingTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
-  const recordingTimerRef = useRef<ReturnType<typeof setInterval>>();
+  const recordingTimerRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
 
   // ── Socket setup ──────────────────────────────────────────────────────────
   useEffect(() => {
