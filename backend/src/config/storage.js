@@ -64,7 +64,7 @@ const r2PublicValid = r2PublicUrl.startsWith('https://') &&
   !r2PublicUrl.includes('XXXX') &&
   !r2PublicUrl.startsWith('your_');
 
-const useR2 = !!(
+const useR2 = process.env.DISABLE_R2 !== 'true' && !!(
   r2AccountId && !r2AccountId.startsWith('your_') &&
   r2AccessKey &&
   r2SecretKey &&
