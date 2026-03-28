@@ -194,7 +194,7 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
             alignItems: 'center',
             justifyContent: 'space-between',
           }}>
-            <span style={{ fontSize: '0.62rem', color: '#1a3560', letterSpacing: '0.1em' }}>PLANO</span>
+            <span style={{ fontSize: '0.62rem', color: '#5a88b0', letterSpacing: '0.1em' }}>PLANO</span>
             <PlanBadge plan={subscription.plan} />
           </div>
         )}
@@ -213,7 +213,7 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
             boxShadow: isConnected ? '0 0 6px #0096ff' : undefined,
             animation: isConnected ? 'pulse 2s infinite' : undefined,
           }} />
-          <span style={{ fontSize: '0.6rem', color: '#0d1f38', letterSpacing: '0.1em' }}>
+          <span style={{ fontSize: '0.6rem', color: '#5a8aaa', letterSpacing: '0.1em' }}>
             {isConnected ? 'CONECTADO' : 'DESCONECTADO'}
           </span>
         </div>

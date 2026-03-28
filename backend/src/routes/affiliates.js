@@ -7,7 +7,19 @@ const Commission = require('../models/Commission');
 // GET /api/affiliates/me — dashboard do afiliado
 router.get('/me', auth, async (req, res) => {
   try {
-    const user = await User.findById(req.user._id).select('referralCode');
+    let user = await User.findById(req.user._id).select('referralCode');
+
+    // Gerar referralCode se o usuário ainda não tiver
+    if (!user.referralCode) {
+      const crypto = require('crypto');
+      let code;
+      let exists = true;
+      while (exists) {
+        code = crypto.randomBytes(4).toString('hex').toUpperCase();
+        exists = await User.exists({ referralCode: code });
+      }
+      user = await User.findByIdAndUpdate(req.user._id, { referralCode: code }, { new: true }).select('referralCode');
+    }
 
     const commissions = await Commission.find({ affiliate: req.user._id })
       .populate('referredUser', 'name email createdAt')
