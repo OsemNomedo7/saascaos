@@ -143,7 +143,7 @@ function fileUpload() {
       },
       contentType: multerS3.AUTO_CONTENT_TYPE,
     });
-    return multer({ storage, limits: { fileSize: 500 * 1024 * 1024 } });
+    return multer({ storage, limits: { fileSize: 5 * 1024 * 1024 * 1024 } });
   }
 
   // Fallback: Cloudinary raw (se só Cloudinary configurado)
@@ -156,7 +156,7 @@ function fileUpload() {
 
   return multer({
     storage: localDiskStorage(),
-    limits: { fileSize: 500 * 1024 * 1024 },
+    limits: { fileSize: 5 * 1024 * 1024 * 1024 },
   });
 }
 

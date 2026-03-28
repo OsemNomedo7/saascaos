@@ -45,14 +45,14 @@ const adminNav: NavItem[] = [
 
 const SkullMini = () => (
   <svg width="22" height="26" viewBox="0 0 36 40" fill="none"
-    style={{ filter: 'drop-shadow(0 0 5px rgba(0,255,65,0.5))' }}>
+    style={{ filter: 'drop-shadow(0 0 5px rgba(0,120,255,0.5))' }}>
     <path d="M18 2C9.163 2 2 9.163 2 18c0 5.4 2.56 10.2 6.56 13.28L9 32h18l.44-0.72C31.44 28.2 34 23.4 34 18 34 9.163 26.837 2 18 2z"
-      fill="rgba(0,255,65,0.08)" stroke="#00ff41" strokeWidth="1.6" strokeLinejoin="round"/>
+      fill="rgba(0,120,255,0.08)" stroke="#0096ff" strokeWidth="1.6" strokeLinejoin="round"/>
     <path d="M9 32v2h2.5v3h3v-3h7v3h3v-3H27v-2H9z"
-      fill="rgba(0,255,65,0.08)" stroke="#00ff41" strokeWidth="1.6"/>
-    <rect x="6.5" y="13" width="8" height="7" rx="1.5" fill="#00ff41" opacity="0.9"/>
-    <rect x="21.5" y="13" width="8" height="7" rx="1.5" fill="#00ff41" opacity="0.9"/>
-    <path d="M15.5 23.5h5l-2.5 3.5-2.5-3.5z" fill="#00ff41" opacity="0.55"/>
+      fill="rgba(0,120,255,0.08)" stroke="#0096ff" strokeWidth="1.6"/>
+    <rect x="6.5" y="13" width="8" height="7" rx="1.5" fill="#00d4ff" opacity="0.9"/>
+    <rect x="21.5" y="13" width="8" height="7" rx="1.5" fill="#00d4ff" opacity="0.9"/>
+    <path d="M15.5 23.5h5l-2.5 3.5-2.5-3.5z" fill="#0096ff" opacity="0.7"/>
   </svg>
 );
 
@@ -81,13 +81,13 @@ export default function Sidebar() {
     <aside style={{
       width: 240,
       minHeight: '100vh',
-      background: '#0a120a',
-      borderRight: '1px solid rgba(0,255,65,0.12)',
+      background: '#060d18',
+      borderRight: '1px solid rgba(0,120,255,0.12)',
       display: 'flex',
       flexDirection: 'column',
     }}>
       {/* Logo */}
-      <div style={{ padding: '20px 16px 16px', borderBottom: '1px solid rgba(0,255,65,0.1)' }}>
+      <div style={{ padding: '20px 16px 16px', borderBottom: '1px solid rgba(0,120,255,0.1)' }}>
         <Link href="/dashboard" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
           <SkullMini />
           <div>
@@ -96,12 +96,12 @@ export default function Sidebar() {
               fontSize: '0.82rem',
               fontWeight: 700,
               letterSpacing: '0.18em',
-              color: '#00ff41',
-              textShadow: '0 0 8px rgba(0,255,65,0.5)',
+              color: '#0096ff',
+              textShadow: '0 0 8px rgba(0,120,255,0.5)',
             }}>
               ELITE TROJAN
             </div>
-            <div style={{ fontSize: '0.58rem', color: '#1a3020', letterSpacing: '0.12em', marginTop: 1 }}>
+            <div style={{ fontSize: '0.58rem', color: '#0d1f38', letterSpacing: '0.12em', marginTop: 1 }}>
               v2.0.0 // SISTEMA
             </div>
           </div>
@@ -153,7 +153,7 @@ export default function Sidebar() {
         {/* Admin */}
         {user?.role === 'admin' && (
           <div>
-            <div className="section-hack" style={{ color: '#4d1a0a' }}>{'// ADMIN'}</div>
+            <div className="section-hack" style={{ color: '#0a1a3d' }}>{'// ADMIN'}</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               {adminNav.map((item) => (
                 <Link
@@ -177,20 +177,20 @@ export default function Sidebar() {
       </nav>
 
       {/* Bottom */}
-      <div style={{ padding: '10px 8px', borderTop: '1px solid rgba(0,255,65,0.08)' }}>
+      <div style={{ padding: '10px 8px', borderTop: '1px solid rgba(0,120,255,0.08)' }}>
         {/* Subscription */}
         {subscription && (
           <div style={{
             marginBottom: 8,
             padding: '8px 12px',
-            background: 'rgba(0,255,65,0.04)',
-            border: '1px solid rgba(0,255,65,0.15)',
+            background: 'rgba(0,120,255,0.04)',
+            border: '1px solid rgba(0,120,255,0.15)',
             borderRadius: 4,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
           }}>
-            <span style={{ fontSize: '0.62rem', color: '#2a4d30', letterSpacing: '0.1em' }}>PLANO</span>
+            <span style={{ fontSize: '0.62rem', color: '#1a3560', letterSpacing: '0.1em' }}>PLANO</span>
             <PlanBadge plan={subscription.plan} />
           </div>
         )}
@@ -205,11 +205,11 @@ export default function Sidebar() {
         }}>
           <div style={{
             width: 6, height: 6, borderRadius: '50%',
-            background: isConnected ? '#00ff41' : '#3a3a3a',
-            boxShadow: isConnected ? '0 0 6px #00ff41' : undefined,
+            background: isConnected ? '#0096ff' : '#3a3a3a',
+            boxShadow: isConnected ? '0 0 6px #0096ff' : undefined,
             animation: isConnected ? 'pulse 2s infinite' : undefined,
           }} />
-          <span style={{ fontSize: '0.6rem', color: '#1a3020', letterSpacing: '0.1em' }}>
+          <span style={{ fontSize: '0.6rem', color: '#0d1f38', letterSpacing: '0.1em' }}>
             {isConnected ? 'CONECTADO' : 'DESCONECTADO'}
           </span>
         </div>
@@ -224,19 +224,19 @@ export default function Sidebar() {
           transition: 'background 0.15s',
           cursor: 'default',
         }}
-          onMouseOver={e => (e.currentTarget.style.background = 'rgba(0,255,65,0.04)')}
+          onMouseOver={e => (e.currentTarget.style.background = 'rgba(0,120,255,0.04)')}
           onMouseOut={e => (e.currentTarget.style.background = 'transparent')}>
           <div style={{
             width: 30, height: 30,
-            background: 'rgba(0,255,65,0.1)',
-            border: '1px solid rgba(0,255,65,0.25)',
+            background: 'rgba(0,120,255,0.1)',
+            border: '1px solid rgba(0,120,255,0.25)',
             borderRadius: '50%',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             fontSize: '0.65rem',
             fontWeight: 700,
-            color: '#00ff41',
+            color: '#0096ff',
             flexShrink: 0,
             overflow: 'hidden',
           }}>
@@ -251,7 +251,7 @@ export default function Sidebar() {
             <p style={{
               fontSize: '0.75rem',
               fontWeight: 600,
-              color: '#a0c8a8',
+              color: '#a0c0e0',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',
@@ -260,10 +260,10 @@ export default function Sidebar() {
           </div>
           <button
             onClick={logout}
-            style={{ padding: 4, color: '#2a4d30', transition: 'color 0.15s', background: 'none', border: 'none', cursor: 'pointer' }}
+            style={{ padding: 4, color: '#1a3560', transition: 'color 0.15s', background: 'none', border: 'none', cursor: 'pointer' }}
             title="Sair"
             onMouseOver={e => (e.currentTarget.style.color = '#ff0040')}
-            onMouseOut={e => (e.currentTarget.style.color = '#2a4d30')}
+            onMouseOut={e => (e.currentTarget.style.color = '#1a3560')}
           >
             <LogOut className="w-3.5 h-3.5" />
           </button>
