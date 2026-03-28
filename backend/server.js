@@ -21,6 +21,7 @@ const dropRoutes = require('./src/routes/drops');
 const adminRoutes = require('./src/routes/admin');
 const searchRoutes = require('./src/routes/search');
 const notificationRoutes = require('./src/routes/notifications');
+const webhookRoutes = require('./src/routes/webhook');
 
 const app = express();
 const server = http.createServer(app);
@@ -60,6 +61,7 @@ app.use('/api/drops', dropRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api', searchRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/webhooks', webhookRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
