@@ -19,7 +19,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   if (isLoading) {
     return (
-      <div style={{ minHeight: '100vh', background: '#050a05', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ minHeight: '100vh', background: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
           <div style={{
             width: 32, height: 32,
@@ -39,63 +39,28 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   if (!isAuthenticated) return null;
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#050a05', position: 'relative' }}>
-      {/* Global ambient orbs — aurora multicolor */}
+    <div style={{ display: 'flex', minHeight: '100vh', background: 'transparent', position: 'relative' }}>
+      {/* Ambient glow — complementa o SVG de circuit board */}
       <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0, overflow: 'hidden' }}>
-        {/* Top-left: ciano intenso */}
         <div className="float-slow" style={{
-          position: 'absolute', width: 1000, height: 800, borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(0,210,255,0.22) 0%, rgba(0,180,255,0.08) 40%, transparent 70%)',
-          top: '-30%', left: '-15%',
-          filter: 'blur(50px)',
-        }} />
-        {/* Top-right: roxo/violeta */}
-        <div className="float-med" style={{
-          position: 'absolute', width: 900, height: 700, borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(160,60,255,0.20) 0%, rgba(120,40,255,0.06) 40%, transparent 70%)',
-          top: '-20%', right: '-15%',
-          filter: 'blur(45px)',
-          animationDelay: '4s',
-        }} />
-        {/* Lado esquerdo: verde (menor presença) */}
-        <div className="float-slow" style={{
-          position: 'absolute', width: 600, height: 700, borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(0,255,100,0.15) 0%, rgba(0,200,60,0.04) 50%, transparent 70%)',
-          top: '30%', left: '-8%',
-          filter: 'blur(40px)',
-          animationDelay: '2s',
-        }} />
-        {/* Lado direito: azul elétrico */}
-        <div className="float-med" style={{
           position: 'absolute', width: 700, height: 600, borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(0,100,255,0.18) 0%, rgba(0,80,220,0.05) 50%, transparent 70%)',
-          top: '25%', right: '-10%',
-          filter: 'blur(40px)',
-          animationDelay: '6s',
+          background: 'radial-gradient(circle, rgba(0,200,255,0.12) 0%, transparent 70%)',
+          top: '-15%', left: '-10%', filter: 'blur(60px)',
         }} />
-        {/* Bottom-left: turquesa/teal */}
-        <div className="float-slow" style={{
-          position: 'absolute', width: 800, height: 700, borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(0,200,180,0.18) 0%, rgba(0,180,160,0.05) 50%, transparent 70%)',
-          bottom: '-20%', left: '-10%',
-          filter: 'blur(45px)',
-          animationDelay: '1s',
-        }} />
-        {/* Bottom-right: magenta/rosa */}
         <div className="float-med" style={{
-          position: 'absolute', width: 700, height: 600, borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(255,0,160,0.14) 0%, rgba(220,0,120,0.04) 50%, transparent 70%)',
-          bottom: '-15%', right: '-10%',
-          filter: 'blur(40px)',
-          animationDelay: '8s',
+          position: 'absolute', width: 600, height: 500, borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(140,50,255,0.10) 0%, transparent 70%)',
+          top: '-10%', right: '-10%', filter: 'blur(55px)', animationDelay: '5s',
         }} />
-        {/* Centro: laranja quente suave */}
         <div className="float-slow" style={{
-          position: 'absolute', width: 400, height: 350, borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(255,120,0,0.10) 0%, transparent 70%)',
-          top: '50%', left: '45%',
-          filter: 'blur(35px)',
-          animationDelay: '3s',
+          position: 'absolute', width: 600, height: 500, borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(0,180,150,0.09) 0%, transparent 70%)',
+          bottom: '-15%', left: '-5%', filter: 'blur(55px)', animationDelay: '3s',
+        }} />
+        <div className="float-med" style={{
+          position: 'absolute', width: 550, height: 500, borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(0,80,255,0.09) 0%, transparent 70%)',
+          bottom: '-10%', right: '-5%', filter: 'blur(50px)', animationDelay: '7s',
         }} />
       </div>
 

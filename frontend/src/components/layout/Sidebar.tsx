@@ -60,6 +60,7 @@ export default function Sidebar() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const [avatarImgError, setAvatarImgError] = React.useState(false);
+  React.useEffect(() => { setAvatarImgError(false); }, [user?.avatar]);
   const { isConnected } = useSocket();
 
   const { data: subData } = useQuery({

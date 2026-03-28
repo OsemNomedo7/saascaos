@@ -43,6 +43,7 @@ export default function ProfilePage() {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [uploadingBanner, setUploadingBanner] = useState(false);
   const [avatarImgError, setAvatarImgError] = useState(false);
+  React.useEffect(() => { setAvatarImgError(false); }, [user?.avatar]);
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
 
