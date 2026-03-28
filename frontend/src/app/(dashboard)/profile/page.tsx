@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import {
@@ -42,8 +42,6 @@ export default function ProfilePage() {
   const [uploadingBanner, setUploadingBanner] = useState(false);
   const [avatarUploadError, setAvatarUploadError] = useState('');
   const [bannerUploadError, setBannerUploadError] = useState('');
-  const avatarInputRef = useRef<HTMLInputElement>(null);
-  const bannerInputRef = useRef<HTMLInputElement>(null);
 
   const { register, handleSubmit, reset, watch } = useForm<EditForm>({
     defaultValues: {
@@ -207,30 +205,29 @@ export default function ProfilePage() {
             backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.1) 2px, rgba(0,0,0,0.1) 4px)',
             pointerEvents: 'none',
           }} />
-          {/* Banner upload button — only in edit mode */}
-          {isEditing && (
-            <button
-              type="button"
-              onClick={() => bannerInputRef.current?.click()}
-              disabled={uploadingBanner}
-              style={{
-                position: 'absolute', bottom: 8, right: 8,
-                display: 'flex', alignItems: 'center', gap: 5,
-                padding: '5px 10px', borderRadius: 4, cursor: uploadingBanner ? 'default' : 'pointer',
-                background: 'rgba(0,0,0,0.7)', border: '1px solid rgba(0,255,65,0.4)',
-                color: '#00ff41', fontFamily: 'JetBrains Mono, monospace', fontSize: '0.62rem',
-              }}
-            >
-              {uploadingBanner ? (
-                <div style={{ width: 11, height: 11, border: '1.5px solid #00ff41', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
-              ) : (
-                <ImageIcon style={{ width: 11, height: 11 }} />
-              )}
-              {uploadingBanner ? 'ENVIANDO...' : 'TROCAR BANNER'}
-            </button>
-          )}
+          {/* Banner upload button — sempre visível */}
+          <label
+            htmlFor="bannerFileInput"
+            style={{
+              position: 'absolute', bottom: 8, right: 8,
+              display: 'flex', alignItems: 'center', gap: 5,
+              padding: '5px 10px', borderRadius: 4,
+              cursor: uploadingBanner ? 'default' : 'pointer',
+              background: 'rgba(0,0,0,0.7)', border: '1px solid rgba(0,255,65,0.4)',
+              color: '#00ff41', fontFamily: 'JetBrains Mono, monospace', fontSize: '0.62rem',
+              pointerEvents: uploadingBanner ? 'none' : 'auto',
+              userSelect: 'none',
+            }}
+          >
+            {uploadingBanner ? (
+              <div style={{ width: 11, height: 11, border: '1.5px solid #00ff41', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
+            ) : (
+              <ImageIcon style={{ width: 11, height: 11 }} />
+            )}
+            {uploadingBanner ? 'ENVIANDO...' : 'TROCAR BANNER'}
+          </label>
           <input
-            ref={bannerInputRef}
+            id="bannerFileInput"
             type="file"
             accept="image/*,image/heic,image/heif,image/webp,image/avif"
             style={{ display: 'none' }}
@@ -246,7 +243,8 @@ export default function ProfilePage() {
           gap: 12,
         }}>
           <div style={{ display: 'flex', alignItems: 'flex-end', gap: 14, marginTop: -28 }}>
-            <div style={{ position: 'relative' }}>
+            <div style={{ position: 'relative', width: 72, height: 72, flexShrink: 0 }}>
+              {/* Avatar circle */}
               <div style={{
                 width: 72, height: 72,
                 background: 'rgba(0,255,65,0.08)',
@@ -255,7 +253,7 @@ export default function ProfilePage() {
                 borderRadius: '50%',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontSize: '1.4rem', fontWeight: 700, color: '#00ff41',
-                flexShrink: 0, overflow: 'hidden', position: 'relative',
+                overflow: 'hidden', position: 'relative',
               }}>
                 <span style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1 }}>
                   {getInitials(user.name)}
@@ -271,30 +269,43 @@ export default function ProfilePage() {
                   />
                 )}
               </div>
-              {/* Avatar upload overlay — sempre visível */}
-              <button
-                type="button"
-                onClick={() => avatarInputRef.current?.click()}
-                disabled={uploadingAvatar}
+              {/* Avatar upload label — sempre clicável via label→input */}
+              <label
+                htmlFor="avatarFileInput"
                 title="Trocar foto de perfil"
                 style={{
                   position: 'absolute', inset: 0, borderRadius: '50%',
-                  background: uploadingAvatar ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0)',
-                  border: 'none', cursor: uploadingAvatar ? 'default' : 'pointer',
+                  background: 'rgba(0,0,0,0)',
+                  cursor: uploadingAvatar ? 'default' : 'pointer',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   color: '#00ff41', transition: 'background 0.2s',
+                  zIndex: 10,
+                  pointerEvents: uploadingAvatar ? 'none' : 'auto',
                 }}
-                onMouseEnter={e => { if (!uploadingAvatar) (e.currentTarget as HTMLButtonElement).style.background = 'rgba(0,0,0,0.6)'; }}
-                onMouseLeave={e => { if (!uploadingAvatar) (e.currentTarget as HTMLButtonElement).style.background = 'rgba(0,0,0,0)'; }}
+                onMouseEnter={e => { (e.currentTarget as HTMLLabelElement).style.background = 'rgba(0,0,0,0.6)'; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLLabelElement).style.background = 'rgba(0,0,0,0)'; }}
               >
-                {uploadingAvatar ? (
+                {uploadingAvatar && (
                   <div style={{ width: 18, height: 18, border: '2px solid #00ff41', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
-                ) : (
-                  <Camera style={{ width: 18, height: 18 }} />
                 )}
-              </button>
+              </label>
+              {/* Ícone de câmera fixo no canto inferior direito */}
+              {!uploadingAvatar && (
+                <label
+                  htmlFor="avatarFileInput"
+                  style={{
+                    position: 'absolute', bottom: 0, right: 0,
+                    width: 22, height: 22, borderRadius: '50%',
+                    background: '#0a2a0a', border: `1.5px solid ${levelInfo.color}`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    cursor: 'pointer', zIndex: 11,
+                  }}
+                >
+                  <Camera style={{ width: 11, height: 11, color: '#00ff41' }} />
+                </label>
+              )}
               <input
-                ref={avatarInputRef}
+                id="avatarFileInput"
                 type="file"
                 accept="image/*,image/heic,image/heif,image/webp,image/avif"
                 style={{ display: 'none' }}
