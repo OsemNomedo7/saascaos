@@ -56,8 +56,13 @@ if (useCloudinary) {
 const r2AccessKey   = process.env.R2_ACCESS_KEY_ID    || '';
 const r2SecretKey   = process.env.R2_SECRET_ACCESS_KEY || '';
 const r2AccountId   = process.env.R2_ACCOUNT_ID        || '';
+const r2PublicUrl   = process.env.R2_PUBLIC_URL         || '';
 const r2AccessValid = r2AccessKey.length >= 20 && !r2AccessKey.startsWith('your_');
 const r2SecretValid = r2SecretKey.length >= 20 && !r2SecretKey.startsWith('your_');
+// R2_PUBLIC_URL precisa ser uma URL real (sem XXXX placeholder) para servir arquivos publicamente
+const r2PublicValid = r2PublicUrl.startsWith('https://') &&
+  !r2PublicUrl.includes('XXXX') &&
+  !r2PublicUrl.startsWith('your_');
 
 const useR2 = !!(
   r2AccountId && !r2AccountId.startsWith('your_') &&
@@ -65,7 +70,8 @@ const useR2 = !!(
   r2SecretKey &&
   process.env.R2_BUCKET_NAME && !process.env.R2_BUCKET_NAME.startsWith('your_') &&
   r2AccessValid &&
-  r2SecretValid
+  r2SecretValid &&
+  r2PublicValid
 );
 
 let r2Client = null;
