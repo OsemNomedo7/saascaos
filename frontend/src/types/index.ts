@@ -28,6 +28,8 @@ export interface User {
     website?: string;
   };
   achievements?: string[];
+  referralCode?: string;
+  referredBy?: string;
 }
 
 export interface Subscription {

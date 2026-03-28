@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Users, DollarSign, Check, Clock, ChevronRight } from 'lucide-react';
+import { Check, ChevronRight } from 'lucide-react';
 import api from '@/lib/api';
 
 interface Affiliate {

@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { Eye, EyeOff, UserPlus, CheckCircle, ChevronRight } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -44,15 +44,14 @@ const terminalLines = [
   { prompt: '✓', text: 'Acesso concedido. Bem-vindo ao sistema.', delay: 3, success: true },
 ];
 
-export default function RegisterPage() {
+function RegisterForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { register: registerUser } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Capturar código de afiliado da URL
-  const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
   const refCode = searchParams?.get('ref') || '';
 
   const { register, handleSubmit, watch, formState: { errors } } = useForm<RegisterForm>();
@@ -296,5 +295,13 @@ export default function RegisterPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={null}>
+      <RegisterForm />
+    </Suspense>
   );
 }
