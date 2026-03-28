@@ -149,6 +149,7 @@ async function processImageUpload(file) {
 }
 
 // ─── fileUpload() ─────────────────────────────────────────────────────────────
+// Sempre salva em disco primeiro (sem limite prático), depois tenta Cloudinary.
 
 function fileUpload() {
   if (useR2) {
@@ -163,17 +164,10 @@ function fileUpload() {
     });
   }
 
-  if (useCloudinary) {
-    // Cloudinary raw para arquivos — usa memoryStorage pois raw não precisa de filename
-    return multer({
-      storage: multer.memoryStorage(),
-      limits: { fileSize: 200 * 1024 * 1024 }, // 200 MB (limite Cloudinary)
-    });
-  }
-
+  // Cloudinary ou disco: salva em disco primeiro, processFileUpload decide depois
   return multer({
     storage: diskStorage(),
-    limits: { fileSize: 5 * 1024 * 1024 * 1024 },
+    limits: { fileSize: 5 * 1024 * 1024 * 1024 }, // 5 GB
   });
 }
 
@@ -182,7 +176,6 @@ function fileUpload() {
 async function processFileUpload(file) {
   // R2 via multer-s3: URL pública em file.location
   if (useR2 && file.location) {
-    // Se R2_PUBLIC_URL estiver configurado, usa URL pública customizada
     if (process.env.R2_PUBLIC_URL && file.key) {
       const publicBase = process.env.R2_PUBLIC_URL.replace(/\/$/, '');
       return `${publicBase}/${file.key}`;
@@ -190,23 +183,33 @@ async function processFileUpload(file) {
     return file.location;
   }
 
-  // Cloudinary raw fallback
-  if (useCloudinary && file.buffer) {
-    return new Promise((resolve, reject) => {
-      const ext = path.extname(file.originalname);
-      const stream = cloudinary.uploader.upload_stream(
-        { folder: 'elite-trojan/files', resource_type: 'raw', public_id: uuidv4() + ext },
-        (error, result) => {
-          if (error) return reject(error);
-          resolve(result.secure_url);
-        }
-      );
-      stream.end(file.buffer);
-    });
+  const fallbackUrl = localUrl(file.filename);
+
+  // Cloudinary raw — lê do disco e faz upload (mesmo padrão das imagens)
+  if (useCloudinary) {
+    try {
+      const buffer = fs.readFileSync(file.path);
+      const cloudUrl = await new Promise((resolve, reject) => {
+        const ext = path.extname(file.originalname);
+        const stream = cloudinary.uploader.upload_stream(
+          { folder: 'elite-trojan/files', resource_type: 'raw', public_id: uuidv4() + ext },
+          (error, result) => {
+            if (error) return reject(error);
+            resolve(result.secure_url);
+          }
+        );
+        stream.end(buffer);
+      });
+      try { fs.unlinkSync(file.path); } catch {}
+      console.log('[storage] ✓ Arquivo no Cloudinary:', cloudUrl);
+      return cloudUrl;
+    } catch (err) {
+      console.error('[storage] ✗ Cloudinary falhou para arquivo:', err.message, '— usando disco');
+    }
   }
 
-  // Disco local
-  return localUrl(file.filename);
+  console.log('[storage] Arquivo salvo localmente:', fallbackUrl);
+  return fallbackUrl;
 }
 
 // ─── getFileUrl() ─────────────────────────────────────────────────────────────

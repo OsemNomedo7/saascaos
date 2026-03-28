@@ -327,21 +327,10 @@ router.post('/presign-upload', auth, admin, async (req, res) => {
 router.post('/upload', auth, admin, (req, res, next) => {
   upload.single('file')(req, res, (err) => {
     if (err?.code === 'LIMIT_FILE_SIZE') {
-      const limitLabel = useR2 ? '5 GB' : '200 MB';
-      const hint = !useR2
-        ? ' Configure as variáveis R2_* no servidor para suporte a arquivos maiores, ou use upload direto via presigned URL.'
-        : '';
-      return res.status(413).json({ message: `Arquivo muito grande. Limite do servidor: ${limitLabel}.${hint}` });
+      return res.status(413).json({ message: 'Arquivo muito grande. Limite máximo: 5 GB.' });
     }
     if (err) {
-      const msg = err.message || '';
-      // Credential length error from AWS SDK → R2 keys are invalid in env vars
-      if (msg.includes('Credential') && msg.includes('length')) {
-        return res.status(500).json({
-          message: 'Credenciais R2 inválidas. Verifique as variáveis R2_ACCESS_KEY_ID e R2_SECRET_ACCESS_KEY no Render (Access Key ID deve ter 32 caracteres).'
-        });
-      }
-      return res.status(500).json({ message: `Erro no upload: ${msg}` });
+      return res.status(500).json({ message: `Erro no upload: ${err.message}` });
     }
     next();
   });
