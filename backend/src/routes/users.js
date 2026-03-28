@@ -117,9 +117,17 @@ router.get('/me/downloads', auth, async (req, res) => {
 });
 
 // POST /api/users/me/avatar - upload avatar image
-router.post('/me/avatar', auth, uploadImage.single('avatar'), async (req, res) => {
+router.post('/me/avatar', auth, (req, res, next) => {
+  uploadImage.single('avatar')(req, res, (err) => {
+    if (err && err.code === 'LIMIT_FILE_SIZE') {
+      return res.status(413).json({ message: 'Imagem muito grande. Limite: 100 MB.' });
+    }
+    if (err) return res.status(500).json({ message: `Erro no upload: ${err.message}` });
+    next();
+  });
+}, async (req, res) => {
   try {
-    if (!req.file) return res.status(400).json({ message: 'No image uploaded.' });
+    if (!req.file) return res.status(400).json({ message: 'Nenhuma imagem enviada.' });
     const avatarUrl = await processImageUpload(req.file);
     console.log('[AVATAR] URL salva:', avatarUrl);
     const user = await User.findByIdAndUpdate(req.user._id, { avatar: avatarUrl }, { new: true });
@@ -131,9 +139,17 @@ router.post('/me/avatar', auth, uploadImage.single('avatar'), async (req, res) =
 });
 
 // POST /api/users/me/banner - upload banner image
-router.post('/me/banner', auth, uploadImage.single('banner'), async (req, res) => {
+router.post('/me/banner', auth, (req, res, next) => {
+  uploadImage.single('banner')(req, res, (err) => {
+    if (err && err.code === 'LIMIT_FILE_SIZE') {
+      return res.status(413).json({ message: 'Imagem muito grande. Limite: 100 MB.' });
+    }
+    if (err) return res.status(500).json({ message: `Erro no upload: ${err.message}` });
+    next();
+  });
+}, async (req, res) => {
   try {
-    if (!req.file) return res.status(400).json({ message: 'No image uploaded.' });
+    if (!req.file) return res.status(400).json({ message: 'Nenhuma imagem enviada.' });
     const bannerUrl = await processImageUpload(req.file);
     const user = await User.findByIdAndUpdate(req.user._id, { bannerUrl }, { new: true });
     res.json({ message: 'Banner updated.', bannerUrl, user });

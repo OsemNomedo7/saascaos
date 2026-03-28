@@ -80,12 +80,12 @@ function imageUpload() {
     // memoryStorage → buffer fica em req.file.buffer → enviamos para Cloudinary em seguida
     return multer({
       storage: multer.memoryStorage(),
-      limits: { fileSize: 50 * 1024 * 1024 },
+      limits: { fileSize: 100 * 1024 * 1024 },
     });
   }
   return multer({
     storage: localDiskStorage(),
-    limits: { fileSize: 50 * 1024 * 1024 },
+    limits: { fileSize: 100 * 1024 * 1024 },
   });
 }
 
