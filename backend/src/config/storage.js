@@ -55,14 +55,15 @@ if (useCloudinary) {
 // Se inválidos, desabilita R2 para evitar erro de runtime.
 const r2AccessKey   = process.env.R2_ACCESS_KEY_ID    || '';
 const r2SecretKey   = process.env.R2_SECRET_ACCESS_KEY || '';
-const r2AccessValid = r2AccessKey.length >= 20;
-const r2SecretValid = r2SecretKey.length >= 20;
+const r2AccountId   = process.env.R2_ACCOUNT_ID        || '';
+const r2AccessValid = r2AccessKey.length >= 20 && !r2AccessKey.startsWith('your_');
+const r2SecretValid = r2SecretKey.length >= 20 && !r2SecretKey.startsWith('your_');
 
 const useR2 = !!(
-  process.env.R2_ACCOUNT_ID &&
+  r2AccountId && !r2AccountId.startsWith('your_') &&
   r2AccessKey &&
   r2SecretKey &&
-  process.env.R2_BUCKET_NAME &&
+  process.env.R2_BUCKET_NAME && !process.env.R2_BUCKET_NAME.startsWith('your_') &&
   r2AccessValid &&
   r2SecretValid
 );
@@ -71,7 +72,7 @@ let r2Client = null;
 if (useR2) {
   r2Client = new S3Client({
     region: 'auto',
-    endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+    endpoint: `https://${r2AccountId}.r2.cloudflarestorage.com`,
     credentials: { accessKeyId: r2AccessKey, secretAccessKey: r2SecretKey },
   });
   console.log('[storage] ✓ Cloudflare R2 pronto, bucket:', process.env.R2_BUCKET_NAME);
