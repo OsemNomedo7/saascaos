@@ -165,9 +165,10 @@ export default function ContentFilter({
                     alignItems: 'center',
                     gap: 7,
                   }}
+                  title={cat.description || cat.name}
                 >
-                  <span style={{ width: 5, height: 5, borderRadius: '50%', background: cat.color, flexShrink: 0 }} />
-                  {cat.name.toUpperCase()}
+                  <span style={{ fontSize: '0.85rem', lineHeight: 1, flexShrink: 0 }}>{cat.icon || '📁'}</span>
+                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{cat.name.toUpperCase()}</span>
                 </button>
               ))}
             </div>

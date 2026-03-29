@@ -263,6 +263,76 @@ export default function ContentPage() {
         )}
       </div>
 
+      {/* Category cards strip */}
+      {categories.length > 0 && (
+        <div style={{ marginBottom: 20 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+            <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.58rem', color: '#00d4ff', letterSpacing: '0.15em' }}>// CATEGORIAS</span>
+            {selectedCategory && (
+              <button
+                onClick={() => { setSelectedCategory(''); setPage(1); }}
+                style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.55rem', color: '#ff4400', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+              >
+                ✕ limpar filtro
+              </button>
+            )}
+          </div>
+          <div style={{ display: 'flex', gap: 10, overflowX: 'auto', paddingBottom: 6, scrollbarWidth: 'thin' }}>
+            {categories.map(cat => {
+              const isSelected = selectedCategory === cat._id;
+              return (
+                <button
+                  key={cat._id}
+                  onClick={() => { setSelectedCategory(isSelected ? '' : cat._id); setPage(1); }}
+                  style={{
+                    flexShrink: 0, width: 160,
+                    padding: '12px 14px',
+                    background: isSelected ? `${cat.color}18` : 'rgba(255,255,255,0.03)',
+                    border: `1px solid ${isSelected ? cat.color + '55' : 'rgba(255,255,255,0.07)'}`,
+                    borderRadius: 8, cursor: 'pointer', textAlign: 'left',
+                    transition: 'all 0.15s',
+                    boxShadow: isSelected ? `0 0 12px ${cat.color}22` : 'none',
+                  }}
+                  onMouseOver={e => {
+                    if (!isSelected) {
+                      (e.currentTarget as HTMLButtonElement).style.border = `1px solid ${cat.color}33`;
+                      (e.currentTarget as HTMLButtonElement).style.background = `${cat.color}0d`;
+                    }
+                  }}
+                  onMouseOut={e => {
+                    if (!isSelected) {
+                      (e.currentTarget as HTMLButtonElement).style.border = '1px solid rgba(255,255,255,0.07)';
+                      (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.03)';
+                    }
+                  }}
+                >
+                  <div style={{ fontSize: '1.4rem', marginBottom: 6, lineHeight: 1 }}>
+                    {cat.icon || '📁'}
+                  </div>
+                  <p style={{
+                    margin: '0 0 3px', fontFamily: 'JetBrains Mono, monospace',
+                    fontSize: '0.68rem', fontWeight: 700,
+                    color: isSelected ? cat.color : '#c0d8e8',
+                    whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                  }}>
+                    {cat.name}
+                  </p>
+                  {cat.description && (
+                    <p style={{
+                      margin: 0, fontSize: '0.6rem', color: '#6a8898',
+                      display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden', lineHeight: 1.4,
+                    }}>
+                      {cat.description}
+                    </p>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Search bar */}
       <div style={{ position: 'relative', marginBottom: 20 }}>
         <Search style={{
