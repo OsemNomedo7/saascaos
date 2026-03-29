@@ -410,7 +410,7 @@ export default function AdminAffiliatesPage() {
                 {ranking.map((r) => (
                   <tr key={r.affiliate?._id} style={{ borderBottom: '1px solid rgba(255,68,0,0.06)', background: r.position === 1 ? 'rgba(255,204,0,0.03)' : 'transparent' }}>
                     <td style={{ padding: '12px 16px' }}>
-                      <span style={{ fontSize: r.position <= 3 ? '1.2rem' : undefined, ...mono, fontSize: r.position > 3 ? '0.8rem' : undefined, color: '#7a3a20' }}>
+                      <span style={{ ...mono, fontSize: r.position <= 3 ? '1.2rem' : '0.8rem', color: '#7a3a20' }}>
                         {r.position <= 3 ? rankMedals[r.position - 1] : `#${r.position}`}
                       </span>
                     </td>
