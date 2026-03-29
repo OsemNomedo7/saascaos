@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import {
   MessageSquare, Pin, Trash2, Plus, Eye, ThumbsUp,
-  Send, Hash, Image, Video, X, Upload, Repeat2,
+  Send, Hash, Image as ImageIcon, Video, X, Upload, Repeat2,
   Bookmark, BookmarkCheck, ChevronDown, ChevronUp, CornerDownRight,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -40,7 +40,6 @@ function PostCard({ post, onLike, onDelete, onPin, onRepost, onBookmark, current
   const [expanded, setExpanded] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [replyTo, setReplyTo] = useState<{ id: string; name: string } | null>(null);
-  const commentInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
 
   const { data: commentsData } = useQuery({
@@ -58,7 +57,7 @@ function PostCard({ post, onLike, onDelete, onPin, onRepost, onBookmark, current
     },
   });
 
-  const { register, handleSubmit, reset, setValue } = useForm<CommentForm>();
+  const { register, handleSubmit, reset, setValue, setFocus } = useForm<CommentForm>();
   const author = post.author as User;
   const likes = post.likes || [];
   const reposts = post.reposts || [];
@@ -77,7 +76,7 @@ function PostCard({ post, onLike, onDelete, onPin, onRepost, onBookmark, current
     setReplyTo({ id: commentId, name: authorName });
     setShowComments(true);
     setValue('content', `@${authorName} `);
-    setTimeout(() => commentInputRef.current?.focus(), 100);
+    setTimeout(() => setFocus('content'), 100);
   };
 
   return (
@@ -310,7 +309,6 @@ function PostCard({ post, onLike, onDelete, onPin, onRepost, onBookmark, current
             {/* Comment input */}
             <form onSubmit={handleSubmit(onCommentSubmit)} style={{ display: 'flex', gap: 7 }}>
               <input
-                ref={commentInputRef}
                 {...register('content', { required: true })}
                 type="text"
                 placeholder="Escreva um comentário..."
@@ -642,7 +640,7 @@ export default function CommunityPage() {
                 {!mediaFile ? (
                   <div style={{ display: 'flex', gap: 8 }}>
                     {[
-                      { label: 'IMAGEM', icon: <Image style={{ width: 13, height: 13 }} />, action: () => imageInputRef.current?.click() },
+                      { label: 'IMAGEM', icon: <ImageIcon style={{ width: 13, height: 13 }} />, action: () => imageInputRef.current?.click() },
                       { label: 'VÍDEO', icon: <Video style={{ width: 13, height: 13 }} />, action: () => videoInputRef.current?.click() },
                     ].map(btn => (
                       <button key={btn.label} type="button" onClick={btn.action} style={{
