@@ -147,7 +147,7 @@ function DropCard({ drop }: { drop: Content }) {
         </p>
 
         {drop.description && (
-          <p style={{ fontSize: '0.72rem', color: '#7a9aaa', margin: '0 0 12px', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+          <p style={{ fontSize: '0.72rem', color: '#7a9aaa', margin: '0 0 12px', lineHeight: 1.5 }}>
             {drop.description}
           </p>
         )}
