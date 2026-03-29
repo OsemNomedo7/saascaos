@@ -267,7 +267,7 @@ export default function ContentPage() {
       {categories.length > 0 && (
         <div style={{ marginBottom: 20 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-            <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.58rem', color: '#00d4ff', letterSpacing: '0.15em' }}>// CATEGORIAS</span>
+            <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.58rem', color: '#00d4ff', letterSpacing: '0.15em' }>{'// CATEGORIAS'}</span>
             {selectedCategory && (
               <button
                 onClick={() => { setSelectedCategory(''); setPage(1); }}

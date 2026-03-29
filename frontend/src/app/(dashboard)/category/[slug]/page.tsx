@@ -101,7 +101,7 @@ export default function CategoryPage() {
           <div style={{ flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
               <p style={{ ...mono, fontSize: '0.55rem', color, letterSpacing: '0.2em', margin: 0, opacity: 0.7 }}>
-                // CATEGORIA
+                {'// CATEGORIA'}
               </p>
             </div>
             <h1 style={{ ...mono, fontSize: '1.4rem', fontWeight: 700, color: '#e0f0ff', margin: '0 0 6px', textShadow: `0 0 20px ${color}44` }}>
