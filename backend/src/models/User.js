@@ -74,6 +74,14 @@ const userSchema = new mongoose.Schema(
       ref: 'User',
       default: null,
     },
+    affiliateCommissionRate: {
+      type: Number,
+      default: null, // null = usa o padrão global (AFFILIATE_COMMISSION_RATE)
+    },
+    isAffiliateActive: {
+      type: Boolean,
+      default: true,
+    },
   },
   {
     timestamps: true,
