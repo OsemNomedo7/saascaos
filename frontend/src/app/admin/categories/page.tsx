@@ -3,11 +3,12 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
-import { Plus, Edit2, Trash2, FolderOpen } from 'lucide-react';
+import { Plus, Edit2, Trash2, FolderOpen, X } from 'lucide-react';
 import { categoriesApi } from '@/lib/api';
 import { Modal, ConfirmModal } from '@/components/ui/Modal';
-import { formatDate } from '@/lib/utils';
 import type { Category } from '@/types';
+
+const mono: React.CSSProperties = { fontFamily: 'JetBrains Mono, monospace' };
 
 interface CategoryForm {
   name: string;
@@ -17,11 +18,127 @@ interface CategoryForm {
   order: number;
 }
 
+// Emoji groups for the icon picker
+const EMOJI_GROUPS = [
+  {
+    label: 'Tech & Segurança',
+    emojis: ['💻','🖥️','📱','⌨️','🖱️','🔒','🔓','🛡️','⚔️','🗡️','💀','☠️','👾','🤖','🧠','⚡','🔐','🕵️','🦠','💣'],
+  },
+  {
+    label: 'Dados & Arquivos',
+    emojis: ['💾','📀','🗄️','📁','📂','🗃️','📊','📈','📉','🔬','🔭','📡','🌐','🕸️','💡','⚗️','🧬','🔧','🔩','⚙️'],
+  },
+  {
+    label: 'Mídia & Conteúdo',
+    emojis: ['🎬','🎥','📹','📷','🎵','🎙️','📻','📺','🎮','🕹️','📖','📝','📄','📋','🗒️','📰','🏴','🚀','🎯','💯'],
+  },
+  {
+    label: 'Pessoas & Ação',
+    emojis: ['👤','👥','🧑‍💻','👨‍🔬','🥷','🦹','🧑‍🎓','🏆','🥇','🎖️','🔑','🗝️','🔎','👁️','👀','✅','❌','⚠️','🚫','💥'],
+  },
+];
+
+function EmojiPickerField({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div style={{ position: 'relative' }}>
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+        {/* Preview + open button */}
+        <button
+          type="button"
+          onClick={() => setOpen(v => !v)}
+          style={{
+            width: 48, height: 48, borderRadius: 8, flexShrink: 0,
+            background: open ? 'rgba(0,150,255,0.12)' : 'rgba(255,255,255,0.04)',
+            border: `1px solid ${open ? 'rgba(0,150,255,0.4)' : 'rgba(255,255,255,0.1)'}`,
+            fontSize: '1.5rem', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            transition: 'all 0.15s',
+          }}
+          title="Escolher ícone"
+        >
+          {value || '📁'}
+        </button>
+        {/* Manual input for custom emoji */}
+        <div style={{ flex: 1 }}>
+          <input
+            type="text"
+            value={value}
+            onChange={e => onChange(e.target.value)}
+            placeholder="Clique no botão ou cole um emoji"
+            style={{
+              width: '100%', padding: '8px 10px',
+              background: 'rgba(255,255,255,0.04)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              borderRadius: 6, color: '#c0d8e8',
+              ...mono, fontSize: '0.72rem', outline: 'none',
+              boxSizing: 'border-box',
+            }}
+          />
+          <p style={{ ...mono, fontSize: '0.55rem', color: '#6a8898', marginTop: 3 }}>
+            Clique no botão para escolher ou cole diretamente um emoji
+          </p>
+        </div>
+      </div>
+
+      {/* Picker dropdown */}
+      {open && (
+        <div style={{
+          position: 'absolute', top: '100%', left: 0, marginTop: 6, zIndex: 50,
+          background: '#060d18', border: '1px solid rgba(0,150,255,0.2)',
+          borderRadius: 10, padding: 14, width: 360,
+          boxShadow: '0 8px 32px rgba(0,0,0,0.7)',
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+            <span style={{ ...mono, fontSize: '0.6rem', color: '#00d4ff', letterSpacing: '0.15em' }}>ESCOLHER ÍCONE</span>
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6a8898', padding: 2 }}
+            >
+              <X style={{ width: 13, height: 13 }} />
+            </button>
+          </div>
+          {EMOJI_GROUPS.map(group => (
+            <div key={group.label} style={{ marginBottom: 12 }}>
+              <p style={{ ...mono, fontSize: '0.55rem', color: '#6a8898', letterSpacing: '0.12em', marginBottom: 5 }}>
+                {group.label.toUpperCase()}
+              </p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
+                {group.emojis.map(emoji => (
+                  <button
+                    key={emoji}
+                    type="button"
+                    onClick={() => { onChange(emoji); setOpen(false); }}
+                    style={{
+                      width: 34, height: 34, fontSize: '1.2rem',
+                      background: value === emoji ? 'rgba(0,150,255,0.2)' : 'rgba(255,255,255,0.03)',
+                      border: `1px solid ${value === emoji ? 'rgba(0,150,255,0.4)' : 'rgba(255,255,255,0.06)'}`,
+                      borderRadius: 6, cursor: 'pointer', transition: 'all 0.1s',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}
+                    onMouseOver={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(0,150,255,0.12)'; }}
+                    onMouseOut={e => { (e.currentTarget as HTMLButtonElement).style.background = value === emoji ? 'rgba(0,150,255,0.2)' : 'rgba(255,255,255,0.03)'; }}
+                  >
+                    {emoji}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function AdminCategoriesPage() {
   const queryClient = useQueryClient();
   const [editModal, setEditModal] = useState<{ open: boolean; category: Category | null }>({ open: false, category: null });
   const [deleteModal, setDeleteModal] = useState<{ open: boolean; id: string | null }>({ open: false, id: null });
   const [isCreating, setIsCreating] = useState(false);
+  const [iconValue, setIconValue] = useState('');
 
   const { data, isLoading } = useQuery({
     queryKey: ['admin-categories'],
@@ -35,6 +152,7 @@ export default function AdminCategoriesPage() {
       queryClient.invalidateQueries({ queryKey: ['categories'] });
       setIsCreating(false);
       reset();
+      setIconValue('');
     },
   });
 
@@ -56,10 +174,11 @@ export default function AdminCategoriesPage() {
     },
   });
 
-  const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<CategoryForm>({
-    defaultValues: { color: '#22c55e', order: 0 },
+  const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<CategoryForm>({
+    defaultValues: { color: '#00d4ff', order: 0 },
   });
 
+  const watchedColor = watch('color', '#00d4ff');
   const categories: Category[] = data?.categories || [];
 
   const openEdit = (cat: Category) => {
@@ -69,100 +188,159 @@ export default function AdminCategoriesPage() {
     setValue('icon', cat.icon);
     setValue('color', cat.color);
     setValue('order', cat.order);
+    setIconValue(cat.icon || '');
   };
 
   const onSubmit = (formData: CategoryForm) => {
+    const payload = { ...formData, icon: iconValue || formData.icon };
     if (editModal.category) {
-      updateCategory.mutate({ id: editModal.category._id, data: formData });
+      updateCategory.mutate({ id: editModal.category._id, data: payload });
     } else {
-      createCategory.mutate(formData);
+      createCategory.mutate(payload);
     }
   };
 
+  const isEmoji = (str: string) => {
+    // rough check: if it's a single short string that looks like an emoji vs a word
+    return str && str.length <= 4 && /\p{Emoji}/u.test(str);
+  };
+
   const renderFormFields = () => (
-    <div className="space-y-4">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       <div>
-        <label className="label-text">Name *</label>
-        <input {...register('name', { required: 'Required' })} type="text" className="input-field" placeholder="Category name" />
-        {errors.name && <p className="text-red-400 text-xs mt-1">{errors.name.message}</p>}
+        <label style={{ ...mono, fontSize: '0.62rem', color: '#a8c4d4', display: 'block', marginBottom: 5 }}>NOME *</label>
+        <input
+          {...register('name', { required: 'Obrigatório' })}
+          type="text"
+          placeholder="Nome da categoria"
+          style={{ width: '100%', padding: '8px 10px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, color: '#c0d8e8', ...mono, fontSize: '0.75rem', outline: 'none', boxSizing: 'border-box' }}
+        />
+        {errors.name && <p style={{ ...mono, fontSize: '0.6rem', color: '#ff4455', marginTop: 3 }}>{errors.name.message}</p>}
       </div>
+
       <div>
-        <label className="label-text">Description</label>
-        <textarea {...register('description')} rows={2} className="input-field resize-none" placeholder="Brief description" />
+        <label style={{ ...mono, fontSize: '0.62rem', color: '#a8c4d4', display: 'block', marginBottom: 5 }}>DESCRIÇÃO</label>
+        <textarea
+          {...register('description')}
+          rows={2}
+          placeholder="Descrição breve da categoria"
+          style={{ width: '100%', padding: '8px 10px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, color: '#c0d8e8', ...mono, fontSize: '0.75rem', outline: 'none', resize: 'none', boxSizing: 'border-box' }}
+        />
       </div>
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="label-text">Icon (emoji or text)</label>
-          <input {...register('icon')} type="text" className="input-field" placeholder="📁 or folder" />
+
+      <div>
+        <label style={{ ...mono, fontSize: '0.62rem', color: '#a8c4d4', display: 'block', marginBottom: 5 }}>ÍCONE</label>
+        <EmojiPickerField value={iconValue} onChange={v => { setIconValue(v); setValue('icon', v); }} />
+      </div>
+
+      <div>
+        <label style={{ ...mono, fontSize: '0.62rem', color: '#a8c4d4', display: 'block', marginBottom: 5 }}>COR</label>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <input
+            {...register('color')}
+            type="color"
+            style={{ width: 40, height: 40, borderRadius: 6, cursor: 'pointer', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', padding: 3, boxSizing: 'border-box' }}
+          />
+          <input
+            {...register('color')}
+            type="text"
+            placeholder="#00d4ff"
+            style={{ flex: 1, padding: '8px 10px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, color: watchedColor, ...mono, fontSize: '0.75rem', outline: 'none', boxSizing: 'border-box' }}
+          />
+          <div style={{ width: 36, height: 36, borderRadius: 6, background: watchedColor, border: '1px solid rgba(255,255,255,0.1)', flexShrink: 0 }} />
         </div>
-        <div>
-          <label className="label-text">Color (hex)</label>
-          <div className="flex gap-2">
-            <input {...register('color')} type="color" className="w-10 h-10 rounded cursor-pointer bg-gray-800 border border-gray-700 p-1" />
-            <input {...register('color')} type="text" className="input-field flex-1" placeholder="#22c55e" />
-          </div>
-        </div>
       </div>
+
       <div>
-        <label className="label-text">Display Order</label>
-        <input {...register('order', { valueAsNumber: true })} type="number" className="input-field w-24" />
+        <label style={{ ...mono, fontSize: '0.62rem', color: '#a8c4d4', display: 'block', marginBottom: 5 }}>ORDEM DE EXIBIÇÃO</label>
+        <input
+          {...register('order', { valueAsNumber: true })}
+          type="number"
+          style={{ width: 80, padding: '8px 10px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, color: '#c0d8e8', ...mono, fontSize: '0.75rem', outline: 'none' }}
+        />
       </div>
     </div>
   );
 
   return (
-    <div className="max-w-4xl mx-auto space-y-5">
-      <div className="flex items-center justify-between">
+    <div style={{ maxWidth: 900, margin: '0 auto' }}>
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
         <div>
-          <h1 className="text-2xl font-bold text-gray-100">Categories Management</h1>
-          <p className="text-gray-500 text-sm">{categories.length} categories</p>
+          <h1 style={{ ...mono, fontSize: '1rem', fontWeight: 700, color: '#00d4ff', letterSpacing: '0.1em', margin: '0 0 4px' }}>{'// CATEGORIAS'}</h1>
+          <p style={{ ...mono, fontSize: '0.65rem', color: '#6a8898' }}>{categories.length} categorias cadastradas</p>
         </div>
-        <button onClick={() => { setIsCreating(true); reset(); }} className="btn-primary flex items-center gap-2">
-          <Plus className="w-4 h-4" /> New Category
+        <button
+          onClick={() => { setIsCreating(true); reset(); setIconValue(''); }}
+          style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', background: 'rgba(0,150,255,0.1)', border: '1px solid rgba(0,150,255,0.3)', borderRadius: 6, cursor: 'pointer', ...mono, fontSize: '0.65rem', color: '#00d4ff', fontWeight: 700 }}
+        >
+          <Plus style={{ width: 13, height: 13 }} /> NOVA CATEGORIA
         </button>
       </div>
 
-      {/* Categories grid */}
+      {/* Grid */}
       {isLoading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="skeleton h-32 rounded-xl" />
+            <div key={i} style={{ height: 130, background: 'rgba(255,255,255,0.03)', borderRadius: 10 }} />
           ))}
         </div>
       ) : categories.length === 0 ? (
-        <div className="text-center py-16 border border-gray-800 rounded-xl bg-gray-900/50">
-          <FolderOpen className="w-10 h-10 text-gray-700 mx-auto mb-3" />
-          <p className="text-gray-500">No categories yet</p>
+        <div style={{ textAlign: 'center', padding: '60px 20px', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 10 }}>
+          <FolderOpen style={{ width: 36, height: 36, color: '#1a3a55', margin: '0 auto 10px' }} />
+          <p style={{ ...mono, fontSize: '0.72rem', color: '#6a8898' }}>Nenhuma categoria ainda</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {categories.map((cat) => (
             <div
               key={cat._id}
-              className="bg-gray-900/80 border rounded-xl p-4 transition-all"
-              style={{ borderColor: `${cat.color}30` }}
+              style={{
+                background: '#060d18',
+                border: `1px solid ${cat.color}28`,
+                borderRadius: 10, padding: '16px',
+                position: 'relative', overflow: 'hidden',
+                transition: 'border-color 0.15s',
+              }}
             >
-              <div className="flex items-start justify-between mb-3">
-                <div
-                  className="w-12 h-12 rounded-xl flex items-center justify-center text-xl"
-                  style={{ backgroundColor: `${cat.color}15`, border: `1px solid ${cat.color}30` }}
-                >
-                  {cat.icon || '📁'}
+              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg, transparent, ${cat.color}66, transparent)` }} />
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 10 }}>
+                <div style={{
+                  width: 44, height: 44, borderRadius: 8, flexShrink: 0,
+                  background: `${cat.color}15`, border: `1px solid ${cat.color}30`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: isEmoji(cat.icon) ? '1.4rem' : '0.6rem',
+                  color: cat.color,
+                }}>
+                  {isEmoji(cat.icon) ? cat.icon : (cat.icon ? '📁' : '📁')}
                 </div>
-                <div className="flex items-center gap-1">
-                  <button onClick={() => openEdit(cat)} className="p-1.5 text-gray-500 hover:text-blue-400 hover:bg-blue-900/20 rounded transition-colors">
-                    <Edit2 className="w-3.5 h-3.5" />
+                <div style={{ display: 'flex', gap: 3 }}>
+                  <button
+                    onClick={() => openEdit(cat)}
+                    style={{ padding: '5px 6px', background: 'rgba(0,150,255,0.08)', border: '1px solid rgba(0,150,255,0.15)', borderRadius: 4, cursor: 'pointer', color: '#6a8898' }}
+                    onMouseOver={e => (e.currentTarget.style.color = '#00d4ff')}
+                    onMouseOut={e => (e.currentTarget.style.color = '#6a8898')}
+                  >
+                    <Edit2 style={{ width: 13, height: 13 }} />
                   </button>
-                  <button onClick={() => setDeleteModal({ open: true, id: cat._id })} className="p-1.5 text-gray-500 hover:text-red-400 hover:bg-red-900/20 rounded transition-colors">
-                    <Trash2 className="w-3.5 h-3.5" />
+                  <button
+                    onClick={() => setDeleteModal({ open: true, id: cat._id })}
+                    style={{ padding: '5px 6px', background: 'rgba(255,0,0,0.06)', border: '1px solid rgba(255,0,0,0.15)', borderRadius: 4, cursor: 'pointer', color: '#6a8898' }}
+                    onMouseOver={e => (e.currentTarget.style.color = '#ff4455')}
+                    onMouseOut={e => (e.currentTarget.style.color = '#6a8898')}
+                  >
+                    <Trash2 style={{ width: 13, height: 13 }} />
                   </button>
                 </div>
               </div>
-              <h3 className="font-semibold text-gray-200 mb-0.5">{cat.name}</h3>
-              <p className="text-xs text-gray-500 line-clamp-2 mb-2">{cat.description || 'No description'}</p>
-              <div className="flex items-center gap-2 text-xs">
-                <span className="text-gray-600">/{cat.slug}</span>
-                <span className="ml-auto text-gray-600">Order: {cat.order}</span>
+              <p style={{ ...mono, fontSize: '0.78rem', fontWeight: 700, color: '#c0d8e8', margin: '0 0 4px' }}>{cat.name}</p>
+              <p style={{ fontSize: '0.65rem', color: '#6a8898', margin: '0 0 8px', lineHeight: 1.4, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                {cat.description || 'Sem descrição'}
+              </p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ width: 8, height: 8, borderRadius: '50%', background: cat.color, boxShadow: `0 0 6px ${cat.color}88` }} />
+                <span style={{ ...mono, fontSize: '0.55rem', color: '#6a8898' }}>{cat.color}</span>
+                <span style={{ ...mono, fontSize: '0.55rem', color: '#6a8898', marginLeft: 'auto' }}>/{cat.slug}</span>
               </div>
             </div>
           ))}
@@ -172,21 +350,26 @@ export default function AdminCategoriesPage() {
       {/* Create/Edit Modal */}
       <Modal
         isOpen={isCreating || editModal.open}
-        onClose={() => { setIsCreating(false); setEditModal({ open: false, category: null }); reset(); }}
-        title={editModal.category ? 'Edit Category' : 'New Category'}
+        onClose={() => { setIsCreating(false); setEditModal({ open: false, category: null }); reset(); setIconValue(''); }}
+        title={editModal.category ? 'Editar Categoria' : 'Nova Categoria'}
         size="md"
       >
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)}>
           {renderFormFields()}
-          <div className="flex gap-3 justify-end pt-2">
-            <button type="button" onClick={() => { setIsCreating(false); setEditModal({ open: false, category: null }); reset(); }} className="btn-secondary">
-              Cancel
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 20 }}>
+            <button
+              type="button"
+              onClick={() => { setIsCreating(false); setEditModal({ open: false, category: null }); reset(); setIconValue(''); }}
+              style={{ padding: '8px 16px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, cursor: 'pointer', ...mono, fontSize: '0.65rem', color: '#8aabbb' }}
+            >
+              CANCELAR
             </button>
-            <button type="submit" disabled={createCategory.isPending || updateCategory.isPending} className="btn-primary flex items-center gap-2">
-              {(createCategory.isPending || updateCategory.isPending) && (
-                <div className="w-4 h-4 border-2 border-gray-950 border-t-transparent rounded-full animate-spin" />
-              )}
-              {editModal.category ? 'Save' : 'Create'}
+            <button
+              type="submit"
+              disabled={createCategory.isPending || updateCategory.isPending}
+              style={{ padding: '8px 18px', background: 'rgba(0,150,255,0.15)', border: '1px solid rgba(0,150,255,0.35)', borderRadius: 6, cursor: 'pointer', ...mono, fontSize: '0.65rem', color: '#00d4ff', fontWeight: 700, opacity: (createCategory.isPending || updateCategory.isPending) ? 0.6 : 1 }}
+            >
+              {(createCategory.isPending || updateCategory.isPending) ? 'SALVANDO...' : (editModal.category ? 'SALVAR' : 'CRIAR')}
             </button>
           </div>
         </form>
@@ -197,9 +380,9 @@ export default function AdminCategoriesPage() {
         isOpen={deleteModal.open}
         onClose={() => setDeleteModal({ open: false, id: null })}
         onConfirm={() => deleteCategory.mutate(deleteModal.id!)}
-        title="Delete Category"
-        description="Are you sure? This will deactivate the category."
-        confirmText="Delete"
+        title="Deletar Categoria"
+        description="Tem certeza? Isso irá desativar a categoria."
+        confirmText="Deletar"
         isLoading={deleteCategory.isPending}
       />
     </div>
