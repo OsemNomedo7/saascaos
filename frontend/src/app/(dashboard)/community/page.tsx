@@ -220,7 +220,7 @@ function PostCard({ post, onLike, onDelete, onPin, onRepost, onBookmark, current
             active={showComments}
             activeColor="#00c8ff"
             label="Comentar"
-            onClick={() => { setShowComments(!showComments); if (!showComments) setTimeout(() => commentInputRef.current?.focus(), 150); }}
+            onClick={() => { setShowComments(!showComments); if (!showComments) setTimeout(() => setFocus('content'), 150); }}
           />
 
           {/* Repost */}
