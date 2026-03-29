@@ -23,8 +23,6 @@ interface ContentForm {
   externalLink: string;
   tags: string;
   isFree: boolean;
-  isDrop: boolean;
-  dropExpiresAt: string;
 }
 
 function getFileIcon(filename: string) {
@@ -221,7 +219,7 @@ export default function AdminContentPage() {
   const { data, isLoading } = useQuery({
     queryKey: ['admin-content', { search, page }],
     queryFn: () =>
-      contentApi.list({ search: search || undefined, page, limit: 15, sort: '-createdAt' }).then((r) => r.data),
+      contentApi.list({ search: search || undefined, page, limit: 15, sort: '-createdAt', isDrop: false }).then((r) => r.data),
   });
 
   const { data: catData } = useQuery({
@@ -264,10 +262,9 @@ export default function AdminContentPage() {
     },
   });
 
-  const { register, handleSubmit, reset: resetForm, setValue, watch, formState: { errors } } = useForm<ContentForm>({
+  const { register, handleSubmit, reset: resetForm, setValue, formState: { errors } } = useForm<ContentForm>({
     defaultValues: { type: 'material', minLevel: 'iniciante', isFree: false },
   });
-  const isDrop = watch('isDrop');
 
   const contents: Content[] = data?.contents || [];
   const pagination = data?.pagination;
@@ -289,8 +286,6 @@ export default function AdminContentPage() {
     setValue('externalLink', content.externalLink || '');
     setValue('tags', content.tags?.join(', ') || '');
     setValue('isFree', content.isFree || false);
-    setValue('isDrop', content.isDrop);
-    setValue('dropExpiresAt', content.dropExpiresAt?.slice(0, 16) || '');
   };
 
   const closeModal = () => {
@@ -360,7 +355,7 @@ export default function AdminContentPage() {
       ...filePayload,
       images: newImageUrls,
       tags: data.tags ? data.tags.split(',').map((t) => t.trim()).filter(Boolean) : [],
-      dropExpiresAt: data.isDrop && data.dropExpiresAt ? new Date(data.dropExpiresAt).toISOString() : null,
+      dropExpiresAt: null,
     };
 
     if (editModal.content) {
@@ -475,14 +470,6 @@ export default function AdminContentPage() {
                                   border: '1px solid rgba(0,255,65,0.2)',
                                   borderRadius: 2, padding: '1px 5px', letterSpacing: '0.08em',
                                 }}>FREE</span>
-                              )}
-                              {item.isDrop && (
-                                <span style={{
-                                  fontSize: '0.58rem', color: '#ffcc00',
-                                  background: 'rgba(255,204,0,0.1)',
-                                  border: '1px solid rgba(255,204,0,0.2)',
-                                  borderRadius: 2, padding: '1px 5px', letterSpacing: '0.08em',
-                                }}>DROP</span>
                               )}
                             </div>
                           </div>
@@ -765,22 +752,6 @@ export default function AdminContentPage() {
                 Qualquer usuário pode baixar sem assinatura
               </p>
             </div>
-            <div>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-                <input {...register('isDrop')} type="checkbox"
-                  style={{ width: 14, height: 14, accentColor: '#ffcc00', cursor: 'pointer' }} />
-                <span className="label-text" style={{ marginBottom: 0 }}>
-                  É um Drop (conteúdo por tempo limitado)
-                </span>
-              </label>
-            </div>
-
-            {isDrop && (
-              <div className="col-span-2">
-                <label className="label-text">DATA DE EXPIRAÇÃO DO DROP</label>
-                <input {...register('dropExpiresAt')} type="datetime-local" className="input-field" />
-              </div>
-            )}
           </div>
 
           <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', paddingTop: 8, borderTop: '1px solid rgba(0,255,65,0.1)' }}>
