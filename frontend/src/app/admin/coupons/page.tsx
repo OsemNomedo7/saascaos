@@ -82,7 +82,7 @@ export default function AdminCouponsPage() {
     border: '1px solid rgba(0,150,255,0.2)',
     borderRadius: 4,
     padding: '8px 12px',
-    color: '#e0c8b8',
+    color: '#d0e8f4',
     fontFamily: 'JetBrains Mono, monospace',
     fontSize: '0.78rem',
     outline: 'none',
@@ -92,7 +92,7 @@ export default function AdminCouponsPage() {
   const labelStyle = {
     fontFamily: 'JetBrains Mono, monospace',
     fontSize: '0.62rem',
-    color: '#4d2a1a',
+    color: '#7a9aaa',
     letterSpacing: '0.1em',
     display: 'block',
     marginBottom: 4,
@@ -256,8 +256,8 @@ export default function AdminCouponsPage() {
           border: '1px solid rgba(0,150,255,0.1)', borderRadius: 6,
           background: 'rgba(10,18,10,0.6)',
         }}>
-          <Tag style={{ width: 32, height: 32, color: '#0a1e2e', margin: '0 auto 10px' }} />
-          <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.78rem', color: '#4d2a1a' }}>
+          <Tag style={{ width: 32, height: 32, color: '#6a8a9a', margin: '0 auto 10px' }} />
+          <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.78rem', color: '#7a9aaa' }}>
             {'> NENHUM CUPOM CADASTRADO'}
           </p>
         </div>
@@ -273,7 +273,7 @@ export default function AdminCouponsPage() {
             background: 'rgba(0,150,255,0.04)', borderBottom: '1px solid rgba(0,150,255,0.15)',
           }}>
             {['CÓDIGO', 'DESCRIÇÃO', 'DESCONTO', 'PLANO', 'USOS', 'EXPIRA', ''].map((h) => (
-              <span key={h} style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.58rem', fontWeight: 700, color: '#4d2a1a', letterSpacing: '0.12em' }}>
+              <span key={h} style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.58rem', fontWeight: 700, color: '#7a9aaa', letterSpacing: '0.12em' }}>
                 {h}
               </span>
             ))}
@@ -298,7 +298,7 @@ export default function AdminCouponsPage() {
                 }} />
                 <span style={{
                   fontFamily: 'JetBrains Mono, monospace', fontSize: '0.78rem', fontWeight: 700,
-                  color: coupon.isActive ? '#ff8844' : '#3a2010', letterSpacing: '0.08em',
+                  color: coupon.isActive ? '#ff8844' : '#6a8898', letterSpacing: '0.08em',
                 }}>
                   {coupon.code}
                 </span>
@@ -321,23 +321,23 @@ export default function AdminCouponsPage() {
                 {coupon.planRestriction === 'all' ? 'todos' : coupon.planRestriction}
               </span>
               <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-                <Users style={{ width: 10, height: 10, color: '#4d2a1a' }} />
+                <Users style={{ width: 10, height: 10, color: '#7a9aaa' }} />
                 <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.7rem', color: '#6a4a2a' }}>
                   {coupon.usedCount}/{coupon.maxUses ?? '∞'}
                 </span>
               </div>
-              <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.6rem', color: '#3a2010' }}>
+              <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.6rem', color: '#6a8898' }}>
                 {coupon.expiresAt ? formatDate(coupon.expiresAt) : '∞'}
               </span>
               <button
                 onClick={() => setDeleteId(coupon._id)}
                 style={{
                   padding: 5, borderRadius: 3, cursor: 'pointer',
-                  background: 'none', border: 'none', color: '#0a1e2e',
+                  background: 'none', border: 'none', color: '#6a8a9a',
                   transition: 'color 0.15s',
                 }}
                 onMouseOver={e => (e.currentTarget.style.color = '#ff0040')}
-                onMouseOut={e => (e.currentTarget.style.color = '#0a1e2e')}
+                onMouseOut={e => (e.currentTarget.style.color = '#6a8a9a')}
               >
                 <Trash2 style={{ width: 13, height: 13 }} />
               </button>
@@ -354,7 +354,7 @@ export default function AdminCouponsPage() {
           background: 'rgba(0,0,0,0.7)',
         }} onClick={() => setDeleteId(null)}>
           <div style={{
-            background: '#0a120a', border: '1px solid rgba(255,0,64,0.3)',
+            background: '#040d18', border: '1px solid rgba(255,0,64,0.3)',
             borderRadius: 8, padding: 24, maxWidth: 340, width: '90%',
           }} onClick={e => e.stopPropagation()}>
             <h3 style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.85rem', fontWeight: 700, color: '#ff0040', marginBottom: 10 }}>

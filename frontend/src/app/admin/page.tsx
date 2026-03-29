@@ -79,7 +79,7 @@ function StatCard({
       }}>
         {value}
       </div>
-      <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.6rem', color: '#2a4a2a', letterSpacing: '0.1em' }}>
+      <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.6rem', color: '#7aaa8a', letterSpacing: '0.1em' }}>
         {label}
       </div>
       {sub && (
@@ -94,7 +94,7 @@ function StatCard({
 function GrowthChart({ data }: { data: { _id: string; count: number }[] }) {
   if (!data || data.length === 0) {
     return (
-      <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.65rem', color: '#1a3020' }}>
+      <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.65rem', color: '#7aaa8a' }}>
         {'> sem dados de crescimento'}
       </p>
     );
@@ -195,7 +195,7 @@ export default function AdminDashboardPage() {
     border: '1px solid rgba(0,150,255,0.2)',
     borderRadius: 4,
     padding: '8px 12px',
-    color: '#e0c8b8',
+    color: '#d0e8f4',
     fontFamily: 'JetBrains Mono, monospace',
     fontSize: '0.75rem',
     outline: 'none',
@@ -218,7 +218,7 @@ export default function AdminDashboardPage() {
               {'// PAINEL DE CONTROLE'}
             </h1>
           </div>
-          <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.65rem', color: '#0a1e2e', margin: 0 }}>
+          <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.65rem', color: '#6a8a9a', margin: 0 }}>
             {'> monitoramento em tempo real do sistema elite-trojan'}
           </p>
         </div>
@@ -278,7 +278,7 @@ export default function AdminDashboardPage() {
             </span>
           </div>
           <GrowthChart data={growthUsers} />
-          <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.58rem', color: '#1a3020', marginTop: 8 }}>
+          <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.58rem', color: '#7aaa8a', marginTop: 8 }}>
             Total: {growthUsers.reduce((s, d) => s + d.count, 0)} nos últimos 30 dias
           </p>
         </div>
@@ -313,12 +313,12 @@ export default function AdminDashboardPage() {
               );
             })}
             {growthSubs.length === 0 && (
-              <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.65rem', color: '#1a3020' }}>
+              <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.65rem', color: '#7aaa8a' }}>
                 {'> sem dados'}
               </p>
             )}
           </div>
-          <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.58rem', color: '#2a2800', marginTop: 8 }}>
+          <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.58rem', color: '#7a9aaa', marginTop: 8 }}>
             Total: {growthSubs.reduce((s, d) => s + d.count, 0)} nos últimos 30 dias
           </p>
         </div>
@@ -340,7 +340,7 @@ export default function AdminDashboardPage() {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {subscriptionsByPlan.length === 0 ? (
-              <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.65rem', color: '#2a1400' }}>{'> sem dados'}</p>
+              <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.65rem', color: '#7a9aaa' }}>{'> sem dados'}</p>
             ) : (
               subscriptionsByPlan.map((item: { _id: string; count: number; revenue: number }) => (
                 <div key={item._id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -354,7 +354,7 @@ export default function AdminDashboardPage() {
                     <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.75rem', fontWeight: 700, color: '#ff8844' }}>
                       {item.count}
                     </span>
-                    <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.58rem', color: '#0a1e2e' }}>subs</span>
+                    <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.58rem', color: '#6a8a9a' }}>subs</span>
                   </div>
                 </div>
               ))
@@ -386,7 +386,7 @@ export default function AdminDashboardPage() {
                     <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.75rem', fontWeight: 700, color: '#ffcc00' }}>
                       {formatCurrency(item.total)}
                     </span>
-                    <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.58rem', color: '#3a2800' }}>
+                    <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.58rem', color: '#8898a8' }}>
                       ({item.count})
                     </span>
                   </div>
@@ -423,7 +423,7 @@ export default function AdminDashboardPage() {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             <div>
-              <label style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.6rem', color: '#2a5a5a', letterSpacing: '0.1em', display: 'block', marginBottom: 3 }}>
+              <label style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.6rem', color: '#6aaabb', letterSpacing: '0.1em', display: 'block', marginBottom: 3 }}>
                 DESTINATÁRIOS
               </label>
               <select
@@ -436,7 +436,7 @@ export default function AdminDashboardPage() {
               </select>
             </div>
             <div>
-              <label style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.6rem', color: '#2a5a5a', letterSpacing: '0.1em', display: 'block', marginBottom: 3 }}>
+              <label style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.6rem', color: '#6aaabb', letterSpacing: '0.1em', display: 'block', marginBottom: 3 }}>
                 TÍTULO
               </label>
               <input
@@ -447,7 +447,7 @@ export default function AdminDashboardPage() {
               />
             </div>
             <div>
-              <label style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.6rem', color: '#2a5a5a', letterSpacing: '0.1em', display: 'block', marginBottom: 3 }}>
+              <label style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.6rem', color: '#6aaabb', letterSpacing: '0.1em', display: 'block', marginBottom: 3 }}>
                 MENSAGEM
               </label>
               <textarea
@@ -493,7 +493,7 @@ export default function AdminDashboardPage() {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {recentLogs.length === 0 ? (
-              <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.65rem', color: '#1a3020' }}>{'> sem atividade recente'}</p>
+              <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.65rem', color: '#7aaa8a' }}>{'> sem atividade recente'}</p>
             ) : (
               recentLogs.slice(0, 10).map((log) => {
                 const logUser = log.user as { name?: string; email?: string } | null;
@@ -514,7 +514,7 @@ export default function AdminDashboardPage() {
                         {' '}
                         <span style={{ color }}>{log.action}</span>
                       </p>
-                      <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.58rem', color: '#1a3020', margin: '1px 0 0' }}>
+                      <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.58rem', color: '#7aaa8a', margin: '1px 0 0' }}>
                         {formatRelativeDate(log.createdAt)}
                       </p>
                     </div>

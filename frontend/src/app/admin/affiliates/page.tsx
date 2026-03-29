@@ -145,7 +145,7 @@ export default function AdminAffiliatesPage() {
         <h1 style={{ ...mono, fontSize: '1rem', fontWeight: 700, color: '#00d4ff', letterSpacing: '0.1em', margin: '0 0 4px' }}>
           {'// AFILIADOS'}
         </h1>
-        <p style={{ ...mono, fontSize: '0.65rem', color: '#0d2a3a' }}>
+        <p style={{ ...mono, fontSize: '0.65rem', color: '#7a9aaa' }}>
           Gerencie afiliados, comissões e saques
         </p>
       </div>
@@ -162,7 +162,7 @@ export default function AdminAffiliatesPage() {
             padding: '14px 16px', borderRadius: 6,
             background: '#040d18', border: `1px solid ${s.color}22`,
           }}>
-            <p style={{ ...mono, fontSize: '0.55rem', color: '#0d2a3a', letterSpacing: '0.15em', margin: '0 0 6px' }}>{s.label}</p>
+            <p style={{ ...mono, fontSize: '0.55rem', color: '#7a9aaa', letterSpacing: '0.15em', margin: '0 0 6px' }}>{s.label}</p>
             <p style={{ ...mono, fontSize: '1.1rem', fontWeight: 700, color: s.color, margin: 0 }}>{s.value}</p>
           </div>
         ))}
@@ -180,7 +180,7 @@ export default function AdminAffiliatesPage() {
             ...mono, fontSize: '0.65rem', fontWeight: 700,
             background: activeTab === tab.key ? 'rgba(0,150,255,0.12)' : 'transparent',
             border: `1px solid ${activeTab === tab.key ? 'rgba(0,150,255,0.35)' : 'rgba(0,150,255,0.1)'}`,
-            color: activeTab === tab.key ? '#00d4ff' : '#1a4a6a',
+            color: activeTab === tab.key ? '#00d4ff' : '#a8c4d4',
             transition: 'all 0.15s',
           }}>
             {tab.label}
@@ -198,18 +198,18 @@ export default function AdminAffiliatesPage() {
                 <thead>
                   <tr style={{ borderBottom: '1px solid rgba(0,150,255,0.12)' }}>
                     {['AFILIADO', 'CÓDIGO', 'COMISSÃO %', 'VENDAS', 'A PAGAR', 'PAGO', 'STATUS', ''].map(h => (
-                      <th key={h} style={{ padding: '10px 12px', textAlign: 'left', ...mono, fontSize: '0.55rem', color: '#1a4a6a', letterSpacing: '0.12em', whiteSpace: 'nowrap' }}>{h}</th>
+                      <th key={h} style={{ padding: '10px 12px', textAlign: 'left', ...mono, fontSize: '0.55rem', color: '#a8c4d4', letterSpacing: '0.12em', whiteSpace: 'nowrap' }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {affiliates.length === 0 ? (
-                    <tr><td colSpan={8} style={{ padding: '24px', textAlign: 'center', ...mono, fontSize: '0.68rem', color: '#0a1e2e' }}>Nenhum afiliado ainda</td></tr>
+                    <tr><td colSpan={8} style={{ padding: '24px', textAlign: 'center', ...mono, fontSize: '0.68rem', color: '#6a8a9a' }}>Nenhum afiliado ainda</td></tr>
                   ) : affiliates.map((aff) => (
                     <tr key={aff._id} style={{ borderBottom: '1px solid rgba(0,150,255,0.06)', background: selectedId === aff._id ? 'rgba(0,150,255,0.04)' : 'transparent' }}>
                       <td style={{ padding: '10px 12px' }}>
-                        <p style={{ ...mono, fontSize: '0.7rem', color: '#6090b0', margin: 0, whiteSpace: 'nowrap' }}>{aff.name}</p>
-                        <p style={{ ...mono, fontSize: '0.58rem', color: '#0d2a3a', margin: 0 }}>{aff.email}</p>
+                        <p style={{ ...mono, fontSize: '0.7rem', color: '#b8d0e0', margin: 0, whiteSpace: 'nowrap' }}>{aff.name}</p>
+                        <p style={{ ...mono, fontSize: '0.58rem', color: '#7a9aaa', margin: 0 }}>{aff.email}</p>
                       </td>
                       <td style={{ padding: '10px 12px', ...mono, fontSize: '0.65rem', color: '#00d4ff', whiteSpace: 'nowrap' }}>{aff.referralCode}</td>
                       {/* Commission rate */}
@@ -236,11 +236,11 @@ export default function AdminAffiliatesPage() {
                             display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none', cursor: 'pointer', padding: 0,
                           }}>
                             <span style={{ ...mono, fontSize: '0.72rem', color: '#ffcc00' }}>{aff.commissionRate}%</span>
-                            <Edit2 style={{ width: 10, height: 10, color: '#0d2a3a' }} />
+                            <Edit2 style={{ width: 10, height: 10, color: '#7a9aaa' }} />
                           </button>
                         )}
                       </td>
-                      <td style={{ padding: '10px 12px', ...mono, fontSize: '0.72rem', color: '#6090b0' }}>{aff.totalSales}</td>
+                      <td style={{ padding: '10px 12px', ...mono, fontSize: '0.72rem', color: '#b8d0e0' }}>{aff.totalSales}</td>
                       <td style={{ padding: '10px 12px', ...mono, fontSize: '0.72rem', color: '#ffcc00', whiteSpace: 'nowrap' }}>R$ {aff.pendingAmount.toFixed(2)}</td>
                       <td style={{ padding: '10px 12px', ...mono, fontSize: '0.72rem', color: '#00ff41', whiteSpace: 'nowrap' }}>R$ {aff.paidAmount.toFixed(2)}</td>
                       {/* Toggle active */}
@@ -248,7 +248,7 @@ export default function AdminAffiliatesPage() {
                         <button onClick={() => handleToggleActive(aff)} title={aff.isAffiliateActive ? 'Desativar' : 'Ativar'} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}>
                           {aff.isAffiliateActive
                             ? <ToggleRight style={{ width: 20, height: 20, color: '#00ff41' }} />
-                            : <ToggleLeft style={{ width: 20, height: 20, color: '#0a1e2e' }} />}
+                            : <ToggleLeft style={{ width: 20, height: 20, color: '#6a8a9a' }} />}
                         </button>
                       </td>
                       <td style={{ padding: '10px 12px' }}>
@@ -276,12 +276,12 @@ export default function AdminAffiliatesPage() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <div>
                     <p style={{ ...mono, fontSize: '0.75rem', color: '#ff8855', fontWeight: 700, margin: '0 0 2px' }}>{detail.affiliate.name}</p>
-                    <p style={{ ...mono, fontSize: '0.58rem', color: '#0d2a3a', margin: 0 }}>{detail.affiliate.email}</p>
+                    <p style={{ ...mono, fontSize: '0.58rem', color: '#7a9aaa', margin: 0 }}>{detail.affiliate.email}</p>
                     <p style={{ ...mono, fontSize: '0.6rem', color: '#00d4ff', margin: '4px 0 0' }}>REF: {detail.affiliate.referralCode}</p>
                   </div>
-                  <button onClick={() => setSelectedId(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#0a1e2e', padding: 4 }}
+                  <button onClick={() => setSelectedId(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6a8a9a', padding: 4 }}
                     onMouseOver={e => (e.currentTarget.style.color = '#00d4ff')}
-                    onMouseOut={e => (e.currentTarget.style.color = '#0a1e2e')}>
+                    onMouseOut={e => (e.currentTarget.style.color = '#6a8a9a')}>
                     <X className="w-4 h-4" />
                   </button>
                 </div>
@@ -293,8 +293,8 @@ export default function AdminAffiliatesPage() {
                     { label: 'CONVERSÃO', value: `${detail.stats.conversionRate}%`, color: '#00ff41' },
                     { label: 'VENDAS', value: detail.stats.totalSales, color: '#ffcc00' },
                   ].map(s => (
-                    <div key={s.label} style={{ padding: '6px 8px', background: '#050505', borderRadius: 4, border: `1px solid ${s.color}18` }}>
-                      <p style={{ ...mono, fontSize: '0.5rem', color: '#0d2a3a', margin: '0 0 2px', letterSpacing: '0.1em' }}>{s.label}</p>
+                    <div key={s.label} style={{ padding: '6px 8px', background: '#040d18', borderRadius: 4, border: `1px solid ${s.color}18` }}>
+                      <p style={{ ...mono, fontSize: '0.5rem', color: '#7a9aaa', margin: '0 0 2px', letterSpacing: '0.1em' }}>{s.label}</p>
                       <p style={{ ...mono, fontSize: '0.82rem', fontWeight: 700, color: s.color, margin: 0 }}>{s.value}</p>
                     </div>
                   ))}
@@ -304,8 +304,8 @@ export default function AdminAffiliatesPage() {
                     { label: 'A PAGAR', value: `R$ ${detail.stats.pendingAmount.toFixed(2)}`, color: '#ffcc00' },
                     { label: 'PAGO', value: `R$ ${detail.stats.paidAmount.toFixed(2)}`, color: '#00ff41' },
                   ].map(s => (
-                    <div key={s.label} style={{ padding: '6px 8px', background: '#050505', borderRadius: 4, border: `1px solid ${s.color}18` }}>
-                      <p style={{ ...mono, fontSize: '0.5rem', color: '#0d2a3a', margin: '0 0 2px', letterSpacing: '0.1em' }}>{s.label}</p>
+                    <div key={s.label} style={{ padding: '6px 8px', background: '#040d18', borderRadius: 4, border: `1px solid ${s.color}18` }}>
+                      <p style={{ ...mono, fontSize: '0.5rem', color: '#7a9aaa', margin: '0 0 2px', letterSpacing: '0.1em' }}>{s.label}</p>
                       <p style={{ ...mono, fontSize: '0.82rem', fontWeight: 700, color: s.color, margin: 0 }}>{s.value}</p>
                     </div>
                   ))}
@@ -319,19 +319,19 @@ export default function AdminAffiliatesPage() {
                     <span style={{ ...mono, fontSize: '0.6rem', color: '#00d4ff', letterSpacing: '0.1em' }}>INDICADOS ({detail.referredUsers.length})</span>
                   </div>
                   {detail.referredUsers.length === 0 ? (
-                    <p style={{ padding: '12px 14px', ...mono, fontSize: '0.65rem', color: '#0a1e2e', margin: 0 }}>Nenhum usuário indicado</p>
+                    <p style={{ padding: '12px 14px', ...mono, fontSize: '0.65rem', color: '#6a8a9a', margin: 0 }}>Nenhum usuário indicado</p>
                   ) : detail.referredUsers.slice(0, 10).map(u => (
                     <div key={u._id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 14px', borderBottom: '1px solid rgba(0,150,255,0.04)' }}>
                       <div>
-                        <p style={{ ...mono, fontSize: '0.65rem', color: '#6090b0', margin: 0 }}>{u.name}</p>
-                        <p style={{ ...mono, fontSize: '0.55rem', color: '#0d2a3a', margin: 0 }}>{u.email}</p>
+                        <p style={{ ...mono, fontSize: '0.65rem', color: '#b8d0e0', margin: 0 }}>{u.name}</p>
+                        <p style={{ ...mono, fontSize: '0.55rem', color: '#7a9aaa', margin: 0 }}>{u.email}</p>
                       </div>
                       <span style={{
                         ...mono, fontSize: '0.5rem', fontWeight: 700,
                         padding: '2px 6px', borderRadius: 3,
                         background: u.converted ? 'rgba(0,255,65,0.1)' : 'rgba(0,150,255,0.08)',
                         border: `1px solid ${u.converted ? 'rgba(0,255,65,0.2)' : 'rgba(0,150,255,0.15)'}`,
-                        color: u.converted ? '#00ff41' : '#0d2a3a',
+                        color: u.converted ? '#00ff41' : '#7a9aaa',
                         letterSpacing: '0.08em',
                       }}>
                         {u.converted ? '✓ COMPROU' : 'SEM COMPRA'}
@@ -339,7 +339,7 @@ export default function AdminAffiliatesPage() {
                     </div>
                   ))}
                   {detail.referredUsers.length > 10 && (
-                    <p style={{ padding: '8px 14px', ...mono, fontSize: '0.58rem', color: '#0d2a3a', margin: 0 }}>
+                    <p style={{ padding: '8px 14px', ...mono, fontSize: '0.58rem', color: '#7a9aaa', margin: 0 }}>
                       +{detail.referredUsers.length - 10} indicados adicionais
                     </p>
                   )}
@@ -351,13 +351,13 @@ export default function AdminAffiliatesPage() {
                     <span style={{ ...mono, fontSize: '0.6rem', color: '#00d4ff', letterSpacing: '0.1em' }}>COMISSÕES ({detail.commissions.length})</span>
                   </div>
                   {detail.commissions.length === 0 ? (
-                    <p style={{ padding: '12px 14px', ...mono, fontSize: '0.65rem', color: '#0a1e2e', margin: 0 }}>Nenhuma comissão</p>
+                    <p style={{ padding: '12px 14px', ...mono, fontSize: '0.65rem', color: '#6a8a9a', margin: 0 }}>Nenhuma comissão</p>
                   ) : detail.commissions.map(c => (
                     <div key={c._id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 14px', borderBottom: '1px solid rgba(0,150,255,0.04)' }}>
                       <div>
-                        <p style={{ ...mono, fontSize: '0.65rem', color: '#6090b0', margin: 0 }}>{c.referredUser?.name}</p>
-                        <p style={{ ...mono, fontSize: '0.55rem', color: '#0d2a3a', margin: 0 }}>{c.plan} — R$ {c.saleAmount?.toFixed(2)}</p>
-                        <p style={{ ...mono, fontSize: '0.52rem', color: '#0a1e2e', margin: 0 }}>{new Date(c.createdAt).toLocaleDateString('pt-BR')}</p>
+                        <p style={{ ...mono, fontSize: '0.65rem', color: '#b8d0e0', margin: 0 }}>{c.referredUser?.name}</p>
+                        <p style={{ ...mono, fontSize: '0.55rem', color: '#7a9aaa', margin: 0 }}>{c.plan} — R$ {c.saleAmount?.toFixed(2)}</p>
+                        <p style={{ ...mono, fontSize: '0.52rem', color: '#6a8a9a', margin: 0 }}>{new Date(c.createdAt).toLocaleDateString('pt-BR')}</p>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
                         <span style={{ ...mono, fontSize: '0.75rem', fontWeight: 700, color: '#00ff41' }}>R$ {c.commissionAmount.toFixed(2)}</span>
@@ -394,7 +394,7 @@ export default function AdminAffiliatesPage() {
             </span>
           </div>
           {ranking.length === 0 ? (
-            <p style={{ padding: '32px', textAlign: 'center', ...mono, fontSize: '0.68rem', color: '#0a1e2e', margin: 0 }}>
+            <p style={{ padding: '32px', textAlign: 'center', ...mono, fontSize: '0.68rem', color: '#6a8a9a', margin: 0 }}>
               Nenhuma venda registrada neste mês
             </p>
           ) : (
@@ -402,7 +402,7 @@ export default function AdminAffiliatesPage() {
               <thead>
                 <tr style={{ borderBottom: '1px solid rgba(0,150,255,0.1)' }}>
                   {['POS', 'AFILIADO', 'CÓDIGO', 'VENDAS', 'COMISSÃO', 'RECEITA GERADA'].map(h => (
-                    <th key={h} style={{ padding: '10px 16px', textAlign: 'left', ...mono, fontSize: '0.55rem', color: '#1a4a6a', letterSpacing: '0.12em' }}>{h}</th>
+                    <th key={h} style={{ padding: '10px 16px', textAlign: 'left', ...mono, fontSize: '0.55rem', color: '#a8c4d4', letterSpacing: '0.12em' }}>{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -410,16 +410,16 @@ export default function AdminAffiliatesPage() {
                 {ranking.map((r) => (
                   <tr key={r.affiliate?._id} style={{ borderBottom: '1px solid rgba(0,150,255,0.06)', background: r.position === 1 ? 'rgba(255,204,0,0.03)' : 'transparent' }}>
                     <td style={{ padding: '12px 16px' }}>
-                      <span style={{ ...mono, fontSize: r.position <= 3 ? '1.2rem' : '0.8rem', color: '#1a4a6a' }}>
+                      <span style={{ ...mono, fontSize: r.position <= 3 ? '1.2rem' : '0.8rem', color: '#a8c4d4' }}>
                         {r.position <= 3 ? rankMedals[r.position - 1] : `#${r.position}`}
                       </span>
                     </td>
                     <td style={{ padding: '12px 16px' }}>
-                      <p style={{ ...mono, fontSize: '0.72rem', color: '#6090b0', margin: 0, fontWeight: r.position === 1 ? 700 : 400 }}>{r.affiliate?.name}</p>
-                      <p style={{ ...mono, fontSize: '0.58rem', color: '#0d2a3a', margin: 0 }}>{r.affiliate?.email}</p>
+                      <p style={{ ...mono, fontSize: '0.72rem', color: '#b8d0e0', margin: 0, fontWeight: r.position === 1 ? 700 : 400 }}>{r.affiliate?.name}</p>
+                      <p style={{ ...mono, fontSize: '0.58rem', color: '#7a9aaa', margin: 0 }}>{r.affiliate?.email}</p>
                     </td>
                     <td style={{ padding: '12px 16px', ...mono, fontSize: '0.65rem', color: '#00d4ff' }}>{r.affiliate?.referralCode}</td>
-                    <td style={{ padding: '12px 16px', ...mono, fontSize: '0.82rem', color: '#6090b0', fontWeight: 700 }}>{r.totalSales}</td>
+                    <td style={{ padding: '12px 16px', ...mono, fontSize: '0.82rem', color: '#b8d0e0', fontWeight: 700 }}>{r.totalSales}</td>
                     <td style={{ padding: '12px 16px', ...mono, fontSize: '0.82rem', color: '#00ff41', fontWeight: 700 }}>
                       R$ {r.totalAmount.toFixed(2)}
                     </td>
@@ -442,34 +442,34 @@ export default function AdminAffiliatesPage() {
               <thead>
                 <tr style={{ borderBottom: '1px solid rgba(0,150,255,0.12)' }}>
                   {['AFILIADO', 'CHAVE PIX', 'NOME / CPF', 'VALOR', 'DATA', 'OBS'].map(h => (
-                    <th key={h} style={{ padding: '10px 14px', textAlign: 'left', ...mono, fontSize: '0.55rem', color: '#1a4a6a', letterSpacing: '0.12em', whiteSpace: 'nowrap' }}>{h}</th>
+                    <th key={h} style={{ padding: '10px 14px', textAlign: 'left', ...mono, fontSize: '0.55rem', color: '#a8c4d4', letterSpacing: '0.12em', whiteSpace: 'nowrap' }}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {withdrawals.length === 0 ? (
-                  <tr><td colSpan={6} style={{ padding: '24px', textAlign: 'center', ...mono, fontSize: '0.68rem', color: '#0a1e2e' }}>Nenhuma solicitação de saque</td></tr>
+                  <tr><td colSpan={6} style={{ padding: '24px', textAlign: 'center', ...mono, fontSize: '0.68rem', color: '#6a8a9a' }}>Nenhuma solicitação de saque</td></tr>
                 ) : withdrawals.map((w: { _id: string; user: { name: string; email: string }; metadata: { pixKey: string; pixKeyType: string; name: string; cpf: string; amount: number; notes: string }; createdAt: string }) => (
                   <tr key={w._id} style={{ borderBottom: '1px solid rgba(0,150,255,0.06)' }}>
                     <td style={{ padding: '10px 14px' }}>
-                      <p style={{ ...mono, fontSize: '0.68rem', color: '#6090b0', margin: 0 }}>{w.user?.name}</p>
-                      <p style={{ ...mono, fontSize: '0.58rem', color: '#0d2a3a', margin: 0 }}>{w.user?.email}</p>
+                      <p style={{ ...mono, fontSize: '0.68rem', color: '#b8d0e0', margin: 0 }}>{w.user?.name}</p>
+                      <p style={{ ...mono, fontSize: '0.58rem', color: '#7a9aaa', margin: 0 }}>{w.user?.email}</p>
                     </td>
                     <td style={{ padding: '10px 14px' }}>
                       <p style={{ ...mono, fontSize: '0.65rem', color: '#00d4ff', margin: 0 }}>{w.metadata?.pixKey}</p>
-                      <p style={{ ...mono, fontSize: '0.58rem', color: '#0d2a3a', margin: 0 }}>{w.metadata?.pixKeyType}</p>
+                      <p style={{ ...mono, fontSize: '0.58rem', color: '#7a9aaa', margin: 0 }}>{w.metadata?.pixKeyType}</p>
                     </td>
                     <td style={{ padding: '10px 14px' }}>
-                      <p style={{ ...mono, fontSize: '0.65rem', color: '#6090b0', margin: 0 }}>{w.metadata?.name}</p>
-                      <p style={{ ...mono, fontSize: '0.58rem', color: '#0d2a3a', margin: 0 }}>{w.metadata?.cpf}</p>
+                      <p style={{ ...mono, fontSize: '0.65rem', color: '#b8d0e0', margin: 0 }}>{w.metadata?.name}</p>
+                      <p style={{ ...mono, fontSize: '0.58rem', color: '#7a9aaa', margin: 0 }}>{w.metadata?.cpf}</p>
                     </td>
                     <td style={{ padding: '10px 14px', ...mono, fontSize: '0.75rem', fontWeight: 700, color: '#ffcc00', whiteSpace: 'nowrap' }}>
                       R$ {w.metadata?.amount?.toFixed(2)}
                     </td>
-                    <td style={{ padding: '10px 14px', ...mono, fontSize: '0.62rem', color: '#1a4a6a', whiteSpace: 'nowrap' }}>
+                    <td style={{ padding: '10px 14px', ...mono, fontSize: '0.62rem', color: '#a8c4d4', whiteSpace: 'nowrap' }}>
                       {new Date(w.createdAt).toLocaleDateString('pt-BR')}
                     </td>
-                    <td style={{ padding: '10px 14px', ...mono, fontSize: '0.62rem', color: '#0d2a3a' }}>
+                    <td style={{ padding: '10px 14px', ...mono, fontSize: '0.62rem', color: '#7a9aaa' }}>
                       {w.metadata?.notes || '—'}
                     </td>
                   </tr>

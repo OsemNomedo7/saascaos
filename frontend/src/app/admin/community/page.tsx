@@ -88,7 +88,7 @@ export default function AdminCommunityPage() {
     <div style={{ maxWidth: 1100, margin: '0 auto' }}>
       <div style={{ marginBottom: 24 }}>
         <h1 style={{ ...mono, fontSize: '1rem', fontWeight: 700, color: '#00d4ff', letterSpacing: '0.1em', margin: '0 0 4px' }}>{'// COMUNIDADE'}</h1>
-        <p style={{ ...mono, fontSize: '0.65rem', color: '#0d2a3a' }}>Controle total sobre posts e comentários</p>
+        <p style={{ ...mono, fontSize: '0.65rem', color: '#7a9aaa' }}>Controle total sobre posts e comentários</p>
       </div>
 
       {/* Tabs */}
@@ -99,10 +99,10 @@ export default function AdminCommunityPage() {
             ...mono, fontSize: '0.65rem', fontWeight: 700,
             background: tab === t.k ? 'rgba(0,150,255,0.12)' : 'transparent',
             border: `1px solid ${tab === t.k ? 'rgba(0,150,255,0.35)' : 'rgba(0,150,255,0.1)'}`,
-            color: tab === t.k ? '#00d4ff' : '#1a4a6a',
+            color: tab === t.k ? '#00d4ff' : '#a8c4d4',
           }}>{t.l}</button>
         ))}
-        <span style={{ ...mono, fontSize: '0.62rem', color: '#0d2a3a', marginLeft: 8, alignSelf: 'center' }}>
+        <span style={{ ...mono, fontSize: '0.62rem', color: '#7a9aaa', marginLeft: 8, alignSelf: 'center' }}>
           {total} registro(s)
         </span>
       </div>
@@ -137,24 +137,24 @@ export default function AdminCommunityPage() {
                 <thead>
                   <tr style={{ borderBottom: '1px solid rgba(0,150,255,0.12)' }}>
                     {['TÍTULO / AUTOR', 'STATUS', 'STATS', 'DATA', 'AÇÕES'].map(h => (
-                      <th key={h} style={{ padding: '10px 12px', textAlign: 'left', ...mono, fontSize: '0.55rem', color: '#1a4a6a', letterSpacing: '0.12em', whiteSpace: 'nowrap' }}>{h}</th>
+                      <th key={h} style={{ padding: '10px 12px', textAlign: 'left', ...mono, fontSize: '0.55rem', color: '#a8c4d4', letterSpacing: '0.12em', whiteSpace: 'nowrap' }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {postsLoading ? (
-                    <tr><td colSpan={5} style={{ padding: '24px', textAlign: 'center', ...mono, fontSize: '0.65rem', color: '#0a1e2e' }}>Carregando...</td></tr>
+                    <tr><td colSpan={5} style={{ padding: '24px', textAlign: 'center', ...mono, fontSize: '0.65rem', color: '#6a8a9a' }}>Carregando...</td></tr>
                   ) : posts.length === 0 ? (
-                    <tr><td colSpan={5} style={{ padding: '24px', textAlign: 'center', ...mono, fontSize: '0.65rem', color: '#0a1e2e' }}>Nenhum post encontrado</td></tr>
+                    <tr><td colSpan={5} style={{ padding: '24px', textAlign: 'center', ...mono, fontSize: '0.65rem', color: '#6a8a9a' }}>Nenhum post encontrado</td></tr>
                   ) : posts.map(p => (
                     <tr key={p._id} style={{ borderBottom: '1px solid rgba(0,150,255,0.06)', background: !p.isActive ? 'rgba(255,0,0,0.03)' : p.isPinned ? 'rgba(0,150,255,0.03)' : 'transparent' }}>
                       <td style={{ padding: '10px 12px', maxWidth: 280 }}>
-                        <p style={{ ...mono, fontSize: '0.7rem', color: p.isActive ? '#6090b0' : '#0d2a3a', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <p style={{ ...mono, fontSize: '0.7rem', color: p.isActive ? '#b8d0e0' : '#7a9aaa', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {p.isPinned && <span style={{ color: '#0096ff', marginRight: 4 }}>📌</span>}
                           {p.title}
                         </p>
-                        <p style={{ ...mono, fontSize: '0.58rem', color: '#0d2a3a', margin: '2px 0 0' }}>{p.author?.name} · {p.author?.email}</p>
-                        {p.mediaType && <span style={{ ...mono, fontSize: '0.5rem', color: '#0a1e2e', background: 'rgba(0,150,255,0.08)', padding: '1px 5px', borderRadius: 3 }}>{p.mediaType}</span>}
+                        <p style={{ ...mono, fontSize: '0.58rem', color: '#7a9aaa', margin: '2px 0 0' }}>{p.author?.name} · {p.author?.email}</p>
+                        {p.mediaType && <span style={{ ...mono, fontSize: '0.5rem', color: '#6a8a9a', background: 'rgba(0,150,255,0.08)', padding: '1px 5px', borderRadius: 3 }}>{p.mediaType}</span>}
                       </td>
                       <td style={{ padding: '10px 12px' }}>
                         <span style={{ ...mono, fontSize: '0.58rem', padding: '2px 7px', borderRadius: 3, background: p.isActive ? 'rgba(0,255,65,0.08)' : 'rgba(255,0,0,0.1)', color: p.isActive ? '#00cc44' : '#ff4455', border: `1px solid ${p.isActive ? 'rgba(0,255,65,0.2)' : 'rgba(255,0,0,0.2)'}` }}>
@@ -163,17 +163,17 @@ export default function AdminCommunityPage() {
                       </td>
                       <td style={{ padding: '10px 12px' }}>
                         <div style={{ display: 'flex', gap: 10 }}>
-                          <span style={{ display: 'flex', alignItems: 'center', gap: 3, ...mono, fontSize: '0.62rem', color: '#0d2a3a' }}><Eye style={{ width: 10, height: 10 }} />{p.views}</span>
-                          <span style={{ display: 'flex', alignItems: 'center', gap: 3, ...mono, fontSize: '0.62rem', color: '#0d2a3a' }}><ThumbsUp style={{ width: 10, height: 10 }} />{p.likes?.length || 0}</span>
-                          <span style={{ display: 'flex', alignItems: 'center', gap: 3, ...mono, fontSize: '0.62rem', color: '#0d2a3a' }}><MessageSquare style={{ width: 10, height: 10 }} />{p.commentCount}</span>
+                          <span style={{ display: 'flex', alignItems: 'center', gap: 3, ...mono, fontSize: '0.62rem', color: '#7a9aaa' }}><Eye style={{ width: 10, height: 10 }} />{p.views}</span>
+                          <span style={{ display: 'flex', alignItems: 'center', gap: 3, ...mono, fontSize: '0.62rem', color: '#7a9aaa' }}><ThumbsUp style={{ width: 10, height: 10 }} />{p.likes?.length || 0}</span>
+                          <span style={{ display: 'flex', alignItems: 'center', gap: 3, ...mono, fontSize: '0.62rem', color: '#7a9aaa' }}><MessageSquare style={{ width: 10, height: 10 }} />{p.commentCount}</span>
                         </div>
                       </td>
-                      <td style={{ padding: '10px 12px', ...mono, fontSize: '0.62rem', color: '#0d2a3a', whiteSpace: 'nowrap' }}>
+                      <td style={{ padding: '10px 12px', ...mono, fontSize: '0.62rem', color: '#7a9aaa', whiteSpace: 'nowrap' }}>
                         {new Date(p.createdAt).toLocaleDateString('pt-BR')}
                       </td>
                       <td style={{ padding: '10px 12px' }}>
                         <div style={{ display: 'flex', gap: 4 }}>
-                          <button onClick={() => pinPost.mutate(p._id)} title={p.isPinned ? 'Desafixar' : 'Fixar'} style={{ padding: '4px 6px', background: p.isPinned ? 'rgba(0,120,255,0.12)' : 'rgba(0,150,255,0.06)', border: `1px solid ${p.isPinned ? 'rgba(0,120,255,0.25)' : 'rgba(0,150,255,0.15)'}`, borderRadius: 3, cursor: 'pointer', color: p.isPinned ? '#0096ff' : '#1a4a6a' }}>
+                          <button onClick={() => pinPost.mutate(p._id)} title={p.isPinned ? 'Desafixar' : 'Fixar'} style={{ padding: '4px 6px', background: p.isPinned ? 'rgba(0,120,255,0.12)' : 'rgba(0,150,255,0.06)', border: `1px solid ${p.isPinned ? 'rgba(0,120,255,0.25)' : 'rgba(0,150,255,0.15)'}`, borderRadius: 3, cursor: 'pointer', color: p.isPinned ? '#0096ff' : '#a8c4d4' }}>
                             <Pin style={{ width: 12, height: 12 }} />
                           </button>
                           {!p.isActive ? (
@@ -204,28 +204,28 @@ export default function AdminCommunityPage() {
               <thead>
                 <tr style={{ borderBottom: '1px solid rgba(0,150,255,0.12)' }}>
                   {['CONTEÚDO', 'AUTOR', 'POST', 'DATA', 'AÇÃO'].map(h => (
-                    <th key={h} style={{ padding: '10px 12px', textAlign: 'left', ...mono, fontSize: '0.55rem', color: '#1a4a6a', letterSpacing: '0.12em' }}>{h}</th>
+                    <th key={h} style={{ padding: '10px 12px', textAlign: 'left', ...mono, fontSize: '0.55rem', color: '#a8c4d4', letterSpacing: '0.12em' }}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {commentsLoading ? (
-                  <tr><td colSpan={5} style={{ padding: '24px', textAlign: 'center', ...mono, fontSize: '0.65rem', color: '#0a1e2e' }}>Carregando...</td></tr>
+                  <tr><td colSpan={5} style={{ padding: '24px', textAlign: 'center', ...mono, fontSize: '0.65rem', color: '#6a8a9a' }}>Carregando...</td></tr>
                 ) : comments.length === 0 ? (
-                  <tr><td colSpan={5} style={{ padding: '24px', textAlign: 'center', ...mono, fontSize: '0.65rem', color: '#0a1e2e' }}>Nenhum comentário</td></tr>
+                  <tr><td colSpan={5} style={{ padding: '24px', textAlign: 'center', ...mono, fontSize: '0.65rem', color: '#6a8a9a' }}>Nenhum comentário</td></tr>
                 ) : comments.map(c => (
                   <tr key={c._id} style={{ borderBottom: '1px solid rgba(0,150,255,0.06)' }}>
                     <td style={{ padding: '10px 12px', maxWidth: 280 }}>
-                      <p style={{ ...mono, fontSize: '0.68rem', color: '#6090b0', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.content}</p>
+                      <p style={{ ...mono, fontSize: '0.68rem', color: '#b8d0e0', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.content}</p>
                     </td>
                     <td style={{ padding: '10px 12px' }}>
-                      <p style={{ ...mono, fontSize: '0.65rem', color: '#6090b0', margin: 0 }}>{c.author?.name}</p>
-                      <p style={{ ...mono, fontSize: '0.55rem', color: '#0d2a3a', margin: 0 }}>{c.author?.email}</p>
+                      <p style={{ ...mono, fontSize: '0.65rem', color: '#b8d0e0', margin: 0 }}>{c.author?.name}</p>
+                      <p style={{ ...mono, fontSize: '0.55rem', color: '#7a9aaa', margin: 0 }}>{c.author?.email}</p>
                     </td>
                     <td style={{ padding: '10px 12px', maxWidth: 200 }}>
-                      <p style={{ ...mono, fontSize: '0.62rem', color: '#1a4a6a', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.post?.title}</p>
+                      <p style={{ ...mono, fontSize: '0.62rem', color: '#a8c4d4', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.post?.title}</p>
                     </td>
-                    <td style={{ padding: '10px 12px', ...mono, fontSize: '0.62rem', color: '#0d2a3a', whiteSpace: 'nowrap' }}>
+                    <td style={{ padding: '10px 12px', ...mono, fontSize: '0.62rem', color: '#7a9aaa', whiteSpace: 'nowrap' }}>
                       {new Date(c.createdAt).toLocaleDateString('pt-BR')}
                     </td>
                     <td style={{ padding: '10px 12px' }}>
@@ -244,11 +244,11 @@ export default function AdminCommunityPage() {
       {/* Pagination */}
       {totalPages > 1 && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12, justifyContent: 'center' }}>
-          <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} style={{ padding: '5px 10px', background: 'rgba(0,150,255,0.06)', border: '1px solid rgba(0,150,255,0.15)', borderRadius: 4, cursor: 'pointer', color: page === 1 ? '#0a1e2e' : '#00d4ff' }}>
+          <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} style={{ padding: '5px 10px', background: 'rgba(0,150,255,0.06)', border: '1px solid rgba(0,150,255,0.15)', borderRadius: 4, cursor: 'pointer', color: page === 1 ? '#6a8a9a' : '#00d4ff' }}>
             <ChevronLeft style={{ width: 13, height: 13 }} />
           </button>
-          <span style={{ ...mono, fontSize: '0.65rem', color: '#1a4a6a' }}>{page} / {totalPages}</span>
-          <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages} style={{ padding: '5px 10px', background: 'rgba(0,150,255,0.06)', border: '1px solid rgba(0,150,255,0.15)', borderRadius: 4, cursor: 'pointer', color: page === totalPages ? '#0a1e2e' : '#00d4ff' }}>
+          <span style={{ ...mono, fontSize: '0.65rem', color: '#a8c4d4' }}>{page} / {totalPages}</span>
+          <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages} style={{ padding: '5px 10px', background: 'rgba(0,150,255,0.06)', border: '1px solid rgba(0,150,255,0.15)', borderRadius: 4, cursor: 'pointer', color: page === totalPages ? '#6a8a9a' : '#00d4ff' }}>
             <ChevronRight style={{ width: 13, height: 13 }} />
           </button>
         </div>

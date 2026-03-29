@@ -116,7 +116,7 @@ function FileUploadZone({
             <p style={{ fontSize: '0.75rem', color: '#a0c8a8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {selectedFile.name}
             </p>
-            <p style={{ fontSize: '0.62rem', color: '#2a4d30', marginTop: 1 }}>
+            <p style={{ fontSize: '0.62rem', color: '#7aaa8a', marginTop: 1 }}>
               {formatBytes(selectedFile.size)}
             </p>
           </div>
@@ -138,9 +138,9 @@ function FileUploadZone({
             </div>
           ) : (
             <button type="button" onClick={onClear}
-              style={{ color: '#2a4d30', background: 'none', border: 'none', cursor: 'pointer', padding: 4, transition: 'color 0.15s' }}
+              style={{ color: '#7aaa8a', background: 'none', border: 'none', cursor: 'pointer', padding: 4, transition: 'color 0.15s' }}
               onMouseOver={e => (e.currentTarget.style.color = '#ff0040')}
-              onMouseOut={e => (e.currentTarget.style.color = '#2a4d30')}>
+              onMouseOut={e => (e.currentTarget.style.color = '#7aaa8a')}>
               <X className="w-3.5 h-3.5" />
             </button>
           )}
@@ -166,11 +166,11 @@ function FileUploadZone({
           onMouseOver={e => (e.currentTarget.style.borderColor = 'rgba(0,255,65,0.3)')}
           onMouseOut={e => !isDragging && (e.currentTarget.style.borderColor = 'rgba(0,255,65,0.15)')}
         >
-          <Upload className="w-7 h-7" style={{ color: '#2a4d30', margin: '0 auto 8px' }} />
+          <Upload className="w-7 h-7" style={{ color: '#7aaa8a', margin: '0 auto 8px' }} />
           <p style={{ fontSize: '0.78rem', color: '#4d8c5a', marginBottom: 4 }}>
             Clique ou arraste um arquivo aqui
           </p>
-          <p style={{ fontSize: '0.65rem', color: '#1a3020', lineHeight: 1.5 }}>
+          <p style={{ fontSize: '0.65rem', color: '#7aaa8a', lineHeight: 1.5 }}>
             Programas (.exe, .msi), PDFs, ZIPs, Vídeos, Scripts, qualquer formato — máx. 5GB
           </p>
         </div>
@@ -380,7 +380,7 @@ export default function AdminContentPage() {
           <h1 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#70b0d0', letterSpacing: '0.08em' }}>
             GERENCIAR CONTEÚDO
           </h1>
-          <p style={{ fontSize: '0.7rem', color: '#0a1e2e', marginTop: 2 }}>
+          <p style={{ fontSize: '0.7rem', color: '#6a8a9a', marginTop: 2 }}>
             {pagination?.total || 0} arquivos no sistema
           </p>
         </div>
@@ -408,7 +408,7 @@ export default function AdminContentPage() {
 
       {/* Search */}
       <div style={{ position: 'relative', maxWidth: 360 }}>
-        <Search className="w-3.5 h-3.5" style={{ position: 'absolute', left: 11, top: '50%', transform: 'translateY(-50%)', color: '#0a1e2e', pointerEvents: 'none' }} />
+        <Search className="w-3.5 h-3.5" style={{ position: 'absolute', left: 11, top: '50%', transform: 'translateY(-50%)', color: '#6a8a9a', pointerEvents: 'none' }} />
         <input
           type="text"
           value={search}
@@ -450,7 +450,7 @@ export default function AdminContentPage() {
                 ))
               ) : contents.length === 0 ? (
                 <tr>
-                  <td colSpan={7} style={{ textAlign: 'center', padding: '40px', color: '#0a1e2e', fontSize: '0.8rem' }}>
+                  <td colSpan={7} style={{ textAlign: 'center', padding: '40px', color: '#6a8a9a', fontSize: '0.8rem' }}>
                     Nenhum conteúdo encontrado
                   </td>
                 </tr>
@@ -463,11 +463,11 @@ export default function AdminContentPage() {
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                           <span style={{ fontSize: '1.1rem' }}>{getContentTypeIcon(item.type)}</span>
                           <div>
-                            <p style={{ fontSize: '0.78rem', fontWeight: 500, color: '#c0a890', maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            <p style={{ fontSize: '0.78rem', fontWeight: 500, color: '#b8d8e8', maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                               {item.title}
                             </p>
                             <div style={{ display: 'flex', gap: 6, marginTop: 2, flexWrap: 'wrap' }}>
-                              {cat && <span style={{ fontSize: '0.6rem', color: '#5a3a2a' }}>{cat.name}</span>}
+                              {cat && <span style={{ fontSize: '0.6rem', color: '#7a9aaa' }}>{cat.name}</span>}
                               {item.isFree && (
                                 <span style={{
                                   fontSize: '0.58rem', color: '#00ff41',
@@ -489,25 +489,25 @@ export default function AdminContentPage() {
                         </div>
                       </td>
                       <td>
-                        <span style={{ fontSize: '0.7rem', color: '#5a3a2a' }}>{getContentTypeLabel(item.type)}</span>
+                        <span style={{ fontSize: '0.7rem', color: '#7a9aaa' }}>{getContentTypeLabel(item.type)}</span>
                       </td>
                       <td><LevelBadge level={item.minLevel} /></td>
                       <td>
                         {item.fileUrl ? (
                           <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                             <CheckCircle2 className="w-3.5 h-3.5" style={{ color: '#00a828' }} />
-                            <span style={{ fontSize: '0.62rem', color: '#2a4d30' }}>
+                            <span style={{ fontSize: '0.62rem', color: '#7aaa8a' }}>
                               {item.fileSize > 0 ? formatBytes(item.fileSize) : 'Arquivo'}
                             </span>
                           </div>
                         ) : item.externalLink ? (
                           <span style={{ fontSize: '0.62rem', color: '#2a6890' }}>Link externo</span>
                         ) : (
-                          <span style={{ fontSize: '0.62rem', color: '#3a3a3a' }}>—</span>
+                          <span style={{ fontSize: '0.62rem', color: '#8898a8' }}>—</span>
                         )}
                       </td>
                       <td>
-                        <div style={{ fontSize: '0.65rem', color: '#3a3a3a', display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        <div style={{ fontSize: '0.65rem', color: '#8898a8', display: 'flex', flexDirection: 'column', gap: 2 }}>
                           <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
                             <Eye className="w-3 h-3" /> {item.views}
                           </span>
@@ -517,23 +517,23 @@ export default function AdminContentPage() {
                         </div>
                       </td>
                       <td>
-                        <span style={{ fontSize: '0.65rem', color: '#3a3a3a' }}>{formatDate(item.createdAt)}</span>
+                        <span style={{ fontSize: '0.65rem', color: '#8898a8' }}>{formatDate(item.createdAt)}</span>
                       </td>
                       <td>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 4 }}>
                           <button
                             onClick={() => openEditModal(item)}
-                            style={{ padding: 6, color: '#3a3a3a', background: 'none', border: 'none', cursor: 'pointer', borderRadius: 3, transition: 'all 0.15s' }}
+                            style={{ padding: 6, color: '#8898a8', background: 'none', border: 'none', cursor: 'pointer', borderRadius: 3, transition: 'all 0.15s' }}
                             onMouseOver={e => { e.currentTarget.style.color = '#00d4ff'; e.currentTarget.style.background = 'rgba(0,212,255,0.08)'; }}
-                            onMouseOut={e => { e.currentTarget.style.color = '#3a3a3a'; e.currentTarget.style.background = 'none'; }}
+                            onMouseOut={e => { e.currentTarget.style.color = '#8898a8'; e.currentTarget.style.background = 'none'; }}
                           >
                             <Edit2 className="w-3.5 h-3.5" />
                           </button>
                           <button
                             onClick={() => setDeleteModal({ open: true, id: item._id })}
-                            style={{ padding: 6, color: '#3a3a3a', background: 'none', border: 'none', cursor: 'pointer', borderRadius: 3, transition: 'all 0.15s' }}
+                            style={{ padding: 6, color: '#8898a8', background: 'none', border: 'none', cursor: 'pointer', borderRadius: 3, transition: 'all 0.15s' }}
                             onMouseOver={e => { e.currentTarget.style.color = '#ff0040'; e.currentTarget.style.background = 'rgba(255,0,64,0.08)'; }}
-                            onMouseOut={e => { e.currentTarget.style.color = '#3a3a3a'; e.currentTarget.style.background = 'none'; }}
+                            onMouseOut={e => { e.currentTarget.style.color = '#8898a8'; e.currentTarget.style.background = 'none'; }}
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -553,14 +553,14 @@ export default function AdminContentPage() {
             borderTop: '1px solid rgba(0,150,255,0.08)',
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           }}>
-            <p style={{ fontSize: '0.65rem', color: '#0a1e2e' }}>
+            <p style={{ fontSize: '0.65rem', color: '#6a8a9a' }}>
               {(page - 1) * 15 + 1}–{Math.min(page * 15, pagination.total)} de {pagination.total}
             </p>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1} className="btn-secondary" style={{ padding: '4px 10px', fontSize: '0.7rem' }}>
                 Anterior
               </button>
-              <span style={{ fontSize: '0.7rem', color: '#0a1e2e' }}>{page}/{pagination.pages}</span>
+              <span style={{ fontSize: '0.7rem', color: '#6a8a9a' }}>{page}/{pagination.pages}</span>
               <button onClick={() => setPage((p) => Math.min(pagination.pages, p + 1))} disabled={page === pagination.pages} className="btn-secondary" style={{ padding: '4px 10px', fontSize: '0.7rem' }}>
                 Próximo
               </button>
@@ -748,7 +748,7 @@ export default function AdminContentPage() {
                   <AlertCircle className="w-3.5 h-3.5" /> {imageUploadError}
                 </div>
               )}
-              <p style={{ fontSize: '0.6rem', color: '#1a3020', marginTop: 4, fontFamily: 'JetBrains Mono, monospace' }}>
+              <p style={{ fontSize: '0.6rem', color: '#7aaa8a', marginTop: 4, fontFamily: 'JetBrains Mono, monospace' }}>
                 Aceita JPG, PNG, GIF, WebP — primeira imagem será o thumbnail principal
               </p>
             </div>
@@ -761,7 +761,7 @@ export default function AdminContentPage() {
                   Conteúdo Gratuito (plano free)
                 </span>
               </label>
-              <p style={{ fontSize: '0.6rem', color: '#1a3020', fontFamily: 'JetBrains Mono, monospace', margin: '3px 0 0 22px' }}>
+              <p style={{ fontSize: '0.6rem', color: '#7aaa8a', fontFamily: 'JetBrains Mono, monospace', margin: '3px 0 0 22px' }}>
                 Qualquer usuário pode baixar sem assinatura
               </p>
             </div>

@@ -110,11 +110,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             className="lg:hidden"
             style={{
               position: 'absolute', right: 8, top: 8,
-              padding: 4, color: '#0d2535', background: 'none', border: 'none',
+              padding: 4, color: '#708090', background: 'none', border: 'none',
               cursor: 'pointer', transition: 'color 0.15s', borderRadius: 4,
             }}
             onMouseOver={e => (e.currentTarget.style.color = '#00d4ff')}
-            onMouseOut={e => (e.currentTarget.style.color = '#0d2535')}
+            onMouseOut={e => (e.currentTarget.style.color = '#708090')}
           >
             <X className="w-4 h-4" />
           </button>
@@ -123,7 +123,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Nav */}
         <nav style={{ flex: 1, padding: '10px 8px' }}>
           <div style={{ marginBottom: 6, padding: '0 10px' }}>
-            <span style={{ fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.2em', color: '#0d2535' }}>
+            <span style={{ fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.2em', color: '#708090' }}>
               {'// CONTROLES'}
             </span>
           </div>
@@ -149,7 +149,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     borderColor: 'rgba(0,212,255,0.25)',
                     boxShadow: '0 0 8px rgba(0,212,255,0.1)',
                   } : {
-                    color: '#1a4a6a',
+                    color: '#a8c4d4',
                   }),
                 }}
                 onMouseOver={e => {
@@ -161,7 +161,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 }}
                 onMouseOut={e => {
                   if (!isActive(item.href)) {
-                    (e.currentTarget as HTMLAnchorElement).style.color = '#1a4a6a';
+                    (e.currentTarget as HTMLAnchorElement).style.color = '#a8c4d4';
                     (e.currentTarget as HTMLAnchorElement).style.background = 'transparent';
                     (e.currentTarget as HTMLAnchorElement).style.borderColor = 'transparent';
                   }
@@ -181,7 +181,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               style={{
                 display: 'flex', alignItems: 'center', gap: 10,
                 padding: '7px 10px', borderRadius: 4,
-                fontSize: '0.72rem', color: '#1a3a55',
+                fontSize: '0.72rem', color: '#8aabbb',
                 textDecoration: 'none', transition: 'all 0.15s',
                 border: '1px solid transparent',
               }}
@@ -191,7 +191,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 (e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgba(0,212,255,0.15)';
               }}
               onMouseOut={e => {
-                (e.currentTarget as HTMLAnchorElement).style.color = '#1a3a55';
+                (e.currentTarget as HTMLAnchorElement).style.color = '#8aabbb';
                 (e.currentTarget as HTMLAnchorElement).style.background = 'transparent';
                 (e.currentTarget as HTMLAnchorElement).style.borderColor = 'transparent';
               }}
@@ -222,12 +222,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <p style={{ fontSize: '0.72rem', fontWeight: 600, color: '#80c8e8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {user?.name}
               </p>
-              <p style={{ fontSize: '0.58rem', color: '#1a4a6a', letterSpacing: '0.08em' }}>ADMINISTRADOR</p>
+              <p style={{ fontSize: '0.58rem', color: '#a8c4d4', letterSpacing: '0.08em' }}>ADMINISTRADOR</p>
             </div>
             <button onClick={logout}
-              style={{ padding: 4, color: '#1a3a55', background: 'none', border: 'none', cursor: 'pointer', transition: 'color 0.15s' }}
+              style={{ padding: 4, color: '#8aabbb', background: 'none', border: 'none', cursor: 'pointer', transition: 'color 0.15s' }}
               onMouseOver={e => (e.currentTarget.style.color = '#ff0040')}
-              onMouseOut={e => (e.currentTarget.style.color = '#1a3a55')}
+              onMouseOut={e => (e.currentTarget.style.color = '#8aabbb')}
             >
               <LogOut className="w-3.5 h-3.5" />
             </button>
@@ -256,27 +256,27 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             onClick={() => setSidebarOpen(!sidebarOpen)}
             className="lg:hidden"
             style={{
-              padding: 6, color: '#0d2535', background: 'none', border: 'none',
+              padding: 6, color: '#708090', background: 'none', border: 'none',
               cursor: 'pointer', transition: 'color 0.15s', borderRadius: 4, flexShrink: 0,
             }}
             onMouseOver={e => (e.currentTarget.style.color = '#00d4ff')}
-            onMouseOut={e => (e.currentTarget.style.color = '#0d2535')}
+            onMouseOut={e => (e.currentTarget.style.color = '#708090')}
           >
             <Menu className="w-5 h-5" />
           </button>
           <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontFamily: 'JetBrains Mono, monospace', fontSize: '0.7rem', minWidth: 0, flex: 1, overflow: 'hidden' }}>
             <span style={{ color: '#00d4ff', flexShrink: 0 }}>root</span>
-            <span className="hidden sm:inline" style={{ color: '#1a3a55' }}>@</span>
+            <span className="hidden sm:inline" style={{ color: '#8aabbb' }}>@</span>
             <span className="hidden sm:inline" style={{ color: '#0096ff' }}>elite-trojan</span>
-            <span style={{ color: '#1a3a55', flexShrink: 0 }}>:~$</span>
-            <span style={{ color: '#2a5070', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{pathname}</span>
+            <span style={{ color: '#8aabbb', flexShrink: 0 }}>:~$</span>
+            <span style={{ color: '#8898aa', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{pathname}</span>
           </div>
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
             <AlertTriangle className="w-3 h-3" style={{ color: '#00d4ff', opacity: 0.6 }} />
-            <span className="hidden sm:inline" style={{ fontSize: '0.58rem', color: '#1a4060', letterSpacing: '0.12em' }}>ZONA RESTRITA</span>
+            <span className="hidden sm:inline" style={{ fontSize: '0.58rem', color: '#9ab8c8', letterSpacing: '0.12em' }}>ZONA RESTRITA</span>
             <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginLeft: 4 }}>
               <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#00ff41', boxShadow: '0 0 5px #00ff41', animation: 'pulse 2s infinite' }} />
-              <span className="hidden sm:inline" style={{ fontSize: '0.58rem', color: '#1a3050', letterSpacing: '0.1em' }}>SYSTEM ONLINE</span>
+              <span className="hidden sm:inline" style={{ fontSize: '0.58rem', color: '#7a9aaa', letterSpacing: '0.1em' }}>SYSTEM ONLINE</span>
             </div>
           </div>
         </div>
