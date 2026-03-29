@@ -16,6 +16,12 @@ const chatUpload = multer({
   limits: { fileSize: 25 * 1024 * 1024 },
 });
 
+// multer para mídia de posts (100 MB — suporta vídeos)
+const postUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 100 * 1024 * 1024 },
+});
+
 // GET /api/community/posts
 router.get('/posts', auth, requireSubscription, async (req, res) => {
   try {
@@ -69,8 +75,9 @@ router.post(
   auth,
   requireSubscription,
   [
-    body('title').trim().notEmpty().withMessage('Title required').isLength({ max: 200 }),
-    body('content').trim().notEmpty().withMessage('Content required').isLength({ max: 10000 }),
+    body('title').trim().notEmpty().withMessage('Título obrigatório').isLength({ max: 200 }),
+    body('content').trim().notEmpty().withMessage('Conteúdo obrigatório').isLength({ max: 10000 }),
+    body('subtitle').optional().isLength({ max: 300 }),
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -79,16 +86,60 @@ router.post(
     }
 
     try {
-      const { title, content, category } = req.body;
-      const post = await Post.create({ title, content, category: category || null, author: req.user._id });
+      const { title, subtitle, content, category, mediaUrl, mediaType, mediaFileName } = req.body;
+      const post = await Post.create({
+        title,
+        subtitle: subtitle || null,
+        content,
+        category: category || null,
+        author: req.user._id,
+        mediaUrl: mediaUrl || null,
+        mediaType: mediaType || null,
+        mediaFileName: mediaFileName || null,
+      });
       await post.populate('author', 'name avatar level role');
       addXp(req.user._id, 'post').catch(() => {});
-      res.status(201).json({ message: 'Post created.', post });
+      res.status(201).json({ message: 'Post criado.', post });
     } catch (error) {
       res.status(500).json({ message: 'Server error.' });
     }
   }
 );
+
+// POST /api/community/posts/upload — upload de mídia para posts
+router.post('/posts/upload', auth, requireSubscription, (req, res, next) => {
+  postUpload.single('media')(req, res, (err) => {
+    if (err?.code === 'LIMIT_FILE_SIZE') {
+      return res.status(400).json({ message: 'Arquivo muito grande. Limite: 100 MB.' });
+    }
+    if (err) return res.status(400).json({ message: err.message });
+    next();
+  });
+}, async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ message: 'Nenhum arquivo enviado.' });
+
+    const mediaType = req.body.type || 'image';
+    let url;
+
+    if (mediaType === 'image') {
+      url = await processImageUpload(req.file);
+    } else {
+      url = await processFileUpload(req.file);
+    }
+
+    res.json({
+      url,
+      fileName: req.file.originalname,
+      fileSize: req.file.size,
+      mimeType: req.file.mimetype,
+      mediaType,
+    });
+  } catch (err) {
+    console.error('[posts/upload]', err);
+    res.status(500).json({ message: 'Falha no upload da mídia.' });
+  }
+});
 
 // PUT /api/community/posts/:id
 router.put('/posts/:id', auth, requireSubscription, async (req, res) => {

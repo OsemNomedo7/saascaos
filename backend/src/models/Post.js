@@ -45,6 +45,15 @@ const postSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    subtitle: {
+      type: String,
+      default: null,
+      maxlength: [300, 'Subtitle cannot exceed 300 characters'],
+      trim: true,
+    },
+    mediaUrl: { type: String, default: null },
+    mediaType: { type: String, enum: ['image', 'video', null], default: null },
+    mediaFileName: { type: String, default: null },
   },
   {
     timestamps: true,

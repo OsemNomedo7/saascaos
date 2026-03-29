@@ -112,7 +112,7 @@ export const subscriptionsApi = {
 export const communityApi = {
   posts: (params?: Record<string, unknown>) => api.get('/community/posts', { params }),
   getPost: (id: string) => api.get(`/community/posts/${id}`),
-  createPost: (data: { title: string; content: string; category?: string }) =>
+  createPost: (data: { title: string; subtitle?: string; content: string; category?: string; mediaUrl?: string; mediaType?: string; mediaFileName?: string }) =>
     api.post('/community/posts', data),
   updatePost: (id: string, data: object) => api.put(`/community/posts/${id}`, data),
   deletePost: (id: string) => api.delete(`/community/posts/${id}`),
@@ -128,6 +128,15 @@ export const communityApi = {
     formData.append('media', file);
     formData.append('type', type);
     return api.post('/community/chat/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      timeout: 0,
+    });
+  },
+  uploadPostMedia: (file: File, type: 'image' | 'video') => {
+    const formData = new FormData();
+    formData.append('media', file);
+    formData.append('type', type);
+    return api.post('/community/posts/upload', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
       timeout: 0,
     });

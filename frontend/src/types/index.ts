@@ -106,6 +106,7 @@ export interface ReviewStats {
 export interface Post {
   _id: string;
   title: string;
+  subtitle?: string | null;
   content: string;
   author: string | User;
   category: string | Category | null;
@@ -114,6 +115,9 @@ export interface Post {
   isActive: boolean;
   views: number;
   commentCount: number;
+  mediaUrl?: string | null;
+  mediaType?: 'image' | 'video' | null;
+  mediaFileName?: string | null;
   createdAt: string;
   updatedAt: string;
 }
