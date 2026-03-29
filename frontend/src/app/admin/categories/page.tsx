@@ -201,8 +201,8 @@ export default function AdminCategoriesPage() {
   };
 
   const isEmoji = (str: string) => {
-    // rough check: if it's a single short string that looks like an emoji vs a word
-    return str && str.length <= 4 && /\p{Emoji}/u.test(str);
+    // emojis have codepoints above 127; Lucide names are plain ASCII words
+    return str && str.length <= 4 && str.codePointAt(0)! > 127;
   };
 
   const renderFormFields = () => (
