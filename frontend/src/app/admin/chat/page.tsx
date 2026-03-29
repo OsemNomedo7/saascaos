@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Trash2, AlertTriangle, MessageSquare, Image, FileText, Mic, BarChart2, RefreshCw } from 'lucide-react';
+import { Trash2, AlertTriangle, MessageSquare, Image as ImageIcon, FileText, Mic, BarChart2, RefreshCw } from 'lucide-react';
 import api from '@/lib/api';
 
 const mono: React.CSSProperties = { fontFamily: 'JetBrains Mono, monospace' };
@@ -21,7 +21,7 @@ interface ChatMessage {
 }
 
 function typeIcon(type: string) {
-  if (type === 'image') return <Image style={{ width: 12, height: 12, color: '#00d4ff' }} />;
+  if (type === 'image') return <ImageIcon style={{ width: 12, height: 12, color: '#00d4ff' }} />;
   if (type === 'file') return <FileText style={{ width: 12, height: 12, color: '#ffcc00' }} />;
   if (type === 'audio') return <Mic style={{ width: 12, height: 12, color: '#a060ff' }} />;
   return <MessageSquare style={{ width: 12, height: 12, color: '#0096ff' }} />;
@@ -94,7 +94,7 @@ export default function AdminChatPage() {
         {[
           { label: 'TOTAL MSGS', value: stats.total, icon: <BarChart2 style={{ width: 14, height: 14 }} />, color: '#00d4ff' },
           { label: 'HOJE', value: stats.todayCount, icon: <MessageSquare style={{ width: 14, height: 14 }} />, color: '#00d4ff' },
-          { label: 'MÍDIAS', value: stats.mediaCount, icon: <Image style={{ width: 14, height: 14 }} />, color: '#ffcc00' },
+          { label: 'MÍDIAS', value: stats.mediaCount, icon: <ImageIcon style={{ width: 14, height: 14 }} />, color: '#ffcc00' },
           { label: 'DELETADAS', value: stats.deletedCount, icon: <Trash2 style={{ width: 14, height: 14 }} />, color: '#ff4455' },
         ].map(s => (
           <div key={s.label} style={{ padding: '12px 16px', background: '#040d18', border: `1px solid ${s.color}22`, borderRadius: 6 }}>

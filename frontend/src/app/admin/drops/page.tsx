@@ -227,7 +227,7 @@ export default function AdminDropsPage() {
       setIsUploading(false);
     }
 
-    let newImageUrls = [...uploadedImageUrls];
+    const newImageUrls = [...uploadedImageUrls];
     if (selectedImages.length > 0) {
       setIsUploadingImages(true);
       try {
