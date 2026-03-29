@@ -5,38 +5,39 @@ import { useState, useEffect } from 'react';
 import { Zap, Clock, Download, ExternalLink, AlertTriangle, Package } from 'lucide-react';
 import { dropsApi, contentApi } from '@/lib/api';
 import { LevelBadge } from '@/components/ui/Badge';
-import { Card } from '@/components/ui/Card';
 import { getContentTypeIcon, getContentTypeLabel, getCountdown, formatRelativeDate, formatBytes } from '@/lib/utils';
-import type { Content } from '@/types';
+import type { Content, Category } from '@/types';
+
+const mono = { fontFamily: 'JetBrains Mono, monospace' } as const;
 
 function DropCountdown({ expiresAt }: { expiresAt: string }) {
   const [countdown, setCountdown] = useState(getCountdown(expiresAt));
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCountdown(getCountdown(expiresAt));
-    }, 1000);
+    const interval = setInterval(() => setCountdown(getCountdown(expiresAt)), 1000);
     return () => clearInterval(interval);
   }, [expiresAt]);
 
   if (countdown.expired) {
     return (
-      <div className="flex items-center gap-1.5 text-red-400 text-sm font-mono">
-        <AlertTriangle className="w-4 h-4" />
-        <span>Expired</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <AlertTriangle style={{ width: 13, height: 13, color: '#ff4455' }} />
+        <span style={{ ...mono, fontSize: '0.72rem', color: '#ff4455' }}>EXPIRADO</span>
       </div>
     );
   }
 
-  const urgency = countdown.hours === 0 && countdown.minutes < 30;
-
+  const urgent = countdown.hours === 0 && countdown.minutes < 60;
   return (
-    <div className={`flex items-center gap-2 font-mono text-lg font-bold ${urgency ? 'text-red-400' : 'text-green-400'}`}>
-      <div className="flex items-center gap-1 text-gray-500 text-sm font-sans font-normal">
-        <Clock className="w-3.5 h-3.5" />
-        <span>Expires in</span>
-      </div>
-      <span className={`${urgency ? 'animate-pulse' : ''}`}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <Clock style={{ width: 12, height: 12, color: urgent ? '#ff6633' : '#ffcc00', flexShrink: 0 }} />
+      <span style={{
+        ...mono, fontWeight: 700,
+        fontSize: '0.85rem',
+        color: urgent ? '#ff6633' : '#ffcc00',
+        textShadow: urgent ? '0 0 8px rgba(255,100,50,0.5)' : '0 0 8px rgba(255,204,0,0.4)',
+        animation: urgent ? 'pulse 1s infinite' : 'none',
+      }}>
         {String(countdown.hours).padStart(2, '0')}:{String(countdown.minutes).padStart(2, '0')}:{String(countdown.seconds).padStart(2, '0')}
       </span>
     </div>
@@ -46,22 +47,20 @@ function DropCountdown({ expiresAt }: { expiresAt: string }) {
 function DropCard({ drop }: { drop: Content }) {
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloads, setDownloads] = useState(drop.downloads);
-  const category = typeof drop.category === 'object' ? drop.category : null;
+  const category = typeof drop.category === 'object' ? drop.category as Category : null;
+  const countdown = getCountdown(drop.dropExpiresAt!);
+  const isExpired = countdown.expired;
+  const isUrgent = !isExpired && countdown.hours === 0 && countdown.minutes < 60;
 
   const handleDownload = async () => {
-    if (isDownloading) return;
+    if (isDownloading || isExpired) return;
     setIsDownloading(true);
     try {
       const response = await contentApi.download(drop._id);
       const { fileUrl, externalLink } = response.data;
-      setDownloads((d) => d + 1);
-
-      if (externalLink) {
-        window.open(externalLink, '_blank', 'noopener,noreferrer');
-      } else if (fileUrl) {
-        if (fileUrl.includes('localhost') || fileUrl.includes('127.0.0.1')) return;
-        window.open(fileUrl, '_blank', 'noopener,noreferrer');
-      }
+      setDownloads(d => d + 1);
+      if (externalLink) window.open(externalLink, '_blank', 'noopener,noreferrer');
+      else if (fileUrl && !fileUrl.includes('localhost')) window.open(fileUrl, '_blank', 'noopener,noreferrer');
     } catch (err) {
       console.error('Download error:', err);
     } finally {
@@ -69,63 +68,98 @@ function DropCard({ drop }: { drop: Content }) {
     }
   };
 
-  const countdown = getCountdown(drop.dropExpiresAt!);
-  const isUrgent = !countdown.expired && countdown.hours === 0 && countdown.minutes < 60;
+  const accentColor = isExpired ? '#555' : isUrgent ? '#ff6633' : '#ffcc00';
 
   return (
-    <Card className={`overflow-hidden transition-all duration-200 ${
-      isUrgent
-        ? 'border-red-500/20 bg-red-500/3'
-        : 'border-yellow-500/15 bg-yellow-500/3'
-    } hover:shadow-lg`}>
+    <div style={{
+      background: '#060d18',
+      border: `1px solid ${accentColor}28`,
+      borderRadius: 10, overflow: 'hidden',
+      position: 'relative',
+      transition: 'border-color 0.2s, box-shadow 0.2s',
+      boxShadow: isUrgent ? `0 0 16px rgba(255,100,50,0.08)` : 'none',
+      opacity: isExpired ? 0.55 : 1,
+    }}
+      onMouseOver={e => { if (!isExpired) (e.currentTarget as HTMLDivElement).style.borderColor = `${accentColor}55`; }}
+      onMouseOut={e => (e.currentTarget as HTMLDivElement).style.borderColor = `${accentColor}28`}
+    >
+      {/* Top accent line */}
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg, transparent, ${accentColor}88, transparent)`, zIndex: 1 }} />
+
       {/* Urgency banner */}
       {isUrgent && (
-        <div className="bg-red-500/10 border-b border-red-500/20 px-4 py-1.5 flex items-center gap-2">
-          <AlertTriangle className="w-3.5 h-3.5 text-red-400" />
-          <span className="text-xs font-semibold text-red-400">Expires soon!</span>
+        <div style={{ background: 'rgba(255,100,50,0.1)', borderBottom: '1px solid rgba(255,100,50,0.2)', padding: '5px 14px', display: 'flex', alignItems: 'center', gap: 6 }}>
+          <AlertTriangle style={{ width: 11, height: 11, color: '#ff6633' }} />
+          <span style={{ ...mono, fontSize: '0.58rem', color: '#ff6633', letterSpacing: '0.1em' }}>EXPIRA EM BREVE!</span>
         </div>
       )}
 
-      <div className="p-5">
-        {/* Header */}
-        <div className="flex items-start gap-4 mb-4">
-          <div className="w-14 h-14 bg-gray-800/60 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 border border-gray-700/40">
-            {getContentTypeIcon(drop.type)}
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex flex-wrap items-center gap-2 mb-1">
-              <span className="text-xs font-medium text-yellow-400 bg-yellow-500/10 border border-yellow-500/20 px-2 py-0.5 rounded">
-                🔥 DROP
-              </span>
-              <LevelBadge level={drop.minLevel} size="sm" />
-              {category && (
-                <span
-                  className="text-xs px-2 py-0.5 rounded border font-medium"
-                  style={{ color: category.color, borderColor: `${category.color}40`, backgroundColor: `${category.color}15` }}
-                >
-                  {category.name}
-                </span>
-              )}
-            </div>
-            <h3 className="text-base font-bold text-gray-100">{drop.title}</h3>
-            <span className="text-xs text-gray-500">{getContentTypeLabel(drop.type)}</span>
-          </div>
+      {/* Thumbnail */}
+      {drop.thumbnail ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={drop.thumbnail}
+          alt={drop.title}
+          style={{ width: '100%', height: 160, objectFit: 'cover', display: 'block' }}
+        />
+      ) : (
+        <div style={{
+          width: '100%', height: 120,
+          background: `linear-gradient(135deg, ${accentColor}12 0%, rgba(0,0,0,0) 100%)`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <span style={{ fontSize: '3rem', opacity: 0.4 }}>{getContentTypeIcon(drop.type)}</span>
         </div>
+      )}
+
+      <div style={{ padding: '14px 16px 16px' }}>
+        {/* Badges */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 5, marginBottom: 8 }}>
+          <span style={{
+            ...mono, fontSize: '0.58rem', fontWeight: 700,
+            color: accentColor, background: `${accentColor}12`,
+            border: `1px solid ${accentColor}35`,
+            borderRadius: 4, padding: '2px 7px',
+          }}>
+            ⚡ DROP
+          </span>
+          <LevelBadge level={drop.minLevel} size="sm" />
+          {category && (
+            <span style={{
+              ...mono, fontSize: '0.58rem', fontWeight: 600,
+              color: category.color, background: `${category.color}15`,
+              border: `1px solid ${category.color}35`,
+              borderRadius: 4, padding: '2px 7px',
+            }}>
+              {category.icon && `${category.icon} `}{category.name}
+            </span>
+          )}
+        </div>
+
+        {/* Title */}
+        <h3 style={{ ...mono, fontSize: '0.85rem', fontWeight: 700, color: '#d0e8f8', margin: '0 0 4px', lineHeight: 1.3 }}>
+          {drop.title}
+        </h3>
+        <p style={{ ...mono, fontSize: '0.6rem', color: '#6a8898', margin: '0 0 8px' }}>
+          {getContentTypeLabel(drop.type)}
+          {drop.fileSize > 0 ? ` · ${formatBytes(drop.fileSize)}` : ''}
+          {` · ${downloads} downloads`}
+        </p>
 
         {drop.description && (
-          <p className="text-sm text-gray-400 mb-4">{drop.description}</p>
+          <p style={{ fontSize: '0.72rem', color: '#7a9aaa', margin: '0 0 12px', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+            {drop.description}
+          </p>
         )}
-
-        {/* Stats */}
-        <div className="flex items-center gap-4 text-xs text-gray-600 mb-4">
-          <span>{downloads} downloads</span>
-          {drop.fileSize > 0 && <span>{formatBytes(drop.fileSize)}</span>}
-          <span>Added {formatRelativeDate(drop.createdAt)}</span>
-        </div>
 
         {/* Countdown */}
         {drop.dropExpiresAt && (
-          <div className="mb-4 p-3 bg-gray-800/40 rounded-lg border border-gray-700/30">
+          <div style={{
+            padding: '8px 12px', marginBottom: 12,
+            background: isUrgent ? 'rgba(255,100,50,0.07)' : 'rgba(255,204,0,0.05)',
+            border: `1px solid ${isUrgent ? 'rgba(255,100,50,0.2)' : 'rgba(255,204,0,0.15)'}`,
+            borderRadius: 6,
+          }}>
             <DropCountdown expiresAt={drop.dropExpiresAt} />
           </div>
         )}
@@ -133,31 +167,32 @@ function DropCard({ drop }: { drop: Content }) {
         {/* Download button */}
         <button
           onClick={handleDownload}
-          disabled={isDownloading || countdown.expired}
-          className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-semibold text-sm transition-all ${
-            countdown.expired
-              ? 'bg-gray-800 text-gray-600 cursor-not-allowed'
-              : 'bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-400 border border-yellow-500/20 hover:border-yellow-500/40'
-          }`}
+          disabled={isDownloading || isExpired}
+          style={{
+            width: '100%', padding: '9px 14px',
+            background: isExpired ? 'rgba(255,255,255,0.04)' : `${accentColor}14`,
+            border: `1px solid ${isExpired ? 'rgba(255,255,255,0.08)' : accentColor + '35'}`,
+            borderRadius: 8, cursor: isExpired ? 'not-allowed' : 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+            ...mono, fontSize: '0.68rem', fontWeight: 700,
+            color: isExpired ? '#3a4a5a' : accentColor,
+            transition: 'all 0.15s',
+          }}
+          onMouseOver={e => { if (!isExpired) (e.currentTarget as HTMLButtonElement).style.background = `${accentColor}22`; }}
+          onMouseOut={e => { if (!isExpired) (e.currentTarget as HTMLButtonElement).style.background = `${accentColor}14`; }}
         >
           {isDownloading ? (
-            <div className="w-4 h-4 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin" />
-          ) : countdown.expired ? (
-            <>
-              <AlertTriangle className="w-4 h-4" /> Drop Expired
-            </>
+            <div style={{ width: 14, height: 14, border: `2px solid ${accentColor}`, borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
+          ) : isExpired ? (
+            <><AlertTriangle style={{ width: 13, height: 13 }} /> DROP EXPIRADO</>
           ) : drop.externalLink ? (
-            <>
-              <ExternalLink className="w-4 h-4" /> Open Link
-            </>
+            <><ExternalLink style={{ width: 13, height: 13 }} /> ABRIR LINK</>
           ) : (
-            <>
-              <Download className="w-4 h-4" /> Download Now
-            </>
+            <><Download style={{ width: 13, height: 13 }} /> BAIXAR AGORA</>
           )}
         </button>
       </div>
-    </Card>
+    </div>
   );
 }
 
@@ -165,70 +200,66 @@ export default function DropsPage() {
   const { data, isLoading, error } = useQuery({
     queryKey: ['drops'],
     queryFn: () => dropsApi.list().then((r) => r.data),
-    refetchInterval: 30000, // Refresh every 30 seconds
+    refetchInterval: 30000,
   });
 
   const drops: Content[] = data?.drops || [];
 
   return (
-    <div className="max-w-7xl mx-auto">
-      {/* Visual Banner */}
+    <div style={{ maxWidth: 1280, margin: '0 auto' }}>
+      {/* Banner */}
       <div style={{
         marginBottom: 22, borderRadius: 8, overflow: 'hidden', position: 'relative', height: 220,
         background: 'url(https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1600&q=85) center/cover no-repeat',
         border: '1px solid rgba(255,204,0,0.22)',
       }}>
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, rgba(15,10,0,0.80) 0%, rgba(30,20,0,0.60) 55%, rgba(0,0,0,0.25) 100%)' }} />
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, rgba(15,10,0,0.82) 0%, rgba(30,20,0,0.62) 55%, rgba(0,0,0,0.25) 100%)' }} />
         <div style={{ position: 'absolute', inset: 0, backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(255,204,0,0.015) 3px, rgba(255,204,0,0.015) 4px)', pointerEvents: 'none' }} />
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: 'linear-gradient(90deg, transparent, rgba(255,204,0,0.5), transparent)' }} />
         <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', padding: '0 28px', gap: 14 }}>
-          <div style={{ width: 42, height: 42, borderRadius: 8, background: 'rgba(255,204,0,0.1)', border: '1px solid rgba(255,204,0,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <Zap style={{ width: 20, height: 20, color: '#ffcc00' }} />
+          <div style={{ width: 44, height: 44, borderRadius: 8, background: 'rgba(255,204,0,0.1)', border: '1px solid rgba(255,204,0,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Zap style={{ width: 22, height: 22, color: '#ffcc00' }} />
           </div>
           <div>
-            <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.58rem', color: '#ffcc00', letterSpacing: '0.2em', margin: '0 0 5px', opacity: 0.7 }}>{'// ELITE TROJAN > DROPS > TEMPO LIMITADO'}</p>
-            <h2 style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '1.3rem', fontWeight: 700, color: '#fff8e0', margin: '0 0 4px', textShadow: '0 0 20px rgba(255,204,0,0.4)' }}>DROPS EXCLUSIVOS</h2>
-            <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.65rem', color: '#8a7a30', margin: 0 }}>{'> Conteúdo exclusivo por tempo limitado — não perca!'}</p>
+            <p style={{ ...mono, fontSize: '0.58rem', color: '#ffcc00', letterSpacing: '0.2em', margin: '0 0 5px', opacity: 0.7 }}>{'// ELITE TROJAN > DROPS > TEMPO LIMITADO'}</p>
+            <h2 style={{ ...mono, fontSize: '1.3rem', fontWeight: 700, color: '#fff8e0', margin: '0 0 4px', textShadow: '0 0 20px rgba(255,204,0,0.4)' }}>DROPS EXCLUSIVOS</h2>
+            <p style={{ ...mono, fontSize: '0.65rem', color: '#8a7a30', margin: 0 }}>
+              {drops.length > 0 ? `> ${drops.length} drop${drops.length !== 1 ? 's' : ''} ativo${drops.length !== 1 ? 's' : ''} agora` : '> carregando drops...'}
+            </p>
           </div>
         </div>
       </div>
 
-      {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="w-10 h-10 bg-yellow-500/10 border border-yellow-500/30 rounded-lg flex items-center justify-center">
-            <Zap className="w-5 h-5 text-yellow-400" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-100">Active Drops</h1>
-            <p className="text-gray-500 text-sm">Time-limited exclusive content</p>
-          </div>
-        </div>
-
-        <div className="mt-3 p-3 bg-yellow-500/5 border border-yellow-500/15 rounded-xl text-sm text-yellow-600/80 flex items-center gap-2">
-          <AlertTriangle className="w-4 h-4 text-yellow-500 flex-shrink-0" />
-          Drops are exclusive content available for a limited time. Don&apos;t miss them!
-        </div>
+      {/* Alert bar */}
+      <div style={{
+        marginBottom: 20, padding: '10px 16px',
+        background: 'rgba(255,204,0,0.05)', border: '1px solid rgba(255,204,0,0.15)',
+        borderRadius: 6, display: 'flex', alignItems: 'center', gap: 8,
+      }}>
+        <AlertTriangle style={{ width: 14, height: 14, color: '#ffcc00', flexShrink: 0 }} />
+        <span style={{ ...mono, fontSize: '0.65rem', color: '#8a7a30' }}>
+          Drops são conteúdos exclusivos disponíveis por tempo limitado — baixe antes que expire!
+        </span>
       </div>
 
       {/* Content */}
       {isLoading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="skeleton h-64 rounded-xl" />
+            <div key={i} style={{ height: 340, background: 'rgba(255,255,255,0.03)', borderRadius: 10 }} />
           ))}
         </div>
       ) : error ? (
-        <div className="text-center py-16 border border-gray-800 rounded-xl bg-gray-900/50">
-          <AlertTriangle className="w-10 h-10 text-red-400 mx-auto mb-3" />
-          <p className="text-gray-400 font-medium">Failed to load drops</p>
-          <p className="text-gray-600 text-sm mt-1">Make sure you have an active subscription</p>
+        <div style={{ textAlign: 'center', padding: '60px 20px', border: '1px solid rgba(255,68,0,0.15)', borderRadius: 10 }}>
+          <AlertTriangle style={{ width: 36, height: 36, color: '#ff4455', margin: '0 auto 10px' }} />
+          <p style={{ ...mono, fontSize: '0.75rem', color: '#ff4455' }}>Falha ao carregar drops</p>
+          <p style={{ ...mono, fontSize: '0.62rem', color: '#6a8898', marginTop: 4 }}>Você precisa de uma assinatura ativa</p>
         </div>
       ) : drops.length === 0 ? (
-        <div className="text-center py-20 border border-gray-800 rounded-xl bg-gray-900/50">
-          <Package className="w-12 h-12 text-gray-700 mx-auto mb-3" />
-          <p className="text-gray-400 text-lg font-semibold">No active drops</p>
-          <p className="text-gray-600 text-sm mt-1">Check back soon for exclusive time-limited content!</p>
+        <div style={{ textAlign: 'center', padding: '70px 20px', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 10 }}>
+          <Package style={{ width: 40, height: 40, color: '#1a3a55', margin: '0 auto 12px' }} />
+          <p style={{ ...mono, fontSize: '0.85rem', fontWeight: 700, color: '#7a9aaa', marginBottom: 4 }}>Nenhum drop ativo</p>
+          <p style={{ ...mono, fontSize: '0.65rem', color: '#6a8898' }}>Volte em breve para conteúdos exclusivos por tempo limitado!</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

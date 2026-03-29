@@ -28,7 +28,8 @@ router.get('/', auth, async (req, res) => {
     const query = { isActive: true };
     if (category) query.category = category;
     if (type) query.type = type;
-    if (isDrop !== undefined) query.isDrop = isDrop === 'true';
+    // Drops are never shown in the regular content library
+    query.isDrop = isDrop === 'true' ? true : false;
     if (level) query.minLevel = level;
 
     if (search) {
