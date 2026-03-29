@@ -78,8 +78,8 @@ export default function AdminCouponsPage() {
 
   const inputStyle = {
     width: '100%',
-    background: 'rgba(255,68,0,0.04)',
-    border: '1px solid rgba(255,68,0,0.2)',
+    background: 'rgba(0,150,255,0.04)',
+    border: '1px solid rgba(0,150,255,0.2)',
     borderRadius: 4,
     padding: '8px 12px',
     color: '#e0c8b8',
@@ -103,12 +103,12 @@ export default function AdminCouponsPage() {
       {/* Header */}
       <div style={{ marginBottom: 24, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <Tag style={{ width: 16, height: 16, color: '#ff4400' }} />
+          <Tag style={{ width: 16, height: 16, color: '#00d4ff' }} />
           <h1 style={{
             fontFamily: 'JetBrains Mono, monospace',
             fontSize: '1.1rem', fontWeight: 700,
-            color: '#ff4400', letterSpacing: '0.12em', margin: 0,
-            textShadow: '0 0 12px rgba(255,68,0,0.4)',
+            color: '#00d4ff', letterSpacing: '0.12em', margin: 0,
+            textShadow: '0 0 12px rgba(0,150,255,0.4)',
           }}>{'// CUPONS'}</h1>
         </div>
         <button
@@ -117,8 +117,8 @@ export default function AdminCouponsPage() {
             display: 'flex', alignItems: 'center', gap: 6,
             padding: '7px 14px', borderRadius: 4, cursor: 'pointer',
             fontFamily: 'JetBrains Mono, monospace', fontSize: '0.68rem', fontWeight: 700,
-            color: '#ff4400', background: 'rgba(255,68,0,0.08)',
-            border: '1px solid rgba(255,68,0,0.3)',
+            color: '#00d4ff', background: 'rgba(0,150,255,0.08)',
+            border: '1px solid rgba(0,150,255,0.3)',
             letterSpacing: '0.08em',
           }}
         >
@@ -132,16 +132,16 @@ export default function AdminCouponsPage() {
         <div style={{
           marginBottom: 20,
           background: 'rgba(10,18,10,0.9)',
-          border: '1px solid rgba(255,68,0,0.25)',
+          border: '1px solid rgba(0,150,255,0.25)',
           borderRadius: 6, padding: 20,
           position: 'relative', overflow: 'hidden',
         }}>
           <div style={{
             position: 'absolute', top: 0, left: 0, right: 0, height: 2,
-            background: 'linear-gradient(90deg, transparent, #ff440088, transparent)',
+            background: 'linear-gradient(90deg, transparent, #00d4ff88, transparent)',
           }} />
           <div style={{ marginBottom: 16 }}>
-            <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.7rem', fontWeight: 700, color: '#ff4400', letterSpacing: '0.1em' }}>
+            <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.7rem', fontWeight: 700, color: '#00d4ff', letterSpacing: '0.1em' }}>
               {'// CRIAR NOVO CUPOM'}
             </span>
           </div>
@@ -226,8 +226,8 @@ export default function AdminCouponsPage() {
                   display: 'flex', alignItems: 'center', gap: 6,
                   padding: '9px 20px', borderRadius: 4, cursor: createCoupon.isPending ? 'wait' : 'pointer',
                   fontFamily: 'JetBrains Mono, monospace', fontSize: '0.72rem', fontWeight: 700,
-                  color: '#ff4400', background: 'rgba(255,68,0,0.1)',
-                  border: '1px solid rgba(255,68,0,0.4)',
+                  color: '#00d4ff', background: 'rgba(0,150,255,0.1)',
+                  border: '1px solid rgba(0,150,255,0.4)',
                   opacity: createCoupon.isPending ? 0.6 : 1,
                   letterSpacing: '0.08em',
                 }}
@@ -246,31 +246,31 @@ export default function AdminCouponsPage() {
           {Array.from({ length: 5 }).map((_, i) => (
             <div key={i} style={{
               height: 52, borderRadius: 4, background: 'rgba(10,18,10,0.6)',
-              border: '1px solid rgba(255,68,0,0.06)', animation: 'pulse 1.5s ease-in-out infinite',
+              border: '1px solid rgba(0,150,255,0.06)', animation: 'pulse 1.5s ease-in-out infinite',
             }} />
           ))}
         </div>
       ) : coupons.length === 0 ? (
         <div style={{
           textAlign: 'center', padding: '48px 20px',
-          border: '1px solid rgba(255,68,0,0.1)', borderRadius: 6,
+          border: '1px solid rgba(0,150,255,0.1)', borderRadius: 6,
           background: 'rgba(10,18,10,0.6)',
         }}>
-          <Tag style={{ width: 32, height: 32, color: '#3a1800', margin: '0 auto 10px' }} />
+          <Tag style={{ width: 32, height: 32, color: '#0a1e2e', margin: '0 auto 10px' }} />
           <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.78rem', color: '#4d2a1a' }}>
             {'> NENHUM CUPOM CADASTRADO'}
           </p>
         </div>
       ) : (
         <div style={{
-          background: 'rgba(10,18,10,0.8)', border: '1px solid rgba(255,68,0,0.15)',
+          background: 'rgba(10,18,10,0.8)', border: '1px solid rgba(0,150,255,0.15)',
           borderRadius: 6, overflow: 'hidden',
         }}>
           {/* Header row */}
           <div style={{
             display: 'grid', gridTemplateColumns: '140px 1fr 80px 100px 80px 80px 40px',
             gap: 10, padding: '10px 16px',
-            background: 'rgba(255,68,0,0.04)', borderBottom: '1px solid rgba(255,68,0,0.15)',
+            background: 'rgba(0,150,255,0.04)', borderBottom: '1px solid rgba(0,150,255,0.15)',
           }}>
             {['CÓDIGO', 'DESCRIÇÃO', 'DESCONTO', 'PLANO', 'USOS', 'EXPIRA', ''].map((h) => (
               <span key={h} style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.58rem', fontWeight: 700, color: '#4d2a1a', letterSpacing: '0.12em' }}>
@@ -283,10 +283,10 @@ export default function AdminCouponsPage() {
             <div key={coupon._id} style={{
               display: 'grid', gridTemplateColumns: '140px 1fr 80px 100px 80px 80px 40px',
               gap: 10, padding: '12px 16px', alignItems: 'center',
-              borderBottom: i < coupons.length - 1 ? '1px solid rgba(255,68,0,0.06)' : 'none',
+              borderBottom: i < coupons.length - 1 ? '1px solid rgba(0,150,255,0.06)' : 'none',
               transition: 'background 0.15s',
             }}
-              onMouseOver={e => (e.currentTarget.style.background = 'rgba(255,68,0,0.02)')}
+              onMouseOver={e => (e.currentTarget.style.background = 'rgba(0,150,255,0.02)')}
               onMouseOut={e => (e.currentTarget.style.background = 'transparent')}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -307,7 +307,7 @@ export default function AdminCouponsPage() {
                 {coupon.description || '—'}
               </span>
               <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-                <Percent style={{ width: 10, height: 10, color: '#ff4400' }} />
+                <Percent style={{ width: 10, height: 10, color: '#00d4ff' }} />
                 <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.78rem', fontWeight: 700, color: '#ff8844' }}>
                   {coupon.discountPercent}
                 </span>
@@ -315,7 +315,7 @@ export default function AdminCouponsPage() {
               <span style={{
                 fontFamily: 'JetBrains Mono, monospace', fontSize: '0.62rem',
                 padding: '2px 7px', borderRadius: 3,
-                background: 'rgba(255,68,0,0.06)', border: '1px solid rgba(255,68,0,0.15)',
+                background: 'rgba(0,150,255,0.06)', border: '1px solid rgba(0,150,255,0.15)',
                 color: '#ff6633', textTransform: 'uppercase',
               }}>
                 {coupon.planRestriction === 'all' ? 'todos' : coupon.planRestriction}
@@ -333,11 +333,11 @@ export default function AdminCouponsPage() {
                 onClick={() => setDeleteId(coupon._id)}
                 style={{
                   padding: 5, borderRadius: 3, cursor: 'pointer',
-                  background: 'none', border: 'none', color: '#3a1800',
+                  background: 'none', border: 'none', color: '#0a1e2e',
                   transition: 'color 0.15s',
                 }}
                 onMouseOver={e => (e.currentTarget.style.color = '#ff0040')}
-                onMouseOut={e => (e.currentTarget.style.color = '#3a1800')}
+                onMouseOut={e => (e.currentTarget.style.color = '#0a1e2e')}
               >
                 <Trash2 style={{ width: 13, height: 13 }} />
               </button>

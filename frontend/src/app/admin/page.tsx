@@ -191,8 +191,8 @@ export default function AdminDashboardPage() {
 
   const inputStyle = {
     width: '100%',
-    background: 'rgba(255,68,0,0.04)',
-    border: '1px solid rgba(255,68,0,0.2)',
+    background: 'rgba(0,150,255,0.04)',
+    border: '1px solid rgba(0,150,255,0.2)',
     borderRadius: 4,
     padding: '8px 12px',
     color: '#e0c8b8',
@@ -208,17 +208,17 @@ export default function AdminDashboardPage() {
       <div style={{ marginBottom: 24, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
-            <Terminal style={{ width: 16, height: 16, color: '#ff4400' }} />
+            <Terminal style={{ width: 16, height: 16, color: '#00d4ff' }} />
             <h1 style={{
               fontFamily: 'JetBrains Mono, monospace',
               fontSize: '1.1rem', fontWeight: 700,
-              color: '#ff4400', letterSpacing: '0.12em', margin: 0,
-              textShadow: '0 0 12px rgba(255,68,0,0.4)',
+              color: '#00d4ff', letterSpacing: '0.12em', margin: 0,
+              textShadow: '0 0 12px rgba(0,150,255,0.4)',
             }}>
               {'// PAINEL DE CONTROLE'}
             </h1>
           </div>
-          <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.65rem', color: '#3a1800', margin: 0 }}>
+          <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.65rem', color: '#0a1e2e', margin: 0 }}>
             {'> monitoramento em tempo real do sistema elite-trojan'}
           </p>
         </div>
@@ -246,7 +246,7 @@ export default function AdminDashboardPage() {
             <div key={i} style={{
               height: 100, borderRadius: 6,
               background: 'rgba(10,18,10,0.6)',
-              border: '1px solid rgba(255,68,0,0.06)',
+              border: '1px solid rgba(0,150,255,0.06)',
               animation: 'pulse 1.5s ease-in-out infinite',
             }} />
           ))}
@@ -328,13 +328,13 @@ export default function AdminDashboardPage() {
         {/* Subscriptions by plan */}
         <div style={{
           background: 'rgba(10,18,10,0.8)',
-          border: '1px solid rgba(255,68,0,0.15)',
+          border: '1px solid rgba(0,150,255,0.15)',
           borderRadius: 6,
           padding: 20,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-            <CreditCard style={{ width: 14, height: 14, color: '#ff4400' }} />
-            <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.68rem', fontWeight: 700, color: '#ff4400', letterSpacing: '0.1em' }}>
+            <CreditCard style={{ width: 14, height: 14, color: '#00d4ff' }} />
+            <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.68rem', fontWeight: 700, color: '#00d4ff', letterSpacing: '0.1em' }}>
               ASSINATURAS POR PLANO
             </span>
           </div>
@@ -345,8 +345,8 @@ export default function AdminDashboardPage() {
               subscriptionsByPlan.map((item: { _id: string; count: number; revenue: number }) => (
                 <div key={item._id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#ff4400', boxShadow: '0 0 5px #ff4400' }} />
-                    <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.68rem', color: '#c08060', textTransform: 'uppercase' }}>
+                    <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#00d4ff', boxShadow: '0 0 5px #00d4ff' }} />
+                    <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.68rem', color: '#70b0d0', textTransform: 'uppercase' }}>
                       {item._id}
                     </span>
                   </div>
@@ -354,7 +354,7 @@ export default function AdminDashboardPage() {
                     <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.75rem', fontWeight: 700, color: '#ff8844' }}>
                       {item.count}
                     </span>
-                    <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.58rem', color: '#3a1800' }}>subs</span>
+                    <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.58rem', color: '#0a1e2e' }}>subs</span>
                   </div>
                 </div>
               ))
@@ -379,7 +379,7 @@ export default function AdminDashboardPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {revenueData.byPlan.map((item: { _id: string; total: number; count: number }) => (
                 <div key={item._id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.68rem', color: '#c08060', textTransform: 'uppercase' }}>
+                  <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.68rem', color: '#70b0d0', textTransform: 'uppercase' }}>
                     {item._id}
                   </span>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>

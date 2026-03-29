@@ -377,10 +377,10 @@ export default function AdminContentPage() {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
         <div>
-          <h1 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#c08060', letterSpacing: '0.08em' }}>
+          <h1 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#70b0d0', letterSpacing: '0.08em' }}>
             GERENCIAR CONTEÚDO
           </h1>
-          <p style={{ fontSize: '0.7rem', color: '#3a1800', marginTop: 2 }}>
+          <p style={{ fontSize: '0.7rem', color: '#0a1e2e', marginTop: 2 }}>
             {pagination?.total || 0} arquivos no sistema
           </p>
         </div>
@@ -389,18 +389,18 @@ export default function AdminContentPage() {
           style={{
             display: 'flex', alignItems: 'center', gap: 6,
             padding: '8px 14px',
-            background: 'rgba(255,68,0,0.1)',
-            border: '1px solid rgba(255,68,0,0.35)',
+            background: 'rgba(0,150,255,0.1)',
+            border: '1px solid rgba(0,150,255,0.35)',
             borderRadius: 4,
-            color: '#ff4400',
+            color: '#00d4ff',
             fontSize: '0.75rem', fontWeight: 600,
             letterSpacing: '0.06em',
             cursor: 'pointer',
             transition: 'all 0.15s',
             fontFamily: 'JetBrains Mono, monospace',
           }}
-          onMouseOver={e => (e.currentTarget.style.background = 'rgba(255,68,0,0.18)')}
-          onMouseOut={e => (e.currentTarget.style.background = 'rgba(255,68,0,0.1)')}
+          onMouseOver={e => (e.currentTarget.style.background = 'rgba(0,150,255,0.18)')}
+          onMouseOut={e => (e.currentTarget.style.background = 'rgba(0,150,255,0.1)')}
         >
           <Plus className="w-3.5 h-3.5" /> NOVO CONTEÚDO
         </button>
@@ -408,7 +408,7 @@ export default function AdminContentPage() {
 
       {/* Search */}
       <div style={{ position: 'relative', maxWidth: 360 }}>
-        <Search className="w-3.5 h-3.5" style={{ position: 'absolute', left: 11, top: '50%', transform: 'translateY(-50%)', color: '#3a1800', pointerEvents: 'none' }} />
+        <Search className="w-3.5 h-3.5" style={{ position: 'absolute', left: 11, top: '50%', transform: 'translateY(-50%)', color: '#0a1e2e', pointerEvents: 'none' }} />
         <input
           type="text"
           value={search}
@@ -422,7 +422,7 @@ export default function AdminContentPage() {
       {/* Table */}
       <div style={{
         background: 'rgba(8,8,8,0.9)',
-        border: '1px solid rgba(255,68,0,0.12)',
+        border: '1px solid rgba(0,150,255,0.12)',
         borderRadius: 6,
         overflow: 'hidden',
       }}>
@@ -450,7 +450,7 @@ export default function AdminContentPage() {
                 ))
               ) : contents.length === 0 ? (
                 <tr>
-                  <td colSpan={7} style={{ textAlign: 'center', padding: '40px', color: '#3a1800', fontSize: '0.8rem' }}>
+                  <td colSpan={7} style={{ textAlign: 'center', padding: '40px', color: '#0a1e2e', fontSize: '0.8rem' }}>
                     Nenhum conteúdo encontrado
                   </td>
                 </tr>
@@ -550,17 +550,17 @@ export default function AdminContentPage() {
         {pagination && pagination.pages > 1 && (
           <div style={{
             padding: '10px 16px',
-            borderTop: '1px solid rgba(255,68,0,0.08)',
+            borderTop: '1px solid rgba(0,150,255,0.08)',
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           }}>
-            <p style={{ fontSize: '0.65rem', color: '#3a1800' }}>
+            <p style={{ fontSize: '0.65rem', color: '#0a1e2e' }}>
               {(page - 1) * 15 + 1}–{Math.min(page * 15, pagination.total)} de {pagination.total}
             </p>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1} className="btn-secondary" style={{ padding: '4px 10px', fontSize: '0.7rem' }}>
                 Anterior
               </button>
-              <span style={{ fontSize: '0.7rem', color: '#3a1800' }}>{page}/{pagination.pages}</span>
+              <span style={{ fontSize: '0.7rem', color: '#0a1e2e' }}>{page}/{pagination.pages}</span>
               <button onClick={() => setPage((p) => Math.min(pagination.pages, p + 1))} disabled={page === pagination.pages} className="btn-secondary" style={{ padding: '4px 10px', fontSize: '0.7rem' }}>
                 Próximo
               </button>
@@ -793,10 +793,10 @@ export default function AdminContentPage() {
               style={{
                 display: 'flex', alignItems: 'center', gap: 6,
                 padding: '9px 18px',
-                background: isSubmitting ? 'rgba(255,68,0,0.05)' : 'rgba(255,68,0,0.1)',
-                border: '1px solid rgba(255,68,0,0.35)',
+                background: isSubmitting ? 'rgba(0,150,255,0.05)' : 'rgba(0,150,255,0.1)',
+                border: '1px solid rgba(0,150,255,0.35)',
                 borderRadius: 4,
-                color: '#ff4400',
+                color: '#00d4ff',
                 fontSize: '0.75rem', fontWeight: 600,
                 cursor: isSubmitting ? 'not-allowed' : 'pointer',
                 opacity: isSubmitting ? 0.7 : 1,
@@ -807,7 +807,7 @@ export default function AdminContentPage() {
               {isSubmitting && (
                 <div style={{
                   width: 13, height: 13,
-                  border: '1.5px solid #ff4400',
+                  border: '1.5px solid #00d4ff',
                   borderTopColor: 'transparent',
                   borderRadius: '50%',
                   animation: 'spin 0.7s linear infinite',

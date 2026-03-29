@@ -10,7 +10,6 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { getInitials } from '@/lib/utils';
-import { cn } from '@/lib/utils';
 import Logo from '@/components/ui/Logo';
 
 const adminNav = [
@@ -27,14 +26,14 @@ const adminNav = [
 
 const AdminSkull = () => (
   <svg width="20" height="22" viewBox="0 0 36 40" fill="none"
-    style={{ filter: 'drop-shadow(0 0 5px rgba(255,68,0,0.6))' }}>
+    style={{ filter: 'drop-shadow(0 0 5px rgba(0,212,255,0.6))' }}>
     <path d="M18 2C9.163 2 2 9.163 2 18c0 5.4 2.56 10.2 6.56 13.28L9 32h18l.44-0.72C31.44 28.2 34 23.4 34 18 34 9.163 26.837 2 18 2z"
-      fill="rgba(255,68,0,0.1)" stroke="#ff4400" strokeWidth="1.5" strokeLinejoin="round"/>
+      fill="rgba(0,212,255,0.1)" stroke="#00d4ff" strokeWidth="1.5" strokeLinejoin="round"/>
     <path d="M9 32v2h2.5v3h3v-3h7v3h3v-3H27v-2H9z"
-      fill="rgba(255,68,0,0.1)" stroke="#ff4400" strokeWidth="1.5"/>
-    <rect x="6.5" y="13" width="8" height="7" rx="1.5" fill="#ff4400" opacity="0.9"/>
-    <rect x="21.5" y="13" width="8" height="7" rx="1.5" fill="#ff4400" opacity="0.9"/>
-    <path d="M15.5 23.5h5l-2.5 3.5-2.5-3.5z" fill="#ff4400" opacity="0.5"/>
+      fill="rgba(0,212,255,0.1)" stroke="#00d4ff" strokeWidth="1.5"/>
+    <rect x="6.5" y="13" width="8" height="7" rx="1.5" fill="#00d4ff" opacity="0.9"/>
+    <rect x="21.5" y="13" width="8" height="7" rx="1.5" fill="#00d4ff" opacity="0.9"/>
+    <path d="M15.5 23.5h5l-2.5 3.5-2.5-3.5z" fill="#00d4ff" opacity="0.5"/>
   </svg>
 );
 
@@ -52,10 +51,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (isLoading) {
     return (
-      <div style={{ minHeight: '100vh', background: '#050a05', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ minHeight: '100vh', background: '#040b14', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{
           width: 28, height: 28,
-          border: '2px solid #ff4400',
+          border: '2px solid #00d4ff',
           borderTopColor: 'transparent',
           borderRadius: '50%',
           animation: 'spin 0.8s linear infinite',
@@ -72,13 +71,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   };
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#050a05' }}>
+    <div style={{ display: 'flex', minHeight: '100vh', background: '#040b14' }}>
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div
           className="lg:hidden"
           onClick={() => setSidebarOpen(false)}
-          style={{ position: 'fixed', inset: 0, zIndex: 40, background: 'rgba(5,10,5,0.85)', backdropFilter: 'blur(4px)' }}
+          style={{ position: 'fixed', inset: 0, zIndex: 40, background: 'rgba(4,11,20,0.85)', backdropFilter: 'blur(4px)' }}
         />
       )}
 
@@ -86,15 +85,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <aside
         className={`fixed inset-y-0 left-0 z-40 transform transition-transform duration-300 lg:relative lg:translate-x-0 lg:z-auto ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
         style={{
-        width: 224,
-        minHeight: '100vh',
-        background: '#080808',
-        borderRight: '1px solid rgba(255,68,0,0.15)',
-        display: 'flex',
-        flexDirection: 'column',
-      }}>
+          width: 224,
+          minHeight: '100vh',
+          background: '#060d18',
+          borderRight: '1px solid rgba(0,150,255,0.15)',
+          display: 'flex',
+          flexDirection: 'column',
+        }}>
         {/* Logo */}
-        <div style={{ padding: '12px 14px', borderBottom: '1px solid rgba(255,68,0,0.12)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, position: 'relative' }}>
+        <div style={{ padding: '12px 14px', borderBottom: '1px solid rgba(0,150,255,0.12)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, position: 'relative' }}>
           <Link href="/admin" style={{ textDecoration: 'none', display: 'block' }} onClick={() => setSidebarOpen(false)}>
             <Logo size={140} />
           </Link>
@@ -103,19 +102,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             fontSize: '0.58rem',
             fontWeight: 700,
             letterSpacing: '0.2em',
-            color: '#ff4400',
-            textShadow: '0 0 8px rgba(255,68,0,0.4)',
+            color: '#00d4ff',
+            textShadow: '0 0 8px rgba(0,212,255,0.5)',
           }}>ADMIN PANEL</span>
           <button
             onClick={() => setSidebarOpen(false)}
             className="lg:hidden"
             style={{
               position: 'absolute', right: 8, top: 8,
-              padding: 4, color: '#3a1800', background: 'none', border: 'none',
+              padding: 4, color: '#0d2535', background: 'none', border: 'none',
               cursor: 'pointer', transition: 'color 0.15s', borderRadius: 4,
             }}
-            onMouseOver={e => (e.currentTarget.style.color = '#ff4400')}
-            onMouseOut={e => (e.currentTarget.style.color = '#3a1800')}
+            onMouseOver={e => (e.currentTarget.style.color = '#00d4ff')}
+            onMouseOut={e => (e.currentTarget.style.color = '#0d2535')}
           >
             <X className="w-4 h-4" />
           </button>
@@ -124,7 +123,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Nav */}
         <nav style={{ flex: 1, padding: '10px 8px' }}>
           <div style={{ marginBottom: 6, padding: '0 10px' }}>
-            <span style={{ fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.2em', color: '#3a1800' }}>
+            <span style={{ fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.2em', color: '#0d2535' }}>
               {'// CONTROLES'}
             </span>
           </div>
@@ -145,29 +144,29 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   transition: 'all 0.15s ease',
                   border: '1px solid transparent',
                   ...(isActive(item.href) ? {
-                    color: '#ff4400',
-                    background: 'rgba(255,68,0,0.08)',
-                    borderColor: 'rgba(255,68,0,0.25)',
-                    boxShadow: '0 0 8px rgba(255,68,0,0.1)',
+                    color: '#00d4ff',
+                    background: 'rgba(0,212,255,0.08)',
+                    borderColor: 'rgba(0,212,255,0.25)',
+                    boxShadow: '0 0 8px rgba(0,212,255,0.1)',
                   } : {
-                    color: '#5a2a1a',
+                    color: '#1a4a6a',
                   }),
                 }}
                 onMouseOver={e => {
                   if (!isActive(item.href)) {
-                    (e.currentTarget as HTMLAnchorElement).style.color = '#ff8866';
-                    (e.currentTarget as HTMLAnchorElement).style.background = 'rgba(255,68,0,0.05)';
-                    (e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgba(255,68,0,0.12)';
+                    (e.currentTarget as HTMLAnchorElement).style.color = '#40c8ff';
+                    (e.currentTarget as HTMLAnchorElement).style.background = 'rgba(0,150,255,0.06)';
+                    (e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgba(0,150,255,0.15)';
                   }
                 }}
                 onMouseOut={e => {
                   if (!isActive(item.href)) {
-                    (e.currentTarget as HTMLAnchorElement).style.color = '#5a2a1a';
+                    (e.currentTarget as HTMLAnchorElement).style.color = '#1a4a6a';
                     (e.currentTarget as HTMLAnchorElement).style.background = 'transparent';
                     (e.currentTarget as HTMLAnchorElement).style.borderColor = 'transparent';
                   }
                 }}
-              onClick={() => setSidebarOpen(false)}
+                onClick={() => setSidebarOpen(false)}
               >
                 {item.icon}
                 <span>{item.label}</span>
@@ -177,16 +176,25 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
 
           {/* Back to user dashboard */}
-          <div style={{ marginTop: 16, paddingTop: 12, borderTop: '1px solid rgba(255,68,0,0.08)' }}>
+          <div style={{ marginTop: 16, paddingTop: 12, borderTop: '1px solid rgba(0,150,255,0.08)' }}>
             <Link href="/dashboard" onClick={() => setSidebarOpen(false)}
               style={{
                 display: 'flex', alignItems: 'center', gap: 10,
                 padding: '7px 10px', borderRadius: 4,
-                fontSize: '0.72rem', color: '#2a2a2a',
-                textDecoration: 'none', transition: 'color 0.15s',
+                fontSize: '0.72rem', color: '#1a3a55',
+                textDecoration: 'none', transition: 'all 0.15s',
+                border: '1px solid transparent',
               }}
-              onMouseOver={e => (e.currentTarget.style.color = '#4d8c5a')}
-              onMouseOut={e => (e.currentTarget.style.color = '#2a2a2a')}
+              onMouseOver={e => {
+                (e.currentTarget as HTMLAnchorElement).style.color = '#00d4ff';
+                (e.currentTarget as HTMLAnchorElement).style.background = 'rgba(0,212,255,0.06)';
+                (e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgba(0,212,255,0.15)';
+              }}
+              onMouseOut={e => {
+                (e.currentTarget as HTMLAnchorElement).style.color = '#1a3a55';
+                (e.currentTarget as HTMLAnchorElement).style.background = 'transparent';
+                (e.currentTarget as HTMLAnchorElement).style.borderColor = 'transparent';
+              }}
             >
               <Terminal className="w-3.5 h-3.5" />
               Dashboard do Usuário
@@ -195,31 +203,31 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </nav>
 
         {/* User */}
-        <div style={{ padding: '10px 8px', borderTop: '1px solid rgba(255,68,0,0.08)' }}>
+        <div style={{ padding: '10px 8px', borderTop: '1px solid rgba(0,150,255,0.08)' }}>
           <div style={{
             display: 'flex', alignItems: 'center', gap: 10,
             padding: '8px 10px',
           }}>
             <div style={{
               width: 26, height: 26,
-              background: 'rgba(255,68,0,0.15)',
-              border: '1px solid rgba(255,68,0,0.3)',
+              background: 'rgba(0,150,255,0.15)',
+              border: '1px solid rgba(0,150,255,0.3)',
               borderRadius: '50%',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '0.6rem', fontWeight: 700, color: '#ff4400', flexShrink: 0,
+              fontSize: '0.6rem', fontWeight: 700, color: '#00d4ff', flexShrink: 0,
             }}>
               {getInitials(user?.name || 'A')}
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <p style={{ fontSize: '0.72rem', fontWeight: 600, color: '#c08060', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <p style={{ fontSize: '0.72rem', fontWeight: 600, color: '#80c8e8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {user?.name}
               </p>
-              <p style={{ fontSize: '0.58rem', color: '#5a2a1a', letterSpacing: '0.08em' }}>ADMINISTRADOR</p>
+              <p style={{ fontSize: '0.58rem', color: '#1a4a6a', letterSpacing: '0.08em' }}>ADMINISTRADOR</p>
             </div>
             <button onClick={logout}
-              style={{ padding: 4, color: '#3a1800', background: 'none', border: 'none', cursor: 'pointer', transition: 'color 0.15s' }}
+              style={{ padding: 4, color: '#1a3a55', background: 'none', border: 'none', cursor: 'pointer', transition: 'color 0.15s' }}
               onMouseOver={e => (e.currentTarget.style.color = '#ff0040')}
-              onMouseOut={e => (e.currentTarget.style.color = '#3a1800')}
+              onMouseOut={e => (e.currentTarget.style.color = '#1a3a55')}
             >
               <LogOut className="w-3.5 h-3.5" />
             </button>
@@ -232,8 +240,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Top bar */}
         <div style={{
           height: 44,
-          background: 'rgba(8,8,8,0.95)',
-          borderBottom: '1px solid rgba(255,68,0,0.1)',
+          background: 'rgba(6,13,24,0.95)',
+          borderBottom: '1px solid rgba(0,150,255,0.1)',
           display: 'flex',
           alignItems: 'center',
           padding: '0 12px 0 8px',
@@ -248,27 +256,27 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             onClick={() => setSidebarOpen(!sidebarOpen)}
             className="lg:hidden"
             style={{
-              padding: 6, color: '#3a1800', background: 'none', border: 'none',
+              padding: 6, color: '#0d2535', background: 'none', border: 'none',
               cursor: 'pointer', transition: 'color 0.15s', borderRadius: 4, flexShrink: 0,
             }}
-            onMouseOver={e => (e.currentTarget.style.color = '#ff4400')}
-            onMouseOut={e => (e.currentTarget.style.color = '#3a1800')}
+            onMouseOver={e => (e.currentTarget.style.color = '#00d4ff')}
+            onMouseOut={e => (e.currentTarget.style.color = '#0d2535')}
           >
             <Menu className="w-5 h-5" />
           </button>
           <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontFamily: 'JetBrains Mono, monospace', fontSize: '0.7rem', minWidth: 0, flex: 1, overflow: 'hidden' }}>
-            <span style={{ color: '#ff4400', flexShrink: 0 }}>root</span>
-            <span className="hidden sm:inline" style={{ color: '#3a3a3a' }}>@</span>
-            <span className="hidden sm:inline" style={{ color: '#cc6600' }}>elite-trojan</span>
-            <span style={{ color: '#3a3a3a', flexShrink: 0 }}>:~$</span>
-            <span style={{ color: '#555', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{pathname}</span>
+            <span style={{ color: '#00d4ff', flexShrink: 0 }}>root</span>
+            <span className="hidden sm:inline" style={{ color: '#1a3a55' }}>@</span>
+            <span className="hidden sm:inline" style={{ color: '#0096ff' }}>elite-trojan</span>
+            <span style={{ color: '#1a3a55', flexShrink: 0 }}>:~$</span>
+            <span style={{ color: '#2a5070', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{pathname}</span>
           </div>
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-            <AlertTriangle className="w-3 h-3" style={{ color: '#ff4400', opacity: 0.6 }} />
-            <span className="hidden sm:inline" style={{ fontSize: '0.58rem', color: '#3a1800', letterSpacing: '0.12em' }}>ZONA RESTRITA</span>
+            <AlertTriangle className="w-3 h-3" style={{ color: '#00d4ff', opacity: 0.6 }} />
+            <span className="hidden sm:inline" style={{ fontSize: '0.58rem', color: '#1a4060', letterSpacing: '0.12em' }}>ZONA RESTRITA</span>
             <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginLeft: 4 }}>
               <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#00ff41', boxShadow: '0 0 5px #00ff41', animation: 'pulse 2s infinite' }} />
-              <span className="hidden sm:inline" style={{ fontSize: '0.58rem', color: '#1a3020', letterSpacing: '0.1em' }}>SYSTEM ONLINE</span>
+              <span className="hidden sm:inline" style={{ fontSize: '0.58rem', color: '#1a3050', letterSpacing: '0.1em' }}>SYSTEM ONLINE</span>
             </div>
           </div>
         </div>
