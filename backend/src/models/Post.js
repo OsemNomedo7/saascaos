@@ -54,6 +54,8 @@ const postSchema = new mongoose.Schema(
     mediaUrl: { type: String, default: null },
     mediaType: { type: String, enum: ['image', 'video', null], default: null },
     mediaFileName: { type: String, default: null },
+    reposts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    bookmarks: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   },
   {
     timestamps: true,

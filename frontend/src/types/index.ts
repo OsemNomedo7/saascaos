@@ -118,6 +118,8 @@ export interface Post {
   mediaUrl?: string | null;
   mediaType?: 'image' | 'video' | null;
   mediaFileName?: string | null;
+  reposts?: string[];
+  bookmarks?: string[];
   createdAt: string;
   updatedAt: string;
 }

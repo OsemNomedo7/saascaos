@@ -118,6 +118,8 @@ export const communityApi = {
   deletePost: (id: string) => api.delete(`/community/posts/${id}`),
   likePost: (id: string) => api.post(`/community/posts/${id}/like`),
   pinPost: (id: string) => api.post(`/community/posts/${id}/pin`),
+  repostPost: (id: string) => api.post(`/community/posts/${id}/repost`),
+  bookmarkPost: (id: string) => api.post(`/community/posts/${id}/bookmark`),
   getComments: (postId: string) => api.get(`/community/posts/${postId}/comments`),
   addComment: (postId: string, content: string) =>
     api.post(`/community/posts/${postId}/comments`, { content }),

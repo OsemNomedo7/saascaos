@@ -201,6 +201,38 @@ router.post('/posts/:id/like', auth, requireSubscription, async (req, res) => {
   }
 });
 
+// POST /api/community/posts/:id/repost
+router.post('/posts/:id/repost', auth, requireSubscription, async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+    if (!post || !post.isActive) return res.status(404).json({ message: 'Post não encontrado.' });
+    const userId = req.user._id;
+    const idx = post.reposts.indexOf(userId);
+    if (idx === -1) post.reposts.push(userId);
+    else post.reposts.splice(idx, 1);
+    await post.save();
+    res.json({ reposts: post.reposts.length, reposted: idx === -1 });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error.' });
+  }
+});
+
+// POST /api/community/posts/:id/bookmark
+router.post('/posts/:id/bookmark', auth, async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+    if (!post || !post.isActive) return res.status(404).json({ message: 'Post não encontrado.' });
+    const userId = req.user._id;
+    const idx = post.bookmarks.indexOf(userId);
+    if (idx === -1) post.bookmarks.push(userId);
+    else post.bookmarks.splice(idx, 1);
+    await post.save();
+    res.json({ bookmarks: post.bookmarks.length, bookmarked: idx === -1 });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error.' });
+  }
+});
+
 // POST /api/community/posts/:id/pin - Admin
 router.post('/posts/:id/pin', auth, admin, async (req, res) => {
   try {
