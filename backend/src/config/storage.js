@@ -113,17 +113,33 @@ function imageUpload() {
   });
 }
 
+// ─── Normaliza file para disco ─────────────────────────────────────────────────
+// Se o arquivo veio de memoryStorage (tem file.buffer mas não file.path),
+// salva em disco temporariamente para que processImageUpload/processFileUpload
+// funcionem normalmente.
+
+function ensureDiskFile(file) {
+  if (file.path && file.filename) return { diskFile: file, tempPath: null };
+  if (!file.buffer) throw new Error('Arquivo sem buffer e sem path — não é possível processar.');
+  const ext = path.extname(file.originalname) || '.tmp';
+  const filename = `${uuidv4()}${ext}`;
+  const tempPath = path.join(uploadsDir, filename);
+  fs.writeFileSync(tempPath, file.buffer);
+  return { diskFile: { ...file, path: tempPath, filename }, tempPath };
+}
+
 // ─── processImageUpload() ─────────────────────────────────────────────────────
-// 1. Se Cloudinary configurado: lê o arquivo do disco, tenta subir para Cloudinary.
-//    Em caso de falha, loga o erro e usa URL do disco como fallback.
-// 2. Se Cloudinary não configurado: retorna URL do disco diretamente.
+// Aceita disk storage (file.path) OU memory storage (file.buffer).
+// 1. Se Cloudinary configurado: tenta subir.
+// 2. Fallback: URL do disco local.
 
 async function processImageUpload(file) {
-  const fallbackUrl = localUrl(file.filename);
+  const { diskFile, tempPath } = ensureDiskFile(file);
+  const fallbackUrl = localUrl(diskFile.filename);
 
   if (useCloudinary) {
     try {
-      const buffer = fs.readFileSync(file.path);
+      const buffer = fs.readFileSync(diskFile.path);
       const cloudUrl = await new Promise((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream(
           { folder: 'elite-trojan/images', resource_type: 'auto' },
@@ -134,13 +150,11 @@ async function processImageUpload(file) {
         );
         stream.end(buffer);
       });
-      // Upload para Cloudinary OK → deleta arquivo local para não ocupar espaço
-      try { fs.unlinkSync(file.path); } catch {}
+      try { fs.unlinkSync(diskFile.path); } catch {}
       console.log('[storage] ✓ Imagem no Cloudinary:', cloudUrl);
       return cloudUrl;
     } catch (err) {
       console.error('[storage] ✗ Cloudinary falhou:', err.message, '— usando disco como fallback');
-      // NÃO deletar o arquivo local — vamos servir ele
     }
   }
 
@@ -172,6 +186,8 @@ function fileUpload() {
 }
 
 // ─── processFileUpload() ──────────────────────────────────────────────────────
+// Aceita disk storage OU memory storage.
+// Detecta áudio e usa resource_type: 'video' no Cloudinary (necessário para playback).
 
 async function processFileUpload(file) {
   // R2 via multer-s3: URL pública em file.location
@@ -183,16 +199,21 @@ async function processFileUpload(file) {
     return file.location;
   }
 
-  const fallbackUrl = localUrl(file.filename);
+  const { diskFile, tempPath } = ensureDiskFile(file);
+  const fallbackUrl = localUrl(diskFile.filename);
 
-  // Cloudinary raw — lê do disco e faz upload (mesmo padrão das imagens)
   if (useCloudinary) {
     try {
-      const buffer = fs.readFileSync(file.path);
+      const buffer = fs.readFileSync(diskFile.path);
+      const mime = diskFile.mimetype || '';
+      const isAudio = mime.startsWith('audio/');
+      const isVideo = mime.startsWith('video/');
+      // Cloudinary: áudio e vídeo usam resource_type 'video'; outros ficam 'raw'
+      const resourceType = (isAudio || isVideo) ? 'video' : 'raw';
+      const ext = path.extname(diskFile.originalname);
       const cloudUrl = await new Promise((resolve, reject) => {
-        const ext = path.extname(file.originalname);
         const stream = cloudinary.uploader.upload_stream(
-          { folder: 'elite-trojan/files', resource_type: 'raw', public_id: uuidv4() + ext },
+          { folder: 'elite-trojan/files', resource_type: resourceType, public_id: uuidv4() + ext },
           (error, result) => {
             if (error) return reject(error);
             resolve(result.secure_url);
@@ -200,7 +221,7 @@ async function processFileUpload(file) {
         );
         stream.end(buffer);
       });
-      try { fs.unlinkSync(file.path); } catch {}
+      try { fs.unlinkSync(diskFile.path); } catch {}
       console.log('[storage] ✓ Arquivo no Cloudinary:', cloudUrl);
       return cloudUrl;
     } catch (err) {
