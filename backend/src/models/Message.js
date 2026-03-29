@@ -28,6 +28,13 @@ const messageSchema = new mongoose.Schema(
     mediaFileName: { type: String,  default: null },
     mediaSize:     { type: Number,  default: 0 },
     mediaMime:     { type: String,  default: null },
+    // Reply / reaction / moderation
+    replyTo: { type: mongoose.Schema.Types.ObjectId, ref: 'Message', default: null },
+    reactions: [{
+      emoji: { type: String, required: true },
+      users: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    }],
+    isDeleted: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

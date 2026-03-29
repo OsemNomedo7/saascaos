@@ -2,9 +2,9 @@
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import {
-  Send, Hash, Users, Wifi, WifiOff, Mic, MicOff,
+  Send, Hash, Users, Mic,
   Paperclip, Smile, X, Download, FileText, Image as ImageIcon,
-  Volume2, ChevronDown,
+  Volume2, ChevronDown, Reply, Trash2, SmilePlus,
 } from 'lucide-react';
 import { useSocket } from '@/contexts/SocketContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -13,13 +13,15 @@ import { getInitials, formatRelativeDate, formatBytes } from '@/lib/utils';
 import { communityApi } from '@/lib/api';
 import type { Message, User } from '@/types';
 
-// ── Emoji Picker ─────────────────────────────────────────────────────────────
+// ── Emoji Picker (full) ───────────────────────────────────────────────────────
 const EMOJI_ROWS = [
   ['😀','😂','🤣','😊','😍','🥰','😎','🤔','😅','😭','😱','😡','🤯','🥳','😴','🫡'],
   ['👍','👎','❤️','🔥','💯','✅','❌','⭐','🎉','💪','🙏','👀','💀','🤙','✌️','👏'],
   ['⚡','💻','🛡️','⚔️','🎯','🚀','💣','🔒','🔓','🕵️','👾','🤖','🧠','💾','📡','🔐'],
   ['😈','💀','☠️','👻','🦾','🦿','🧬','⚗️','🔬','🔭','📱','💥','🌐','🕸️','🗡️','🏴‍☠️'],
 ];
+
+const QUICK_REACTIONS = ['👍','❤️','😂','🔥','💯','😎','🤯','💀'];
 
 function EmojiPicker({ onSelect, onClose }: { onSelect: (e: string) => void; onClose: () => void }) {
   return (
@@ -58,13 +60,54 @@ function EmojiPicker({ onSelect, onClose }: { onSelect: (e: string) => void; onC
   );
 }
 
-// ── Avatar component ──────────────────────────────────────────────────────────
+// ── Reaction mini picker ──────────────────────────────────────────────────────
+function ReactionPicker({ onSelect, onClose, onOpenFull }: { onSelect: (e: string) => void; onClose: () => void; onOpenFull: () => void }) {
+  return (
+    <div
+      style={{
+        position: 'absolute', bottom: 'calc(100% + 6px)', left: '50%', transform: 'translateX(-50%)',
+        zIndex: 60, background: '#050e1a', border: '1px solid rgba(0,150,255,0.25)',
+        borderRadius: 20, padding: '5px 8px', boxShadow: '0 4px 20px rgba(0,0,0,0.7)',
+        display: 'flex', alignItems: 'center', gap: 2,
+      }}
+      onMouseLeave={onClose}
+    >
+      {QUICK_REACTIONS.map(emoji => (
+        <button
+          key={emoji}
+          onClick={() => { onSelect(emoji); onClose(); }}
+          style={{
+            background: 'none', border: 'none', cursor: 'pointer',
+            fontSize: '1.15rem', padding: '2px 4px', borderRadius: 4,
+            transition: 'transform 0.1s',
+          }}
+          onMouseOver={e => { e.currentTarget.style.transform = 'scale(1.3)'; }}
+          onMouseOut={e => { e.currentTarget.style.transform = 'scale(1)'; }}
+        >
+          {emoji}
+        </button>
+      ))}
+      <button
+        onClick={onOpenFull}
+        title="Mais emojis"
+        style={{
+          background: 'rgba(0,100,200,0.15)', border: '1px solid rgba(0,100,200,0.2)',
+          borderRadius: '50%', width: 22, height: 22, cursor: 'pointer',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0096ff',
+        }}
+      >
+        <SmilePlus style={{ width: 11, height: 11 }} />
+      </button>
+    </div>
+  );
+}
+
+// ── Avatar ────────────────────────────────────────────────────────────────────
 function Avatar({ src, name, size = 32 }: { src?: string | null; name: string; size?: number }) {
   return (
     <div style={{
       width: size, height: size, borderRadius: '50%',
-      background: 'rgba(0,150,255,0.1)',
-      border: '1px solid rgba(0,150,255,0.2)',
+      background: 'rgba(0,150,255,0.1)', border: '1px solid rgba(0,150,255,0.2)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       fontSize: size * 0.28, fontWeight: 700, color: '#0096ff',
       flexShrink: 0, overflow: 'hidden', position: 'relative',
@@ -75,9 +118,7 @@ function Avatar({ src, name, size = 32 }: { src?: string | null; name: string; s
       {src && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          key={src}
-          src={src}
-          alt=""
+          key={src} src={src} alt=""
           style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top', zIndex: 2 }}
           onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
         />
@@ -86,10 +127,41 @@ function Avatar({ src, name, size = 32 }: { src?: string | null; name: string; s
   );
 }
 
-// ── Message bubble ────────────────────────────────────────────────────────────
-function MessageBubble({ msg, isOwn }: { msg: Message; isOwn: boolean }) {
+// ── Reply quote ───────────────────────────────────────────────────────────────
+function ReplyQuote({ msg }: { msg: Message }) {
   const author = msg.author as User;
-  const accent = isOwn ? '#0096ff' : 'rgba(255,255,255,0.06)';
+  const preview = msg.isDeleted ? '— mensagem deletada —'
+    : msg.content ? msg.content.slice(0, 80) + (msg.content.length > 80 ? '…' : '')
+    : msg.mediaFileName ? `📎 ${msg.mediaFileName}`
+    : '📷 mídia';
+  return (
+    <div style={{
+      borderLeft: '2px solid rgba(0,150,255,0.4)',
+      paddingLeft: 8, marginBottom: 6,
+      background: 'rgba(0,80,160,0.12)', borderRadius: '0 4px 4px 0',
+      padding: '4px 8px',
+    }}>
+      <p style={{ margin: 0, fontSize: '0.6rem', color: '#0096ff', fontWeight: 600 }}>{author?.name || 'Usuário'}</p>
+      <p style={{ margin: 0, fontSize: '0.68rem', color: '#4a7090', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{preview}</p>
+    </div>
+  );
+}
+
+// ── Message bubble ────────────────────────────────────────────────────────────
+interface BubbleProps {
+  msg: Message;
+  isOwn: boolean;
+  isAdmin: boolean;
+  onReply: (msg: Message) => void;
+  onReact: (msgId: string, emoji: string) => void;
+  onDelete: (msgId: string) => void;
+}
+
+function MessageBubble({ msg, isOwn, isAdmin, onReply, onReact, onDelete }: BubbleProps) {
+  const author = msg.author as User;
+  const [hovered, setHovered] = useState(false);
+  const [showReactionPicker, setShowReactionPicker] = useState(false);
+  const [showFullEmoji, setShowFullEmoji] = useState(false);
   const textColor = isOwn ? '#cce8ff' : '#b8cfe8';
 
   const renderMedia = () => {
@@ -120,9 +192,7 @@ function MessageBubble({ msg, isOwn }: { msg: Message; isOwn: boolean }) {
       const ext = (msg.mediaFileName || '').split('.').pop()?.toUpperCase() || 'FILE';
       return (
         <a
-          href={msg.mediaUrl}
-          target="_blank"
-          rel="noopener noreferrer"
+          href={msg.mediaUrl} target="_blank" rel="noopener noreferrer"
           style={{
             display: 'flex', alignItems: 'center', gap: 10,
             marginTop: msg.content ? 8 : 0, padding: '8px 12px',
@@ -152,9 +222,16 @@ function MessageBubble({ msg, isOwn }: { msg: Message; isOwn: boolean }) {
     return null;
   };
 
+  const canDelete = isOwn || isAdmin;
+
   return (
-    <div style={{ display: 'flex', gap: 10, flexDirection: isOwn ? 'row-reverse' : 'row', alignItems: 'flex-end' }}>
+    <div
+      style={{ display: 'flex', gap: 10, flexDirection: isOwn ? 'row-reverse' : 'row', alignItems: 'flex-end' }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => { setHovered(false); setShowReactionPicker(false); setShowFullEmoji(false); }}
+    >
       {!isOwn && <Avatar src={author?.avatar} name={author?.name || 'U'} size={30} />}
+
       <div style={{ maxWidth: '70%', display: 'flex', flexDirection: 'column', alignItems: isOwn ? 'flex-end' : 'flex-start' }}>
         {!isOwn && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 3, flexWrap: 'wrap' }}>
@@ -165,25 +242,130 @@ function MessageBubble({ msg, isOwn }: { msg: Message; isOwn: boolean }) {
             )}
           </div>
         )}
-        <div style={{
-          padding: (msg.content && !msg.mediaUrl) ? '8px 12px' : (msg.mediaUrl && !msg.content) ? '8px' : '8px 12px',
-          background: isOwn ? 'rgba(0,96,200,0.2)' : 'rgba(255,255,255,0.04)',
-          border: `1px solid ${isOwn ? 'rgba(0,150,255,0.3)' : 'rgba(255,255,255,0.06)'}`,
-          borderRadius: isOwn ? '12px 12px 2px 12px' : '12px 12px 12px 2px',
-          boxShadow: isOwn ? '0 0 12px rgba(0,100,200,0.15)' : 'none',
-        }}>
-          {msg.content && (
-            <p style={{ margin: 0, fontSize: '0.82rem', color: textColor, lineHeight: 1.5, wordBreak: 'break-word' }}>
-              {msg.content}
-            </p>
+
+        {/* Bubble wrapper with action bar */}
+        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 6, flexDirection: isOwn ? 'row' : 'row-reverse' }}>
+
+          {/* Action bar — appears on hover */}
+          {hovered && !msg.isDeleted && (
+            <div style={{
+              display: 'flex', gap: 3, alignItems: 'center',
+              background: '#050e1a', border: '1px solid rgba(0,100,200,0.2)',
+              borderRadius: 16, padding: '3px 6px',
+              boxShadow: '0 2px 12px rgba(0,0,0,0.5)',
+            }}>
+              {/* Reply */}
+              <button
+                onClick={() => onReply(msg)}
+                title="Responder"
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#2a6090', padding: '2px 4px', borderRadius: 4, display: 'flex', alignItems: 'center' }}
+                onMouseOver={e => (e.currentTarget.style.color = '#0096ff')}
+                onMouseOut={e => (e.currentTarget.style.color = '#2a6090')}
+              >
+                <Reply style={{ width: 13, height: 13 }} />
+              </button>
+
+              {/* React */}
+              <div style={{ position: 'relative' }}>
+                <button
+                  onClick={() => setShowReactionPicker(v => !v)}
+                  title="Reagir"
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#2a6090', padding: '2px 4px', borderRadius: 4, display: 'flex', alignItems: 'center' }}
+                  onMouseOver={e => (e.currentTarget.style.color = '#0096ff')}
+                  onMouseOut={e => (e.currentTarget.style.color = '#2a6090')}
+                >
+                  <SmilePlus style={{ width: 13, height: 13 }} />
+                </button>
+                {showReactionPicker && !showFullEmoji && (
+                  <ReactionPicker
+                    onSelect={(emoji) => onReact(msg._id, emoji)}
+                    onClose={() => setShowReactionPicker(false)}
+                    onOpenFull={() => setShowFullEmoji(true)}
+                  />
+                )}
+                {showFullEmoji && (
+                  <div style={{ position: 'absolute', bottom: 'calc(100% + 6px)', right: 0, zIndex: 70 }}>
+                    <EmojiPicker
+                      onSelect={(emoji) => { onReact(msg._id, emoji); setShowFullEmoji(false); setShowReactionPicker(false); }}
+                      onClose={() => { setShowFullEmoji(false); setShowReactionPicker(false); }}
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Delete */}
+              {canDelete && (
+                <button
+                  onClick={() => onDelete(msg._id)}
+                  title="Deletar"
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#2a6090', padding: '2px 4px', borderRadius: 4, display: 'flex', alignItems: 'center' }}
+                  onMouseOver={e => (e.currentTarget.style.color = '#ff4455')}
+                  onMouseOut={e => (e.currentTarget.style.color = '#2a6090')}
+                >
+                  <Trash2 style={{ width: 13, height: 13 }} />
+                </button>
+              )}
+            </div>
           )}
-          {renderMedia()}
+
+          {/* Bubble */}
+          <div style={{
+            padding: msg.isDeleted ? '7px 12px' : (msg.content && !msg.mediaUrl) ? '8px 12px' : (msg.mediaUrl && !msg.content) ? '8px' : '8px 12px',
+            background: msg.isDeleted ? 'rgba(0,0,0,0.2)' : isOwn ? 'rgba(0,96,200,0.2)' : 'rgba(255,255,255,0.04)',
+            border: `1px solid ${msg.isDeleted ? 'rgba(255,255,255,0.04)' : isOwn ? 'rgba(0,150,255,0.3)' : 'rgba(255,255,255,0.06)'}`,
+            borderRadius: isOwn ? '12px 12px 2px 12px' : '12px 12px 12px 2px',
+            boxShadow: (!msg.isDeleted && isOwn) ? '0 0 12px rgba(0,100,200,0.15)' : 'none',
+          }}>
+            {/* replyTo quote */}
+            {msg.replyTo && <ReplyQuote msg={msg.replyTo as Message} />}
+
+            {msg.isDeleted ? (
+              <p style={{ margin: 0, fontSize: '0.75rem', color: '#1a3050', fontStyle: 'italic' }}>
+                — mensagem deletada —
+              </p>
+            ) : (
+              <>
+                {msg.content && (
+                  <p style={{ margin: 0, fontSize: '0.82rem', color: textColor, lineHeight: 1.5, wordBreak: 'break-word' }}>
+                    {msg.content}
+                  </p>
+                )}
+                {renderMedia()}
+              </>
+            )}
+          </div>
         </div>
+
+        {/* Reactions bar */}
+        {msg.reactions && msg.reactions.length > 0 && (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 4 }}>
+            {msg.reactions.map(r => (
+              <button
+                key={r.emoji}
+                onClick={() => onReact(msg._id, r.emoji)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 3,
+                  background: 'rgba(0,100,200,0.1)', border: '1px solid rgba(0,150,255,0.18)',
+                  borderRadius: 10, padding: '2px 7px', cursor: 'pointer',
+                  fontSize: '0.75rem', color: '#4a80b0',
+                  fontFamily: 'JetBrains Mono,monospace', transition: 'background 0.1s',
+                }}
+                onMouseOver={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(0,150,255,0.18)'; }}
+                onMouseOut={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(0,100,200,0.1)'; }}
+              >
+                <span style={{ fontSize: '0.85rem' }}>{r.emoji}</span>
+                <span style={{ fontSize: '0.65rem' }}>{r.users.length}</span>
+              </button>
+            ))}
+          </div>
+        )}
+
         <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: '0.55rem', color: '#1a3050', marginTop: 3 }}>
           {formatRelativeDate(msg.createdAt)}
         </span>
       </div>
-      {isOwn && <Avatar src={undefined} name={''} size={0} />}
+
+      {isOwn && <div style={{ width: 0 }} />}
     </div>
   );
 }
@@ -203,6 +385,7 @@ export default function ChatPage() {
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [showScrollBtn, setShowScrollBtn] = useState(false);
+  const [replyTo, setReplyTo] = useState<Message | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -213,6 +396,8 @@ export default function ChatPage() {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const recordingTimerRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
+
+  const isAdmin = user?.role === 'admin';
 
   // ── Socket setup ──────────────────────────────────────────────────────────
   useEffect(() => {
@@ -235,12 +420,28 @@ export default function ChatPage() {
     });
     socket.on('user_stopped_typing', () => setIsTyping(null));
 
+    // Handle message deleted (soft or admin hard-delete)
+    socket.on('message_deleted', ({ messageId }: { messageId: string }) => {
+      setMessages(prev => prev.map(m => m._id === messageId ? { ...m, isDeleted: true } : m));
+    });
+
+    // Handle reaction update
+    socket.on('message_reaction_update', ({ messageId, reactions }: { messageId: string; reactions: { emoji: string; users: string[] }[] }) => {
+      setMessages(prev => prev.map(m => m._id === messageId ? { ...m, reactions } : m));
+    });
+
+    // Handle chat cleared
+    socket.on('chat_cleared', () => setMessages([]));
+
     return () => {
       socket.off('message_history');
       socket.off('new_message');
       socket.off('system_message');
       socket.off('user_typing');
       socket.off('user_stopped_typing');
+      socket.off('message_deleted');
+      socket.off('message_reaction_update');
+      socket.off('chat_cleared');
     };
   }, [socket]);
 
@@ -266,16 +467,25 @@ export default function ChatPage() {
   const handleSend = useCallback((e?: React.FormEvent) => {
     e?.preventDefault();
     if (!socket || !inputValue.trim() || !isConnected) return;
-    socket.emit('send_message', { content: inputValue.trim(), room: 'global', type: 'text' });
+    socket.emit('send_message', {
+      content: inputValue.trim(),
+      room: 'global',
+      type: 'text',
+      replyTo: replyTo?._id || null,
+    });
     socket.emit('typing_stop', { room: 'global' });
     setInputValue('');
     setShowEmoji(false);
-  }, [socket, inputValue, isConnected]);
+    setReplyTo(null);
+  }, [socket, inputValue, isConnected, replyTo]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSend();
+    }
+    if (e.key === 'Escape' && replyTo) {
+      setReplyTo(null);
     }
   };
 
@@ -293,6 +503,24 @@ export default function ChatPage() {
     inputRef.current?.focus();
   };
 
+  // ── Reply ─────────────────────────────────────────────────────────────────
+  const handleReply = useCallback((msg: Message) => {
+    setReplyTo(msg);
+    inputRef.current?.focus();
+  }, []);
+
+  // ── React ─────────────────────────────────────────────────────────────────
+  const handleReact = useCallback((msgId: string, emoji: string) => {
+    if (!socket || !isConnected) return;
+    socket.emit('add_reaction', { messageId: msgId, emoji, room: 'global' });
+  }, [socket, isConnected]);
+
+  // ── Delete ────────────────────────────────────────────────────────────────
+  const handleDelete = useCallback((msgId: string) => {
+    if (!socket || !isConnected) return;
+    socket.emit('delete_message', { messageId: msgId, room: 'global' });
+  }, [socket, isConnected]);
+
   // ── File / image upload ───────────────────────────────────────────────────
   const uploadAndSend = async (file: File, type: 'image' | 'file' | 'audio') => {
     if (!socket || !isConnected) return;
@@ -309,7 +537,9 @@ export default function ChatPage() {
         mediaFileName: fileName,
         mediaSize: fileSize,
         mediaMime: mimeType,
+        replyTo: replyTo?._id || null,
       });
+      setReplyTo(null);
     } catch {
       setUploadError('Falha no upload. Tente um arquivo menor (máx 25 MB).');
     } finally {
@@ -364,7 +594,6 @@ export default function ChatPage() {
 
   const cancelRecording = () => {
     if (mediaRecorderRef.current?.state === 'recording') {
-      // Remove onstop handler to discard audio
       mediaRecorderRef.current.onstop = null;
       mediaRecorderRef.current.stop();
       mediaRecorderRef.current.stream?.getTracks().forEach(t => t.stop());
@@ -376,6 +605,15 @@ export default function ChatPage() {
 
   const globalOnlineUsers = (onlineUsers as OnlineUser[]).filter(u => u.room === 'global');
   const fmtRecTime = `${Math.floor(recordingTime / 60).toString().padStart(2, '0')}:${(recordingTime % 60).toString().padStart(2, '0')}`;
+
+  // replyTo preview text
+  const replyAuthor = replyTo ? (replyTo.author as User)?.name || 'Usuário' : '';
+  const replyPreview = replyTo
+    ? replyTo.isDeleted ? '— mensagem deletada —'
+      : replyTo.content ? replyTo.content.slice(0, 60) + (replyTo.content.length > 60 ? '…' : '')
+      : replyTo.mediaFileName ? `📎 ${replyTo.mediaFileName}`
+      : '📷 mídia'
+    : '';
 
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto', height: 'calc(100vh - 7rem)', display: 'flex', gap: 12 }}>
@@ -461,7 +699,17 @@ export default function ChatPage() {
             }
             const author = msg.author as User;
             const isOwn = author?._id === user?._id;
-            return <MessageBubble key={msg._id} msg={msg} isOwn={isOwn} />;
+            return (
+              <MessageBubble
+                key={msg._id}
+                msg={msg}
+                isOwn={isOwn}
+                isAdmin={isAdmin}
+                onReply={handleReply}
+                onReact={handleReact}
+                onDelete={handleDelete}
+              />
+            );
           })}
 
           {isTyping && (
@@ -506,6 +754,25 @@ export default function ChatPage() {
               {uploadError}
             </span>
             <button onClick={() => setUploadError('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#882233', padding: 0, flexShrink: 0 }}>
+              <X style={{ width: 12, height: 12 }} />
+            </button>
+          </div>
+        )}
+
+        {/* Reply preview bar */}
+        {replyTo && (
+          <div style={{
+            margin: '0 16px 0', padding: '7px 12px',
+            background: 'rgba(0,60,120,0.2)', borderLeft: '3px solid #0096ff',
+            borderRadius: '0 4px 4px 0',
+            display: 'flex', alignItems: 'center', gap: 8,
+          }}>
+            <Reply style={{ width: 12, height: 12, color: '#0096ff', flexShrink: 0 }} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <span style={{ fontSize: '0.6rem', color: '#0096ff', fontWeight: 600 }}>{replyAuthor}</span>
+              <p style={{ margin: '1px 0 0', fontSize: '0.68rem', color: '#2a5070', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{replyPreview}</p>
+            </div>
+            <button onClick={() => setReplyTo(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#1a3557', padding: 2, flexShrink: 0 }}>
               <X style={{ width: 12, height: 12 }} />
             </button>
           </div>
@@ -616,7 +883,7 @@ export default function ChatPage() {
                   value={inputValue}
                   onChange={handleInputChange}
                   onKeyDown={handleKeyDown}
-                  placeholder={isConnected ? '// mensagem...' : 'Conectando...'}
+                  placeholder={isConnected ? (replyTo ? `// respondendo ${replyAuthor}...` : '// mensagem...') : 'Conectando...'}
                   disabled={!isConnected || isUploading}
                   maxLength={1000}
                   rows={1}
@@ -667,7 +934,7 @@ export default function ChatPage() {
           {!isRecording && (
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 4 }}>
               <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: '0.55rem', color: '#0d2040' }}>
-                {inputValue.length}/1000 · Enter para enviar · Shift+Enter nova linha
+                {inputValue.length}/1000 · Enter para enviar · Shift+Enter nova linha{replyTo ? ' · Esc para cancelar resposta' : ''}
               </span>
             </div>
           )}
@@ -697,38 +964,37 @@ export default function ChatPage() {
           </span>
           <div style={{
             marginLeft: 'auto',
-            background: 'rgba(0,100,200,0.15)', border: '1px solid rgba(0,150,255,0.2)',
-            borderRadius: 8, padding: '1px 7px',
-            fontFamily: 'JetBrains Mono,monospace', fontSize: '0.62rem', color: '#0096ff',
+            minWidth: 18, height: 18, borderRadius: 9,
+            background: 'rgba(0,150,255,0.15)', border: '1px solid rgba(0,150,255,0.25)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontFamily: 'JetBrains Mono,monospace', fontSize: '0.6rem', color: '#0096ff',
+            padding: '0 5px',
           }}>
             {globalOnlineUsers.length}
           </div>
         </div>
-        <div style={{ flex: 1, overflowY: 'auto', padding: '10px 10px' }}>
-          {globalOnlineUsers.map(u => (
-            <div key={u._id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 4px', borderRadius: 6, marginBottom: 2 }}>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '8px 6px' }}>
+          {globalOnlineUsers.length === 0 ? (
+            <p style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: '0.6rem', color: '#0d2040', textAlign: 'center', padding: '20px 0' }}>
+              nenhum usuário
+            </p>
+          ) : globalOnlineUsers.map(u => (
+            <div key={u._id} style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '5px 6px', borderRadius: 5 }}>
               <div style={{ position: 'relative', flexShrink: 0 }}>
-                <Avatar src={u.avatar} name={u.name} size={28} />
+                <Avatar src={u.avatar} name={u.name} size={24} />
                 <div style={{
                   position: 'absolute', bottom: 0, right: 0,
-                  width: 8, height: 8, borderRadius: '50%',
-                  background: '#0096ff', border: '1.5px solid #040b14',
-                  boxShadow: '0 0 5px #0096ff',
+                  width: 7, height: 7, borderRadius: '50%',
+                  background: '#00d4aa', border: '1.5px solid #040b14',
                 }} />
               </div>
               <div style={{ minWidth: 0, flex: 1 }}>
-                <p style={{ fontSize: '0.7rem', fontWeight: 600, color: '#8ab0d0', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <p style={{ margin: 0, fontSize: '0.68rem', color: u.role === 'admin' ? '#ff7755' : '#6090b0', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {u.name}
                 </p>
-                <LevelBadge level={u.level as 'iniciante' | 'intermediario' | 'avancado' | 'elite'} size="sm" />
               </div>
             </div>
           ))}
-          {globalOnlineUsers.length === 0 && (
-            <p style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: '0.6rem', color: '#0d2040', textAlign: 'center', padding: '20px 0' }}>
-              {'// nenhum usuário online'}
-            </p>
-          )}
         </div>
       </div>
     </div>

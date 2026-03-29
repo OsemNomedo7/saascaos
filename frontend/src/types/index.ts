@@ -145,6 +145,9 @@ export interface Message {
   mediaFileName?: string | null;
   mediaSize?: number;
   mediaMime?: string | null;
+  replyTo?: Message | null;
+  reactions?: { emoji: string; users: string[] }[];
+  isDeleted?: boolean;
   createdAt: string;
 }
 

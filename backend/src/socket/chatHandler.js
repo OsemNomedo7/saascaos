@@ -55,11 +55,13 @@ const chatHandler = (io) => {
     // ── Message history ────────────────────────────────────────
     socket.on('get_history', async ({ room = 'global', limit = 60 } = {}) => {
       try {
-        const messages = await Message.find({ room })
+        const messages = await Message.find({ room, isDeleted: { $ne: true } })
           .sort({ createdAt: -1 })
           .limit(limit)
           .populate('author', 'name avatar level role')
+          .populate('replyTo', 'content author type mediaUrl mediaFileName')
           .lean();
+        // Populate replyTo.author manually for lean queries
         socket.emit('message_history', messages.reverse());
       } catch (err) {
         socket.emit('error', { message: 'Falha ao carregar histórico.' });
@@ -75,32 +77,67 @@ const chatHandler = (io) => {
       mediaFileName = null,
       mediaSize = 0,
       mediaMime = null,
+      replyTo = null,
     } = {}) => {
       try {
         const text = content.trim();
-
-        // Must have text OR media
         if (!text && !mediaUrl) return;
-        if (text.length > 1000) {
-          return socket.emit('error', { message: 'Mensagem muito longa.' });
-        }
+        if (text.length > 1000) return socket.emit('error', { message: 'Mensagem muito longa.' });
 
         const message = await Message.create({
           content: text,
           author: user._id,
           room,
           type: mediaUrl ? type : 'text',
-          mediaUrl,
-          mediaFileName,
-          mediaSize,
-          mediaMime,
+          mediaUrl, mediaFileName, mediaSize, mediaMime,
+          replyTo: replyTo || null,
         });
 
         await message.populate('author', 'name avatar level role');
+        await message.populate('replyTo', 'content author type mediaUrl mediaFileName');
         io.to(room).emit('new_message', message);
       } catch (err) {
         console.error('[Socket] send_message error:', err.message);
         socket.emit('error', { message: 'Falha ao enviar mensagem.' });
+      }
+    });
+
+    // ── Delete message ─────────────────────────────────────────
+    socket.on('delete_message', async ({ messageId, room = 'global' } = {}) => {
+      try {
+        const msg = await Message.findById(messageId);
+        if (!msg) return;
+        if (msg.author.toString() !== user._id.toString() && user.role !== 'admin') return;
+        msg.isDeleted = true;
+        msg.content = '';
+        msg.mediaUrl = null;
+        msg.mediaFileName = null;
+        await msg.save();
+        io.to(room).emit('message_deleted', { messageId });
+      } catch (err) {
+        console.error('[Socket] delete_message error:', err.message);
+      }
+    });
+
+    // ── Add/toggle emoji reaction ──────────────────────────────
+    socket.on('add_reaction', async ({ messageId, emoji, room = 'global' } = {}) => {
+      try {
+        const msg = await Message.findById(messageId);
+        if (!msg || msg.isDeleted) return;
+        const existing = msg.reactions.find(r => r.emoji === emoji);
+        if (existing) {
+          const idx = existing.users.findIndex(id => id.toString() === user._id.toString());
+          if (idx === -1) existing.users.push(user._id);
+          else existing.users.splice(idx, 1);
+          if (existing.users.length === 0)
+            msg.reactions = msg.reactions.filter(r => r.emoji !== emoji);
+        } else {
+          msg.reactions.push({ emoji, users: [user._id] });
+        }
+        await msg.save();
+        io.to(room).emit('message_reaction_update', { messageId, reactions: msg.reactions });
+      } catch (err) {
+        console.error('[Socket] add_reaction error:', err.message);
       }
     });
 

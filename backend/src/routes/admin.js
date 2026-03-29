@@ -4,6 +4,8 @@ const User = require('../models/User');
 const Subscription = require('../models/Subscription');
 const Content = require('../models/Content');
 const Post = require('../models/Post');
+const Comment = require('../models/Comment');
+const Message = require('../models/Message');
 const Log = require('../models/Log');
 const auth = require('../middlewares/auth');
 const admin = require('../middlewares/admin');
@@ -288,6 +290,150 @@ router.get('/stats/growth', auth, admin, async (req, res) => {
     }
     res.json({ growth: results });
   } catch (error) {
+    res.status(500).json({ message: 'Server error.' });
+  }
+});
+
+// ─── Admin: Community management ─────────────────────────────────────────────
+
+router.get('/community/posts', auth, admin, async (req, res) => {
+  try {
+    const { page = 1, limit = 30, search, status } = req.query;
+    const query = {};
+    if (search) query.$text = { $search: search };
+    if (status === 'active') query.isActive = true;
+    if (status === 'deleted') query.isActive = false;
+    const [posts, total] = await Promise.all([
+      Post.find(query)
+        .sort({ createdAt: -1 })
+        .skip((parseInt(page) - 1) * parseInt(limit))
+        .limit(parseInt(limit))
+        .populate('author', 'name email avatar level'),
+      Post.countDocuments(query),
+    ]);
+    res.json({ posts, total, page: parseInt(page), pages: Math.ceil(total / parseInt(limit)) });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error.' });
+  }
+});
+
+router.delete('/community/posts/:id', auth, admin, async (req, res) => {
+  try {
+    await Comment.deleteMany({ post: req.params.id });
+    await Post.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Post e comentários deletados.' });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error.' });
+  }
+});
+
+router.patch('/community/posts/:id/pin', auth, admin, async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+    if (!post) return res.status(404).json({ message: 'Post não encontrado.' });
+    post.isPinned = !post.isPinned;
+    await post.save();
+    res.json({ isPinned: post.isPinned });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error.' });
+  }
+});
+
+router.patch('/community/posts/:id/restore', auth, admin, async (req, res) => {
+  try {
+    await Post.findByIdAndUpdate(req.params.id, { isActive: true });
+    res.json({ message: 'Post restaurado.' });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error.' });
+  }
+});
+
+router.get('/community/comments', auth, admin, async (req, res) => {
+  try {
+    const { page = 1, limit = 30, postId } = req.query;
+    const query = postId ? { post: postId } : {};
+    const [comments, total] = await Promise.all([
+      Comment.find(query)
+        .sort({ createdAt: -1 })
+        .skip((parseInt(page) - 1) * parseInt(limit))
+        .limit(parseInt(limit))
+        .populate('author', 'name email avatar level')
+        .populate('post', 'title'),
+      Comment.countDocuments(query),
+    ]);
+    res.json({ comments, total, page: parseInt(page), pages: Math.ceil(total / parseInt(limit)) });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error.' });
+  }
+});
+
+router.delete('/community/comments/:id', auth, admin, async (req, res) => {
+  try {
+    const comment = await Comment.findByIdAndDelete(req.params.id);
+    if (comment) await Post.findByIdAndUpdate(comment.post, { $inc: { commentCount: -1 } });
+    res.json({ message: 'Comentário deletado.' });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error.' });
+  }
+});
+
+// ─── Admin: Chat management ───────────────────────────────────────────────────
+
+router.get('/chat/messages', auth, admin, async (req, res) => {
+  try {
+    const { room = 'global', limit = 100, page = 1 } = req.query;
+    const query = { room };
+    const [messages, total] = await Promise.all([
+      Message.find(query)
+        .sort({ createdAt: -1 })
+        .skip((parseInt(page) - 1) * parseInt(limit))
+        .limit(parseInt(limit))
+        .populate('author', 'name email avatar level role'),
+      Message.countDocuments(query),
+    ]);
+    res.json({ messages: messages.reverse(), total, page: parseInt(page) });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error.' });
+  }
+});
+
+router.delete('/chat/messages/:id', auth, admin, async (req, res) => {
+  try {
+    await Message.findByIdAndDelete(req.params.id);
+    const io = req.app.get('io');
+    if (io) io.to(req.query.room || 'global').emit('message_deleted', { messageId: req.params.id });
+    res.json({ message: 'Mensagem deletada.' });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error.' });
+  }
+});
+
+router.delete('/chat/clear', auth, admin, async (req, res) => {
+  try {
+    const { room = 'global' } = req.body;
+    const count = await Message.countDocuments({ room });
+    await Message.deleteMany({ room });
+    const io = req.app.get('io');
+    if (io) io.to(room).emit('chat_cleared');
+    res.json({ message: `${count} mensagens removidas do canal ${room}.`, count });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error.' });
+  }
+});
+
+router.get('/chat/stats', auth, admin, async (req, res) => {
+  try {
+    const { room = 'global' } = req.query;
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const [total, todayCount, deletedCount, mediaCount] = await Promise.all([
+      Message.countDocuments({ room }),
+      Message.countDocuments({ room, createdAt: { $gte: today } }),
+      Message.countDocuments({ room, isDeleted: true }),
+      Message.countDocuments({ room, type: { $in: ['image', 'file', 'audio'] } }),
+    ]);
+    res.json({ total, todayCount, deletedCount, mediaCount });
+  } catch (err) {
     res.status(500).json({ message: 'Server error.' });
   }
 });
