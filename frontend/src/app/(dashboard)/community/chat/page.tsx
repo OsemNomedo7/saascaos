@@ -1092,58 +1092,6 @@ export default function ChatPage() {
         <input ref={fileInputRef} type="file" style={{ display: 'none' }} onChange={handleFileSelect} />
       </div>
 
-      {/* ── Online users panel ─────────────────────────────────────────────── */}
-      <div style={{
-        width: 200, display: 'flex', flexDirection: 'column',
-        background: '#040b14', border: '1px solid rgba(0,100,200,0.15)',
-        borderRadius: 10, overflow: 'hidden',
-      }}
-        className="hidden lg:flex"
-      >
-        <div style={{
-          padding: '12px 14px', borderBottom: '1px solid rgba(0,100,200,0.1)',
-          background: 'rgba(0,30,70,0.4)',
-          display: 'flex', alignItems: 'center', gap: 8,
-        }}>
-          <Users style={{ width: 13, height: 13, color: '#0096ff' }} />
-          <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: '0.65rem', fontWeight: 700, color: '#4a80b0' }}>
-            ONLINE
-          </span>
-          <div style={{
-            marginLeft: 'auto',
-            minWidth: 18, height: 18, borderRadius: 9,
-            background: 'rgba(0,150,255,0.15)', border: '1px solid rgba(0,150,255,0.25)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontFamily: 'JetBrains Mono,monospace', fontSize: '0.6rem', color: '#0096ff',
-            padding: '0 5px',
-          }}>
-            {globalOnlineUsers.length}
-          </div>
-        </div>
-        <div style={{ flex: 1, overflowY: 'auto', padding: '8px 6px' }}>
-          {globalOnlineUsers.length === 0 ? (
-            <p style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: '0.6rem', color: '#0d2040', textAlign: 'center', padding: '20px 0' }}>
-              nenhum usuário
-            </p>
-          ) : globalOnlineUsers.map(u => (
-            <div key={u._id} style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '5px 6px', borderRadius: 5 }}>
-              <div style={{ position: 'relative', flexShrink: 0 }}>
-                <Avatar src={u.avatar} name={u.name} size={24} />
-                <div style={{
-                  position: 'absolute', bottom: 0, right: 0,
-                  width: 7, height: 7, borderRadius: '50%',
-                  background: '#00d4aa', border: '1.5px solid #040b14',
-                }} />
-              </div>
-              <div style={{ minWidth: 0, flex: 1 }}>
-                <p style={{ margin: 0, fontSize: '0.68rem', color: u.role === 'admin' ? '#ff7755' : '#6090b0', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {u.name}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
     </div>
   );
 }
