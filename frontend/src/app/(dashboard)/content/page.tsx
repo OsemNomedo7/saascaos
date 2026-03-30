@@ -32,15 +32,20 @@ export default function ContentPage() {
     queryFn: () => categoriesApi.list().then((r) => r.data),
   });
 
-  const { data: subData } = useQuery({
+  const { data: subData, isFetched: subFetched } = useQuery({
     queryKey: ['my-subscription'],
     queryFn: () => subscriptionsApi.my().then((r) => r.data),
     enabled: !!user,
     staleTime: 5 * 60 * 1000,
   });
 
+  const subscription = subData?.subscription as Subscription | null;
+  const hasSubscription = !!subscription;
+  // Wait for subscription check before loading content (so we know which filter to apply)
+  const subReady = !user || subFetched;
+
   const { data, isLoading } = useQuery({
-    queryKey: ['content', { search, selectedCategory, selectedType, selectedLevel, sortBy, page }],
+    queryKey: ['content', { search, selectedCategory, selectedType, selectedLevel, sortBy, page, hasSubscription }],
     queryFn: () =>
       contentApi.list({
         search: search || undefined,
@@ -50,15 +55,16 @@ export default function ContentPage() {
         sort: sortBy,
         page,
         limit: 18,
+        // Non-subscribers see only free content
+        ...(!hasSubscription && user?.role !== 'admin' ? { isFree: true } : {}),
       }).then((r) => r.data),
     placeholderData: keepPreviousData,
+    enabled: subReady,
   });
 
   const categories: Category[] = categoriesData?.categories || [];
   const contents: Content[] = data?.contents || [];
   const pagination = data?.pagination;
-  const subscription = subData?.subscription as Subscription | null;
-  const hasSubscription = !!subscription;
 
   useEffect(() => {
     const timer = setTimeout(() => {

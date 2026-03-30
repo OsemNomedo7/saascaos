@@ -22,7 +22,7 @@ const LEVEL_ORDER = { iniciante: 0, intermediario: 1, avancado: 2, elite: 3 };
 // GET /api/content
 router.get('/', auth, async (req, res) => {
   try {
-    const { page = 1, limit = 20, category, type, level, search, sort = '-createdAt', isDrop } = req.query;
+    const { page = 1, limit = 20, category, type, level, search, sort = '-createdAt', isDrop, isFree } = req.query;
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
     const query = { isActive: true };
@@ -31,6 +31,7 @@ router.get('/', auth, async (req, res) => {
     // Drops are never shown in the regular content library
     query.isDrop = isDrop === 'true' ? true : false;
     if (level) query.minLevel = level;
+    if (isFree === 'true') query.isFree = true;
 
     if (search) {
       query.$text = { $search: search };
