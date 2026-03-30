@@ -386,6 +386,7 @@ export default function ChatPage() {
   const [recordingTime, setRecordingTime] = useState(0);
   const [showScrollBtn, setShowScrollBtn] = useState(false);
   const [replyTo, setReplyTo] = useState<Message | null>(null);
+  const [showOnlineModal, setShowOnlineModal] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -515,6 +516,13 @@ export default function ChatPage() {
     socket.emit('add_reaction', { messageId: msgId, emoji, room: 'global' });
   }, [socket, isConnected]);
 
+  // ── Mention ───────────────────────────────────────────────────────────────
+  const handleMention = useCallback((name: string) => {
+    setInputValue(prev => (prev ? `${prev} @${name} ` : `@${name} `));
+    setShowOnlineModal(false);
+    setTimeout(() => inputRef.current?.focus(), 50);
+  }, []);
+
   // ── Delete ────────────────────────────────────────────────────────────────
   const handleDelete = useCallback((msgId: string) => {
     if (!socket || !isConnected) return;
@@ -628,15 +636,15 @@ export default function ChatPage() {
 
         {/* Header */}
         <div style={{
-          padding: '12px 20px', borderBottom: '1px solid rgba(0,100,200,0.12)',
+          padding: '10px 14px', borderBottom: '1px solid rgba(0,100,200,0.12)',
           background: 'rgba(0,30,70,0.4)',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{
               width: 30, height: 30, borderRadius: 6,
               background: 'rgba(0,150,255,0.1)', border: '1px solid rgba(0,150,255,0.2)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
             }}>
               <Hash style={{ width: 14, height: 14, color: '#0096ff' }} />
             </div>
@@ -649,21 +657,159 @@ export default function ChatPage() {
               </div>
             </div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{
-              width: 7, height: 7, borderRadius: '50%',
-              background: isConnected ? '#0096ff' : '#3a3a3a',
-              boxShadow: isConnected ? '0 0 8px #0096ff' : 'none',
-              animation: isConnected ? 'pulse 2s infinite' : 'none',
-            }} />
-            <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: '0.6rem', color: isConnected ? '#0060aa' : '#3a3a3a' }}>
-              {isConnected ? 'CONECTADO' : 'DESCONECTADO'}
-            </span>
-            <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: '0.6rem', color: '#1a3557', marginLeft: 6 }}>
-              {globalOnlineUsers.length} online
-            </span>
+
+          {/* Status + online avatars */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+            {/* Connection status */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+              <div style={{
+                width: 7, height: 7, borderRadius: '50%',
+                background: isConnected ? '#0096ff' : '#3a3a3a',
+                boxShadow: isConnected ? '0 0 8px #0096ff' : 'none',
+                animation: isConnected ? 'pulse 2s infinite' : 'none',
+              }} />
+              <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: '0.58rem', color: isConnected ? '#0060aa' : '#3a3a3a' }}>
+                {isConnected ? 'ONLINE' : 'OFF'}
+              </span>
+            </div>
+
+            {/* Stacked avatars button */}
+            {globalOnlineUsers.length > 0 && (
+              <button
+                onClick={() => setShowOnlineModal(true)}
+                title={`${globalOnlineUsers.length} usuários online`}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: 5 }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  {globalOnlineUsers.slice(0, 3).map((u, i) => (
+                    <div
+                      key={u._id}
+                      style={{
+                        width: 26, height: 26, borderRadius: '50%',
+                        background: 'rgba(0,150,255,0.15)', border: '2px solid #040b14',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: '0.55rem', fontWeight: 700, color: '#0096ff',
+                        marginLeft: i === 0 ? 0 : -8,
+                        position: 'relative', zIndex: 3 - i,
+                        overflow: 'hidden',
+                      }}
+                    >
+                      {u.avatar ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={u.avatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                          onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
+                      ) : (
+                        getInitials(u.name)
+                      )}
+                    </div>
+                  ))}
+                  {globalOnlineUsers.length > 3 && (
+                    <div style={{
+                      width: 26, height: 26, borderRadius: '50%',
+                      background: 'rgba(0,100,200,0.25)', border: '2px solid #040b14',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: '0.5rem', fontWeight: 700, color: '#0096ff',
+                      marginLeft: -8, zIndex: 0,
+                    }}>
+                      +{globalOnlineUsers.length - 3}
+                    </div>
+                  )}
+                </div>
+              </button>
+            )}
           </div>
         </div>
+
+        {/* Online users modal */}
+        {showOnlineModal && (
+          <div
+            style={{ position: 'fixed', inset: 0, zIndex: 100, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}
+            onClick={() => setShowOnlineModal(false)}
+          >
+            <div
+              style={{
+                width: '100%', maxWidth: 480,
+                background: '#040b14', border: '1px solid rgba(0,150,255,0.2)',
+                borderRadius: '16px 16px 0 0', padding: '0 0 24px',
+                maxHeight: '60vh', display: 'flex', flexDirection: 'column',
+              }}
+              onClick={e => e.stopPropagation()}
+            >
+              {/* Handle */}
+              <div style={{ display: 'flex', justifyContent: 'center', padding: '10px 0 4px' }}>
+                <div style={{ width: 36, height: 4, borderRadius: 2, background: 'rgba(0,150,255,0.2)' }} />
+              </div>
+              {/* Title */}
+              <div style={{
+                padding: '8px 16px 12px',
+                borderBottom: '1px solid rgba(0,100,200,0.12)',
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <Users style={{ width: 14, height: 14, color: '#0096ff' }} />
+                  <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: '0.72rem', fontWeight: 700, color: '#4a80b0' }}>
+                    ONLINE AGORA
+                  </span>
+                  <div style={{
+                    minWidth: 18, height: 18, borderRadius: 9, padding: '0 5px',
+                    background: 'rgba(0,150,255,0.15)', border: '1px solid rgba(0,150,255,0.25)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontFamily: 'JetBrains Mono,monospace', fontSize: '0.6rem', color: '#0096ff',
+                  }}>
+                    {globalOnlineUsers.length}
+                  </div>
+                </div>
+                <button onClick={() => setShowOnlineModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#1a3557', padding: 4 }}>
+                  <X style={{ width: 14, height: 14 }} />
+                </button>
+              </div>
+              {/* User list */}
+              <div style={{ overflowY: 'auto', flex: 1, padding: '8px 12px' }}>
+                <p style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: '0.58rem', color: '#1a3557', margin: '4px 0 10px', letterSpacing: '0.1em' }}>
+                  {'// toque em um usuário para mencionar'}
+                </p>
+                {globalOnlineUsers.map(u => (
+                  <button
+                    key={u._id}
+                    onClick={() => handleMention(u.name)}
+                    style={{
+                      width: '100%', display: 'flex', alignItems: 'center', gap: 10,
+                      padding: '8px 10px', borderRadius: 8, cursor: 'pointer',
+                      background: 'none', border: '1px solid transparent',
+                      marginBottom: 4, transition: 'all 0.1s', textAlign: 'left',
+                    }}
+                    onMouseOver={e => {
+                      (e.currentTarget as HTMLButtonElement).style.background = 'rgba(0,100,200,0.1)';
+                      (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(0,150,255,0.2)';
+                    }}
+                    onMouseOut={e => {
+                      (e.currentTarget as HTMLButtonElement).style.background = 'none';
+                      (e.currentTarget as HTMLButtonElement).style.borderColor = 'transparent';
+                    }}
+                  >
+                    <div style={{ position: 'relative', flexShrink: 0 }}>
+                      <Avatar src={u.avatar} name={u.name} size={32} />
+                      <div style={{
+                        position: 'absolute', bottom: 0, right: 0,
+                        width: 8, height: 8, borderRadius: '50%',
+                        background: '#00d4aa', border: '1.5px solid #040b14',
+                      }} />
+                    </div>
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                      <p style={{ margin: 0, fontSize: '0.78rem', fontWeight: 600, color: u.role === 'admin' ? '#ff7755' : '#80b0d0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {u.name}
+                        {u.role === 'admin' && <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: '0.55rem', color: '#ff4400', marginLeft: 6 }}>ADMIN</span>}
+                      </p>
+                      <p style={{ margin: 0, fontFamily: 'JetBrains Mono,monospace', fontSize: '0.58rem', color: '#1a4a70' }}>
+                        toque para @mencionar
+                      </p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Messages */}
         <div
