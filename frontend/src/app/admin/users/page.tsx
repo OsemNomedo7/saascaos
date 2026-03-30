@@ -7,7 +7,7 @@ import { usersApi } from '@/lib/api';
 import { LevelBadge, StatusBadge, PlanBadge } from '@/components/ui/Badge';
 import { ConfirmModal, Modal } from '@/components/ui/Modal';
 import { formatDate, formatRelativeDate, getInitials } from '@/lib/utils';
-import type { User, UserLevel } from '@/types';
+import type { User, UserLevel, SubscriptionPlan } from '@/types';
 
 const LEVELS: UserLevel[] = ['iniciante', 'intermediario', 'avancado', 'elite'];
 
@@ -119,8 +119,8 @@ export default function AdminUsersPage() {
                       <LevelBadge level={user.level} />
                     </td>
                     <td className="px-4 py-3">
-                      {(user as User & { subscription?: { plan: string } }).subscription
-                        ? <PlanBadge plan={(user as User & { subscription: { plan: string } }).subscription.plan} />
+                      {(user as User & { subscription?: { plan: SubscriptionPlan } }).subscription
+                        ? <PlanBadge plan={(user as User & { subscription: { plan: SubscriptionPlan } }).subscription.plan} />
                         : <span className="text-xs text-gray-600">—</span>}
                     </td>
                     <td className="px-4 py-3">
