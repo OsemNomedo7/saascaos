@@ -6,8 +6,8 @@ const auth = require('../middlewares/auth');
 const admin = require('../middlewares/admin');
 const requireSubscription = require('../middlewares/subscription');
 
-// GET /api/drops - Active drops
-router.get('/', auth, requireSubscription, async (req, res) => {
+// GET /api/drops - Active drops (visible to all logged-in users)
+router.get('/', auth, async (req, res) => {
   try {
     const now = new Date();
     const drops = await Content.find({
@@ -26,7 +26,7 @@ router.get('/', auth, requireSubscription, async (req, res) => {
 });
 
 // GET /api/drops/:id
-router.get('/:id', auth, requireSubscription, async (req, res) => {
+router.get('/:id', auth, async (req, res) => {
   try {
     const drop = await Content.findOne({
       _id: req.params.id,
