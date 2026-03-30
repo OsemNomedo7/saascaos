@@ -339,9 +339,7 @@ function NotificationItem({
     fontFamily: "'JetBrains Mono', monospace",
     lineHeight: 1.4,
     marginBottom: 2,
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
+    wordBreak: 'break-word',
   };
 
   const msgStyle: CSSProperties = {
@@ -349,10 +347,7 @@ function NotificationItem({
     color: notif.isRead ? '#ffffff44' : '#ffffff88',
     fontFamily: "'JetBrains Mono', monospace",
     lineHeight: 1.5,
-    display: '-webkit-box',
-    WebkitLineClamp: 2,
-    WebkitBoxOrient: 'vertical',
-    overflow: 'hidden',
+    wordBreak: 'break-word',
   };
 
   const timeStyle: CSSProperties = {
