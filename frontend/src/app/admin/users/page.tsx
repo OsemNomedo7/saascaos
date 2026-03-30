@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Search, UserX, UserCheck, ChevronUp, Shield } from 'lucide-react';
-import { usersApi } from '@/lib/api';
+import { usersApi, adminApi } from '@/lib/api';
 import { LevelBadge, StatusBadge, PlanBadge } from '@/components/ui/Badge';
 import { ConfirmModal, Modal } from '@/components/ui/Modal';
 import { formatDate, formatRelativeDate, getInitials } from '@/lib/utils';
@@ -22,7 +22,7 @@ export default function AdminUsersPage() {
 
   const { data, isLoading } = useQuery({
     queryKey: ['admin-users', { search, page }],
-    queryFn: () => usersApi.list({ search: search || undefined, page, limit: 20 }).then((r) => r.data),
+    queryFn: () => adminApi.users({ search: search || undefined, page, limit: 20 }).then((r) => r.data),
   });
 
   const banUser = useMutation({
