@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Search, UserX, UserCheck, ChevronUp, Shield } from 'lucide-react';
 import { usersApi } from '@/lib/api';
-import { LevelBadge, StatusBadge } from '@/components/ui/Badge';
+import { LevelBadge, StatusBadge, PlanBadge } from '@/components/ui/Badge';
 import { ConfirmModal, Modal } from '@/components/ui/Modal';
 import { formatDate, formatRelativeDate, getInitials } from '@/lib/utils';
 import type { User, UserLevel } from '@/types';
@@ -74,6 +74,7 @@ export default function AdminUsersPage() {
               <tr className="border-b border-gray-800/60">
                 <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">User</th>
                 <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">Level</th>
+                <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">Plano</th>
                 <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">Role</th>
                 <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">Status</th>
                 <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">Joined</th>
@@ -116,6 +117,11 @@ export default function AdminUsersPage() {
                     </td>
                     <td className="px-4 py-3">
                       <LevelBadge level={user.level} />
+                    </td>
+                    <td className="px-4 py-3">
+                      {(user as User & { subscription?: { plan: string } }).subscription
+                        ? <PlanBadge plan={(user as User & { subscription: { plan: string } }).subscription.plan} />
+                        : <span className="text-xs text-gray-600">—</span>}
                     </td>
                     <td className="px-4 py-3">
                       {user.role === 'admin' ? (

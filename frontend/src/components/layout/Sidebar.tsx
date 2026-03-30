@@ -14,9 +14,25 @@ import { LevelBadge, PlanBadge } from '@/components/ui/Badge';
 import { getInitials } from '@/lib/utils';
 import Logo from '@/components/ui/Logo';
 import { useQuery } from '@tanstack/react-query';
-import { subscriptionsApi } from '@/lib/api';
+import { subscriptionsApi, communityApi } from '@/lib/api';
 import type { Subscription } from '@/types';
 import { cn } from '@/lib/utils';
+
+function NotifBadge({ count }: { count: number }) {
+  if (count === 0) return null;
+  return (
+    <span style={{
+      marginLeft: 'auto',
+      minWidth: 16, height: 16, borderRadius: 8, padding: '0 4px',
+      background: '#ff0040', color: '#fff',
+      fontSize: '0.55rem', fontWeight: 700,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      lineHeight: 1, flexShrink: 0,
+    }}>
+      {count > 99 ? '99+' : count}
+    </span>
+  );
+}
 
 interface NavItem {
   label: string;
@@ -62,7 +78,7 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
   const { user, logout } = useAuth();
   const [avatarImgError, setAvatarImgError] = React.useState(false);
   React.useEffect(() => { setAvatarImgError(false); }, [user?.avatar]);
-  const { isConnected } = useSocket();
+  const { isConnected, unreadChat } = useSocket();
 
   const { data: subData } = useQuery({
     queryKey: ['my-subscription'],
@@ -70,6 +86,33 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
     enabled: !!user,
     staleTime: 5 * 60 * 1000,
   });
+
+  // Community unread: count posts newer than last visit
+  const lastVisitRef = React.useRef<string>(
+    typeof window !== 'undefined' ? (localStorage.getItem('lastVisitCommunity') || new Date(0).toISOString()) : new Date(0).toISOString()
+  );
+  const { data: communityUnreadData } = useQuery({
+    queryKey: ['community-unread'],
+    queryFn: () => communityApi.posts({ limit: 1, sort: '-createdAt' }).then((r) => {
+      const latest = r.data?.posts?.[0];
+      if (!latest) return 0;
+      return new Date(latest.createdAt) > new Date(lastVisitRef.current) ? 1 : 0;
+    }),
+    enabled: !!user && !pathname.startsWith('/community'),
+    refetchInterval: 60000,
+    staleTime: 30000,
+  });
+
+  // Mark community as visited when on community pages
+  React.useEffect(() => {
+    if (pathname.startsWith('/community') && !pathname.includes('chat')) {
+      const now = new Date().toISOString();
+      localStorage.setItem('lastVisitCommunity', now);
+      lastVisitRef.current = now;
+    }
+  }, [pathname]);
+
+  const unreadCommunity = pathname.startsWith('/community') && !pathname.includes('chat') ? 0 : (communityUnreadData ?? 0);
 
   const subscription = subData?.subscription as Subscription | null;
 
@@ -115,20 +158,27 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
         <div>
           <div className="section-hack">{'// NAVEGAÇÃO'}</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            {userNav.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(isActive(item.href) ? 'nav-link-active' : 'nav-link')}
-                onClick={onClose}
-              >
-                {item.icon}
-                <span>{item.label}</span>
-                {isActive(item.href) && (
-                  <ChevronRight className="w-3 h-3 ml-auto opacity-50" />
-                )}
-              </Link>
-            ))}
+            {userNav.map((item) => {
+              const isChatItem = item.href === '/community/chat';
+              const isCommunityItem = item.href === '/community';
+              const badge = isChatItem ? unreadChat : isCommunityItem ? unreadCommunity : 0;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(isActive(item.href) ? 'nav-link-active' : 'nav-link')}
+                  onClick={onClose}
+                >
+                  {item.icon}
+                  <span>{item.label}</span>
+                  {badge > 0 ? (
+                    <NotifBadge count={badge} />
+                  ) : isActive(item.href) ? (
+                    <ChevronRight className="w-3 h-3 ml-auto opacity-50" />
+                  ) : null}
+                </Link>
+              );
+            })}
           </div>
         </div>
 

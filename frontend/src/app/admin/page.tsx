@@ -513,6 +513,9 @@ export default function AdminDashboardPage() {
                         <span style={{ color: '#a0c8a0', fontWeight: 700 }}>{logUser?.name || 'Unknown'}</span>
                         {' '}
                         <span style={{ color }}>{log.action}</span>
+                        {log.action === 'download' && log.metadata?.title && (
+                          <span style={{ color: '#7aaa8a' }}>{' — '}{String(log.metadata.title)}</span>
+                        )}
                       </p>
                       <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.58rem', color: '#7aaa8a', margin: '1px 0 0' }}>
                         {formatRelativeDate(log.createdAt)}

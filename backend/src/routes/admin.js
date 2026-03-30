@@ -80,13 +80,24 @@ router.get('/users', auth, admin, async (req, res) => {
     if (level) query.level = level;
     if (isBanned !== undefined) query.isBanned = isBanned === 'true';
 
+    const Subscription = require('../models/Subscription');
     const [users, total] = await Promise.all([
       User.find(query).sort({ createdAt: -1 }).skip(skip).limit(parseInt(limit)),
       User.countDocuments(query),
     ]);
 
+    // Attach active subscription to each user
+    const userIds = users.map(u => u._id);
+    const subscriptions = await Subscription.find({ user: { $in: userIds }, status: 'active' }).select('user plan status endDate');
+    const subMap = {};
+    subscriptions.forEach(s => { subMap[s.user.toString()] = s; });
+    const usersWithSub = users.map(u => ({
+      ...u.toObject(),
+      subscription: subMap[u._id.toString()] || null,
+    }));
+
     res.json({
-      users,
+      users: usersWithSub,
       pagination: { total, page: parseInt(page), limit: parseInt(limit), pages: Math.ceil(total / parseInt(limit)) },
     });
   } catch (error) {
