@@ -326,8 +326,8 @@ export default function PlanosPage() {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2" style={{ gap: 16 }}>
           {[
-            { q: 'Posso cancelar a qualquer momento?', a: 'Sim. Planos semanais e mensais podem ser cancelados antes da renovação.' },
-            { q: 'Quais métodos de pagamento são aceitos?', a: 'Aceitamos cartões de crédito, débito e PIX via Stripe e MercadoPago.' },
+            { q: 'Posso cancelar a qualquer momento?', a: 'Não há renovação automática. Quando seu plano vencer, você decide se quer renovar ou não — sem cobranças surpresa.' },
+            { q: 'Quais métodos de pagamento são aceitos?', a: 'Apenas PIX. Você pode pagar via link de pagamento, copia e cola ou QR Code.' },
             { q: 'O plano vitalício é realmente para sempre?', a: 'Sim! Pague uma vez e tenha acesso a todo o conteúdo da plataforma para sempre.' },
             { q: 'O que acontece se meu plano expirar?', a: 'Você perde acesso ao conteúdo mas mantém sua conta na comunidade.' },
           ].map((item, i) => (
