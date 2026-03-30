@@ -164,7 +164,7 @@ export default function PlanosPage() {
       </div>
 
       {/* Plans grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" style={{ gap: 16 }}>
         {plans.map((plan) => {
           const isCurrentPlan = subscription?.plan === plan.key && subscription?.status === 'active';
 
@@ -179,7 +179,6 @@ export default function PlanosPage() {
                 position: 'relative',
                 overflow: 'hidden',
                 boxShadow: plan.highlight ? `0 0 30px ${plan.glowColor}, inset 0 0 40px ${plan.glowColor}` : 'none',
-                transform: plan.highlight ? 'scale(1.03)' : 'none',
                 transition: 'transform 0.2s, box-shadow 0.2s',
               }}
               onMouseOver={e => {
@@ -325,7 +324,7 @@ export default function PlanosPage() {
             {'// PERGUNTAS FREQUENTES'}
           </span>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+        <div className="grid grid-cols-1 sm:grid-cols-2" style={{ gap: 16 }}>
           {[
             { q: 'Posso cancelar a qualquer momento?', a: 'Sim. Planos semanais e mensais podem ser cancelados antes da renovação.' },
             { q: 'Quais métodos de pagamento são aceitos?', a: 'Aceitamos cartões de crédito, débito e PIX via Stripe e MercadoPago.' },

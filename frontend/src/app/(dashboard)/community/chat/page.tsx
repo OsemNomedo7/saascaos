@@ -29,7 +29,7 @@ function EmojiPicker({ onSelect, onClose }: { onSelect: (e: string) => void; onC
       position: 'absolute', bottom: '100%', left: 0, marginBottom: 8, zIndex: 50,
       background: '#050e1a', border: '1px solid rgba(0,150,255,0.25)',
       borderRadius: 8, padding: 12, boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
-      width: 320,
+      width: 'min(320px, calc(100vw - 32px))',
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
         <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: '0.6rem', color: '#0096ff', letterSpacing: '0.15em' }}>EMOJIS</span>
@@ -616,7 +616,7 @@ export default function ChatPage() {
     : '';
 
   return (
-    <div style={{ maxWidth: 1200, margin: '0 auto', height: 'calc(100vh - 7rem)', display: 'flex', gap: 12 }}>
+    <div style={{ maxWidth: 1200, margin: '0 auto', height: 'calc(100dvh - 7rem)', display: 'flex', gap: 12 }}>
 
       {/* ── Chat area ───────────────────────────────────────────────────────── */}
       <div style={{
@@ -668,7 +668,7 @@ export default function ChatPage() {
         {/* Messages */}
         <div
           ref={messagesContainerRef}
-          style={{ flex: 1, overflowY: 'auto', padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 10, position: 'relative' }}
+          style={{ flex: 1, overflowY: 'auto', padding: '12px 10px', display: 'flex', flexDirection: 'column', gap: 10, position: 'relative' }}
           onScroll={() => {
             const el = messagesContainerRef.current;
             if (!el) return;
@@ -732,7 +732,7 @@ export default function ChatPage() {
           <button
             onClick={scrollToBottom}
             style={{
-              position: 'absolute', bottom: 90, right: 280,
+              position: 'absolute', bottom: 90, right: 16,
               width: 32, height: 32, borderRadius: '50%',
               background: 'rgba(0,100,200,0.8)', border: '1px solid rgba(0,150,255,0.4)',
               color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -779,7 +779,7 @@ export default function ChatPage() {
         )}
 
         {/* Input area */}
-        <div style={{ padding: '12px 16px 14px', borderTop: '1px solid rgba(0,100,200,0.1)', background: 'rgba(0,20,50,0.3)' }}>
+        <div style={{ padding: '10px 10px 12px', borderTop: '1px solid rgba(0,100,200,0.1)', background: 'rgba(0,20,50,0.3)' }}>
           {/* Recording state */}
           {isRecording ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -803,7 +803,7 @@ export default function ChatPage() {
           ) : (
             <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
               {/* Toolbar buttons */}
-              <div style={{ display: 'flex', gap: 4, alignSelf: 'flex-end', paddingBottom: 1, position: 'relative' }}>
+              <div style={{ display: 'flex', gap: 3, alignSelf: 'flex-end', paddingBottom: 1, position: 'relative', flexShrink: 0 }}>
                 {/* Emoji */}
                 <div style={{ position: 'relative' }}>
                   {showEmoji && <EmojiPicker onSelect={insertEmoji} onClose={() => setShowEmoji(false)} />}
@@ -934,7 +934,8 @@ export default function ChatPage() {
           {!isRecording && (
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 4 }}>
               <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: '0.55rem', color: '#0d2040' }}>
-                {inputValue.length}/1000 · Enter para enviar · Shift+Enter nova linha{replyTo ? ' · Esc para cancelar resposta' : ''}
+                <span className="hidden sm:inline">{inputValue.length}/1000 · Enter para enviar · Shift+Enter nova linha{replyTo ? ' · Esc para cancelar' : ''}</span>
+                <span className="sm:hidden">{inputValue.length}/1000</span>
               </span>
             </div>
           )}
